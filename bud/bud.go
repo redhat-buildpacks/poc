@@ -23,7 +23,7 @@ func main() {
 
 	b := util.InitOptions()
 
-	logrus.Infof("Buildah tempdir : ",util.BuildParameter.)
+	logrus.Infof("Buildah tempdir : ",b.TempDir)
 
 	currentDir, err := os.Getwd()
 	if err != nil {
