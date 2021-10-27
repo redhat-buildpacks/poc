@@ -1,2 +1,7 @@
 FROM redhat/buildpacks-builder-quarkus-jvm
-COPY ./out/bud /workspace/bud
+
+USER root
+RUN microdnf install buildah
+
+USER 185
+COPY ./out/bud /

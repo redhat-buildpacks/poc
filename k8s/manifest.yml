@@ -55,7 +55,7 @@ spec:
             - |
               set -e
               echo -e "\n## Execute buildah bud"
-              /workspace/bud
+              /bud
           volumeMounts:
             - name: workspace-dir
               mountPath: /workspace
