@@ -22,8 +22,14 @@ type BuildParameter struct {
 
 func InitOptions() BuildParameter {
 	b := BuildParameter{}
+
 	workspaceDir := os.Getenv("WORKSPACE_DIR")
 	logrus.Infof("WORKSPACE DIR: ", workspaceDir)
+
+	graphDriverName := os.Getenv("STORAGE_DRIVER")
+	if graphDriverName == "" {
+		graphDriverName = "vfs"
+	}
 
 	var transientMounts []string
 	b.TempDir, _ = ioutil.TempDir(workspaceDir, "buildah-poc-")
@@ -57,7 +63,7 @@ func InitOptions() BuildParameter {
 
 	// Initialize storage for buildah
 	b.StoreOptions = storage.StoreOptions{
-		GraphDriverName:     "overlay",
+		GraphDriverName:     graphDriverName,
 		GraphRoot:           rootDir,
 		RunRoot:             runrootDir,
 		RootlessStoragePath: rootDir,

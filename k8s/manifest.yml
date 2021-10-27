@@ -49,6 +49,8 @@ spec:
           env:
             - name: WORKSPACE_DIR
               value: "/workspace"
+            - name: STORAGE_DRIVER
+              value: "vfs"
           workingDir: /workspace
           command: [ "/bin/sh","-c" ]
           args:
