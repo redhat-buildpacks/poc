@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: poc
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: buildah-poc
+  namespace: poc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buildah-poc-cache
+  namespace: poc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buildah-poc
+  namespace: poc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buildah-poc
+  template:
+    metadata:
+      labels:
+        app: buildah-poc
+    spec:
+      volumes:
+        - name: cache-dir
+          persistentVolumeClaim:
+            claimName: buildah-poc-cache
+        - name: workspace-dir
+          emptyDir: {}
+      initContainers:
+        - name: buildah-bud
+          image: quay.io/snowdrop/buildah-poc
+          env:
+            - name: WORKSPACE_DIR
+              value: "/workspace"
+          workingDir: /workspace
+          command: [ "/bin/sh","-c" ]
+          args:
+            - |
+              set -e
+              echo -e "\n## Execute buildah bud"
+              /workspace/bud
+          volumeMounts:
+            - name: workspace-dir
+              mountPath: /workspace
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+      containers:
+        - name: completion
+          image: busybox:1.28
+          command: [ "/bin/sh","-c" ]
+          args:
+            - |
+              echo "# Builah bud executed successfully"
+      serviceAccountName: buildah-poc
+

@@ -13,8 +13,9 @@ Next, you can build the project and launch it there
 cd poc
 go build -o out/bud ./bud
 
-sudo ./out/bud
-INFO[0000] Buildah tempdir : %!(EXTRA string=/root/buildah-poc-3011355348) 
+sudo WORKSPACE_DIR="/home/vagrant" ./out/bud
+INFO[0000] WORKSPACE DIR: %!(EXTRA string=/home/vagrant) 
+INFO[0000] Buildah tempdir : %!(EXTRA string=/home/vagrant/buildah-poc-3853289916) 
 INFO[0000] Dockerfile name: %!(EXTRA string=/home/vagrant/poc/Dockerfile, string=/home/vagrant/poc/Dockerfile) 
 INFO[0003] Image id: %!(EXTRA string=f8cce29a1b02c26b62dee5d7fad3dfd3e9474ca4c0205de626bc681b04b3f014)  
 ```
@@ -30,6 +31,24 @@ drwx------. 2 root root 4096 Oct 27 11:52 f8cce29a1b02c26b62dee5d7fad3dfd3e9474c
 -rw-r--r--. 1 root root   64 Oct 27 11:52 images.lock
 ```
 **NOTE**: From your local machine, sync the files with the VM using the command `vagrant rsync`
+
+## Kubernetes
+
+To test the POC on kubernetes, build a container image from your local machine (containing the poc bud executable).
+
+```bash
+cd k8s
+docker build -t quay.io/snowdrop/buildah-poc .
+docker push quay.io/snowdrop/buildah-poc
+```
+
+Next, deploy the poc on kubernetes to verify if buildah can buld the image
+```bash
+kubectl create ns poc
+kubectl apply -f k8s/manifest.yml
+
+kubectl delete -f k8s/manifest.yml
+```
 
 ## MacOS
 

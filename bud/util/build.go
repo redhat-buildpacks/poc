@@ -22,12 +22,11 @@ type BuildParameter struct {
 
 func InitOptions() BuildParameter {
 	b := BuildParameter{}
-	dirname, err := os.UserHomeDir()
-	if err != nil {
-		logrus.Fatal( err )
-	}
+	workspaceDir := os.Getenv("WORKSPACE_DIR")
+	logrus.Infof("WORKSPACE DIR: ", workspaceDir)
+
 	var transientMounts []string
-	b.TempDir, err = ioutil.TempDir(dirname, "buildah-poc-")
+	b.TempDir, _ = ioutil.TempDir(workspaceDir, "buildah-poc-")
 	rootDir := filepath.Join(b.TempDir, "root")
 	runrootDir := filepath.Join(b.TempDir, "runroot")
 	contextDir := filepath.Join(b.TempDir, "context")
