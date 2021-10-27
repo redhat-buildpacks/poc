@@ -37,16 +37,16 @@ drwx------. 2 root root 4096 Oct 27 11:52 f8cce29a1b02c26b62dee5d7fad3dfd3e9474c
 To test the POC on kubernetes, build a container image from your local machine (containing the poc bud executable).
 
 ```bash
-cd k8s
-docker build -t quay.io/snowdrop/buildah-poc .
+docker build -t quay.io/snowdrop/buildah-poc -f Dockerfile-bud .
 docker push quay.io/snowdrop/buildah-poc
 ```
 
 Next, deploy the poc on kubernetes to verify if buildah can buld the image
 ```bash
-kubectl create ns poc
 kubectl apply -f k8s/manifest.yml
-
+```
+To clean up the project on kubernetes
+```bash
 kubectl delete -f k8s/manifest.yml
 ```
 
