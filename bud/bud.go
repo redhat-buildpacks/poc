@@ -8,7 +8,6 @@ import (
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/sirupsen/logrus"
 	"me.snowdrop/bud/util"
-	"os"
 	"path/filepath"
 )
 
@@ -25,12 +24,8 @@ func main() {
 
 	logrus.Infof("Buildah tempdir : ",b.TempDir)
 
-	currentDir, err := os.Getwd()
-	if err != nil {
-		logrus.Errorf("unable to choose current working directory as build context")
-	}
-	dockerFileName := filepath.Join(currentDir, "Dockerfile")
-	logrus.Infof("Dockerfile name: ",dockerFileName,dockerFileName)
+	dockerFileName := filepath.Join(b.WorkspaceDir, "Dockerfile")
+	logrus.Infof("Dockerfile : ",dockerFileName)
 
 	// storeOptions, err := storage.DefaultStoreOptions(false,0)
 

@@ -18,13 +18,14 @@ type BuildParameter struct {
 	BuildOptions define.BuildOptions
     StoreOptions storage.StoreOptions
 	TempDir      string
+	WorkspaceDir string
 }
 
 func InitOptions() BuildParameter {
 	b := BuildParameter{}
 
-	workspaceDir := os.Getenv("WORKSPACE_DIR")
-	logrus.Infof("WORKSPACE DIR: ", workspaceDir)
+	b.WorkspaceDir = os.Getenv("WORKSPACE_DIR")
+	logrus.Infof("WORKSPACE DIR: ", b.WorkspaceDir)
 
 	graphDriverName := os.Getenv("STORAGE_DRIVER")
 	if graphDriverName == "" {
@@ -32,7 +33,7 @@ func InitOptions() BuildParameter {
 	}
 
 	var transientMounts []string
-	b.TempDir, _ = ioutil.TempDir(workspaceDir, "buildah-poc-")
+	b.TempDir, _ = ioutil.TempDir(b.WorkspaceDir, "buildah-poc-")
 	rootDir := filepath.Join(b.TempDir, "root")
 	runrootDir := filepath.Join(b.TempDir, "runroot")
 	contextDir := filepath.Join(b.TempDir, "context")
