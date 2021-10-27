@@ -57,8 +57,10 @@ spec:
             - |
               set -e
               echo -e "\n## Execute buildah bud"
-              cp Dockerfile $WORKSPACE_DIR/
+              cp /Dockerfile $WORKSPACE_DIR/
               /bud
+              echo "BUILDAH_TEMP_DIR: $BUILDAH_TEMP_DIR"
+              ls -la $BUILDAH_TEMP_DIR/
           volumeMounts:
             - name: workspace-dir
               mountPath: /workspace

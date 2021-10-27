@@ -8,6 +8,7 @@ import (
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/sirupsen/logrus"
 	"me.snowdrop/bud/util"
+	"os"
 	"path/filepath"
 )
 
@@ -22,6 +23,7 @@ func main() {
 
 	b := util.InitOptions()
 
+	os.Setenv("BUILDAH_TEMP_DIR", b.TempDir)
 	logrus.Infof("Buildah tempdir : ",b.TempDir)
 
 	dockerFileName := filepath.Join(b.WorkspaceDir, "Dockerfile")
