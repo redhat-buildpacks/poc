@@ -1,1 +1,4 @@
 /.idea/
+vagrant
+out
+.DS_Store
