@@ -13,28 +13,45 @@ import (
 	"time"
 )
 
-type BuildParameter struct {
+type BuildahParameters struct {
 	BuildOptions define.BuildOptions
     StoreOptions storage.StoreOptions
 	TempDir      string
 	WorkspaceDir string
+	StorageRootDir    string
+	StorageRunRootDir string
+	GraphDriverName   string
 }
 
-func InitOptions() BuildParameter {
-	b := BuildParameter{}
+func InitOptions() BuildahParameters {
+	b := BuildahParameters{}
 
 	b.WorkspaceDir = os.Getenv("WORKSPACE_DIR")
-	logrus.Infof("WORKSPACE DIR: ", b.WorkspaceDir)
-
-	graphDriverName := os.Getenv("STORAGE_DRIVER")
-	if graphDriverName == "" {
-		graphDriverName = "vfs"
+	if b.WorkspaceDir == "" {
+		b.WorkspaceDir = "/workspace/buildah-layers"
 	}
+	logrus.Infof("WORKSPACE DIR: %s", b.WorkspaceDir)
+
+	b.GraphDriverName = os.Getenv("GRAPH_DRIVER")
+	if b.GraphDriverName == "" {
+		b.GraphDriverName = "vfs"
+	}
+	logrus.Infof("GRAPH_DRIVER: %s", b.GraphDriverName)
+
+	b.StorageRootDir = os.Getenv("STORAGE_ROOT_PATH")
+	if b.StorageRootDir == "" {
+		b.StorageRootDir = "/var/lib/containers/storage"
+	}
+	logrus.Infof("STORAGE ROOT PATH: %s", b.StorageRootDir)
+
+	b.StorageRunRootDir = os.Getenv("STORAGE_RUN_ROOT_PATH")
+	if b.StorageRunRootDir == "" {
+		b.StorageRunRootDir = "/var/run/containers/storage"
+	}
+	logrus.Infof("STORAGE RUN ROOT PATH: %s", b.StorageRunRootDir)
 
 	var transientMounts []string
 	b.TempDir = filepath.Join(b.WorkspaceDir,"buildah-layers") // ioutil.TempDir(b.WorkspaceDir, "buildah-poc-")
-	rootDir := filepath.Join(b.TempDir, "root")
-	runrootDir := filepath.Join(b.TempDir, "runroot")
 	contextDir := filepath.Join(b.TempDir, "context")
 
 	dateStamp := fmt.Sprintf("%d", time.Now().UnixNano())
@@ -63,10 +80,10 @@ func InitOptions() BuildParameter {
 
 	// Initialize storage for buildah
 	b.StoreOptions = storage.StoreOptions{
-		GraphDriverName:     graphDriverName,
-		GraphRoot:           rootDir,
-		RunRoot:             runrootDir,
-		RootlessStoragePath: rootDir,
+		GraphDriverName:     b.GraphDriverName,
+		GraphRoot:           b.StorageRootDir,
+		RunRoot:             b.StorageRunRootDir,
+		RootlessStoragePath: b.StorageRootDir,
 	}
 	return b
 }
