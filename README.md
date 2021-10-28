@@ -13,7 +13,7 @@ Next, you can build the project and launch it there
 cd poc
 go build -o out/bud ./bud
 
-sudo WORKSPACE_DIR="/home/vagrant" ./out/bud
+sudo WORKSPACE_DIR="/home/vagrant/wks" ./out/bud
 INFO[0000] WORKSPACE DIR: %!(EXTRA string=/home/vagrant) 
 INFO[0000] Buildah tempdir : %!(EXTRA string=/home/vagrant/buildah-poc-3853289916) 
 INFO[0000] Dockerfile name: %!(EXTRA string=/home/vagrant/poc/Dockerfile, string=/home/vagrant/poc/Dockerfile) 
