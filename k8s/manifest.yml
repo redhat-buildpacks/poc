@@ -40,6 +40,18 @@ spec:
     requests:
       storage: 500m
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buildah-layers
+  namespace: buildpack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500m
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -60,7 +72,8 @@ spec:
           persistentVolumeClaim:
             claimName: buildah-poc-cache
         - name: layers
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: buildah-layers
         - name: host
           hostPath:
             path: /
@@ -132,7 +145,8 @@ spec:
               which node ||
 
               echo "## Use node from the layer extracted"
-              /layers/usr/bin/node -V || true
+              ls -la /layers/usr/bin/n*
+              ./layers/usr/bin/node -v || true
           volumeMounts:
             #- name: host
             #  mountPath: /
