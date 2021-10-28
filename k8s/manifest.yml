@@ -52,114 +52,111 @@ spec:
     requests:
       storage: 500m
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: buildah-poc
   namespace: buildpack
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: buildah-poc
-  template:
-    metadata:
-      labels:
-        app: buildah-poc
-    spec:
-      volumes:
-        - name: cache-dir
-          persistentVolumeClaim:
-            claimName: buildah-poc-cache
+  volumes:
+    - name: cache-dir
+      persistentVolumeClaim:
+        claimName: buildah-poc-cache
+    - name: layers
+      persistentVolumeClaim:
+        claimName: buildah-layers
+    - name: host
+      hostPath:
+        path: /
+  initContainers:
+    - name: check-before
+      image: busybox:1.28
+      command: [ "/bin/sh","-c" ]
+      args:
+        - |
+          echo "### Check if Node exists"
+          node -v || true
+          which node || true
+      volumeMounts:
+        #- name: host
+        #  mountPath: /
         - name: layers
-          persistentVolumeClaim:
-            claimName: buildah-layers
-        - name: host
-          hostPath:
-            path: /
-      initContainers:
-        - name: check-before
-          image: busybox:1.28
-          command: [ "/bin/sh","-c" ]
-          args:
-            - |
-              echo "### Check if Node exists"
-              node -v || true
-              which node || true
-          volumeMounts:
-            #- name: host
-            #  mountPath: /
-            - name: layers
-              mountPath: /layers
-        - name: buildah-bud
-          image: registry.local:5000/snowdrop/buildah-poc
-          env:
-            - name: WORKSPACE_DIR
-              value: "/workspace"
-            - name: STORAGE_DRIVER
-              value: "vfs"
-          workingDir: /workspace
-          command: [ "/bin/sh","-c" ]
-          args:
-            - |
-              set -e
+          mountPath: /layers
+    - name: buildah-bud
+      image: registry.local:5000/snowdrop/buildah-poc
+      env:
+        - name: WORKSPACE_DIR
+          value: "/workspace"
+        - name: STORAGE_DRIVER
+          value: "vfs"
+      workingDir: /workspace
+      command: [ "/bin/sh","-c" ]
+      args:
+        - |
+          set -e
 
-              echo "### Check if Node exists"
-              node -v || true
-              which node || true
+          echo "### Check if Node exists"
+          node -v || true
+          which node || true
 
-              echo "## Execute buildah bud"
-              cp /Dockerfile $WORKSPACE_DIR/
-              cp /undocker.py $WORKSPACE_DIR/
-              /bud
+          echo "## Execute buildah bud"
+          cp /Dockerfile $WORKSPACE_DIR/
+          cp /undocker.py $WORKSPACE_DIR/
+          /bud
 
-              echo -e "## Check if the image has been created locally"
-              GRAPH_DRIVER="vfs"
-              STORAGE_DIR=/var/lib/containers/storage
-              buildah --storage-driver $GRAPH_DRIVER images
+          echo -e "## Check if the image has been created locally"
+          GRAPH_DRIVER="vfs"
+          STORAGE_DIR=/var/lib/containers/storage
+          buildah --storage-driver $GRAPH_DRIVER images
 
-              EXTRACT_DIR="/layers"
-              alias docker=podman
-              REPO="localhost/buildpack-buildah"
-              echo "## Extract the layer to $EXTRACT_DIR ####"
+          EXTRACT_DIR="/layers"
+          alias docker=podman
+          REPO="localhost/buildpack-buildah"
+          echo "## Extract the layer to $EXTRACT_DIR ####"
 
-              TAG=$(buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
-              LAST_LAYER_ID=$(docker save $REPO:$TAG | ./undocker.py --layers | tail -n1)
-              echo "Layer ID: $LAST_LAYER_ID"
-              docker save $REPO:$TAG | ./undocker.py -iv -o $EXTRACT_DIR -l $LAST_LAYER_ID
-          volumeMounts:
-            - name: cache-dir
-              mountPath: /workspace
-            - name: layers
-              mountPath: /layers
-          imagePullPolicy: Always
-          securityContext:
-            privileged: true
-        - name: check-after
-          image: busybox:1.28
-          command: [ "/bin/sh","-c" ]
-          args:
-            - |
-              echo "### Check if Node exists"
-              node -v || true
-              which node ||
+          TAG=$(buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
+          LAST_LAYER_ID=$(docker save $REPO:$TAG | ./undocker.py --layers | tail -n1)
+          echo "Layer ID: $LAST_LAYER_ID"
+          docker save $REPO:$TAG | ./undocker.py -iv -o $EXTRACT_DIR -l $LAST_LAYER_ID
+      volumeMounts:
+        - name: cache-dir
+          mountPath: /workspace
+        - name: layers
+          mountPath: /layers
+      imagePullPolicy: Always
+      securityContext:
+        privileged: true
+    - name: check-after
+      image: busybox:1.28
+      command: [ "/bin/sh","-c" ]
+      args:
+        - |
+          echo "## Check if Node exists"
+          node -v || true
+          which node ||
 
-              echo "## Use node from the layer extracted"
-              ls -la /layers/usr/bin/n*
-              ./layers/usr/bin/node -v || true
-          volumeMounts:
-            #- name: host
-            #  mountPath: /
-            - name: layers
-              mountPath: /layers
-          securityContext:
-            privileged: true
-      containers:
-        - name: completion
-          image: busybox:1.28
-          command: [ "/bin/sh","-c" ]
-          args:
-            - |
-              echo "# Builah bud executed successfully"
-      serviceAccountName: buildpack
+          echo "## PATH"
+          export PATH="/layers/usr/bin:$PATH"
+          echo $PATH
+
+          echo "## Use node from the layer extracted"
+          ls -la /layers/usr/bin/n*
+          ./layers/usr/bin/node -v || true
+          node -v || true
+      volumeMounts:
+        #- name: host
+        #  mountPath: /
+        - name: layers
+          mountPath: /layers
+      securityContext:
+        privileged: true
+  containers:
+    - name: completion
+      image: busybox:1.28
+      command: [ "/bin/sh","-c","--" ]
+      args: [ "while true; do sleep 30; done;" ]
+      volumeMounts:
+      - name: layers
+        mountPath: /layers
+  serviceAccountName: buildpack
 
