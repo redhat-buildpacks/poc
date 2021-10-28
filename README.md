@@ -50,6 +50,30 @@ To clean up the project on kubernetes
 kubectl delete -f k8s/manifest.yml
 ```
 
+### Mount root FS
+
+See the following links where it is discussed `How to mount a root FS`:
+- https://itnext.io/mount-a-kubernetes-workers-root-filesystem-as-a-container-volume-for-fun-and-fortune-53ae492698db
+- https://github.com/kubernetes/kubernetes/issues/101749
+
+The problem that we will have, if we want to mount the root FS, within the pod is that currently
+we cannot mount it under `/` but using a different path as otherwise that will clash
+```yaml
+spec:
+  volumes:
+    - name: host
+      hostPath:
+        path: /
+volumeMounts:
+  - name: cache-dir
+    mountPath: /workspace
+  - name: host
+    mountPath: /host
+```
+
+The consequence is that we need to find a way to copy the content of the subpath `/host` to the `/`
+using a different `initContainer` which is only used to copy the files coming from the layers !
+
 ## Python utility tool to list, unpack layer
 
 See: https://blog.oddbit.com/post/2015-02-13-unpacking-docker-images/
@@ -60,7 +84,7 @@ docker save busybox | ./undocker.py -v --layers
 ```
 End to end test using as FROM image `alpine` and the following Dockerfile
 ```bash
-cat <EOF > Dockerfile
+cat <<EOF > Dockerfile-alpine
 FROM alpine
 
 RUN apk add wget
@@ -69,7 +93,7 @@ EOF
 docker build -f Dockerfile my-alpine .
 IMAGE_ID=$(docker images --format="{{.Repository}} {{.ID}}" | awk '/none/ { print $2; }')
 docker tag $IMAGE_ID my-alpine
-LAST_LAYER_ID=$( docker save localhost/my-alpine | ./undocker.py --layers | tail -n1)
+LAST_LAYER_ID=$(docker save localhost/my-alpine | ./undocker.py --layers | head -n 1)
 docker save my-alpine | ./undocker.py -i -o my-alpine-wget -l $LAST_LAYER_ID
 
 Example: 

@@ -1,20 +1,38 @@
+#
+# REG_USERNAME="admin"
+# REG_PASWORD="snowdrop"
+# REG_SERVER="registry.local:5000"
+# kubectl create secret docker-registry local-registry -n fs --docker-server=$REG_SERVER --docker-username=$REG_USERNAME --docker-password=$REG_PASWORD
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: poc
+  name: buildpack
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: local-registry
+  namespace: buildpack
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJyZWdpc3RyeS5sb2NhbDo1MDAwIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJwYXNzd29yZCI6InNub3dkcm9wIiwiYXV0aCI6IllXUnRhVzQ2YzI1dmQyUnliM0E9In19fQ==
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: buildah-poc
-  namespace: poc
+  name: buildpack
+  namespace: buildpack
+secrets:
+  - name: local-registry
+imagePullSecrets:
+  - name: local-registry
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: buildah-poc-cache
-  namespace: poc
+  namespace: buildpack
 spec:
   accessModes:
     - ReadWriteOnce
@@ -26,7 +44,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: buildah-poc
-  namespace: poc
+  namespace: buildpack
 spec:
   replicas: 1
   selector:
@@ -41,9 +59,12 @@ spec:
         - name: cache-dir
           persistentVolumeClaim:
             claimName: buildah-poc-cache
+        - name: host
+          hostPath:
+            path: /
       initContainers:
         - name: buildah-bud
-          image: quay.io/snowdrop/buildah-poc
+          image: registry.local:5000/snowdrop/buildah-poc
           env:
             - name: WORKSPACE_DIR
               value: "/workspace"
@@ -56,10 +77,31 @@ spec:
               set -e
               echo -e "\n## Execute buildah bud"
               cp /Dockerfile $WORKSPACE_DIR/
+              cp /undocker.py $WORKSPACE_DIR/
               /bud
+
+              echo -e "## Check if the image has been created locally"
+              GRAPH_DRIVER="vfs"
+              STORAGE_DIR=/var/lib/containers/storage
+              buildah --storage-driver $GRAPH_DRIVER images
+
+              EXTRACT_DIR="/host"
+              alias docker=podman
+              REPO="localhost/buildpack-buildah"
+              echo "#### Extract the layer to $EXTRACT_DIR ####"
+
+              TAG=$(buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
+              LAST_LAYER_ID=$(docker save $REPO:$TAG | ./undocker.py --layers | tail -n1)
+              echo "Layer ID: $LAST_LAYER_ID"
+              docker save $REPO:$TAG | ./undocker.py -iv -o $EXTRACT_DIR -l $LAST_LAYER_ID
+
+              echo "#### Node version"
+              $EXTRACT_DIR/usr/bin/node -v
           volumeMounts:
             - name: cache-dir
               mountPath: /workspace
+            - name: host
+              mountPath: /host
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -70,5 +112,5 @@ spec:
           args:
             - |
               echo "# Builah bud executed successfully"
-      serviceAccountName: buildah-poc
+      serviceAccountName: buildpack
 
