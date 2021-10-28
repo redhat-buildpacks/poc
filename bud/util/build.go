@@ -8,7 +8,6 @@ import (
 	"github.com/containers/storage"
 	rspec "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -33,7 +32,7 @@ func InitOptions() BuildParameter {
 	}
 
 	var transientMounts []string
-	b.TempDir, _ = ioutil.TempDir(b.WorkspaceDir, "buildah-poc-")
+	b.TempDir = filepath.Join(b.WorkspaceDir,"buildah-layers") // ioutil.TempDir(b.WorkspaceDir, "buildah-poc-")
 	rootDir := filepath.Join(b.TempDir, "root")
 	runrootDir := filepath.Join(b.TempDir, "runroot")
 	contextDir := filepath.Join(b.TempDir, "context")

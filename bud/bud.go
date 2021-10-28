@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
+	is "github.com/containers/image/v5/storage"
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/sirupsen/logrus"
@@ -41,5 +43,19 @@ func main() {
 	if err != nil {
 		logrus.Errorf("Build image failed: ",err.Error())
 	}
-	logrus.Infof("Image id: ",imageID)
+	logrus.Infof("Image id : ",imageID)
+
+	builder, err := buildah.ImportBuilderFromImage(context.TODO(), store,buildah.ImportFromImageOptions{Image: imageID})
+	if err != nil {
+		panic(err)
+	}
+
+	imageRef, err := is.Transport.ParseStoreReference(store, imageID)
+	if err != nil {
+		logrus.Errorf( "no such image %q", imageID)
+	}
+
+	imageId, _, _, err := builder.Commit(context.TODO(), imageRef, buildah.CommitOptions{})
+
+	fmt.Printf("Image built! %s\n", imageId)
 }
