@@ -1,10 +1,8 @@
 FROM redhat/buildpacks-builder-quarkus-jvm
 
 USER root
-RUN microdnf install buildah
+RUN microdnf install buildah podman python3
 
-#RUN echo jboss:100000:65536 > /etc/subuid; \
-#    echo jboss:100000:65536 > /etc/subgid;
-
+COPY ./undocker.py /
 COPY ./Dockerfile /
 COPY ./out/bud /
