@@ -41,8 +41,6 @@ spec:
         - name: cache-dir
           persistentVolumeClaim:
             claimName: buildah-poc-cache
-        - name: workspace-dir
-          emptyDir: {}
       initContainers:
         - name: buildah-bud
           image: quay.io/snowdrop/buildah-poc
@@ -59,10 +57,8 @@ spec:
               echo -e "\n## Execute buildah bud"
               cp /Dockerfile $WORKSPACE_DIR/
               /bud
-              echo "BUILDAH_TEMP_DIR: $BUILDAH_TEMP_DIR"
-              ls -la $BUILDAH_TEMP_DIR/
           volumeMounts:
-            - name: workspace-dir
+            - name: cache-dir
               mountPath: /workspace
           imagePullPolicy: Always
           securityContext:
