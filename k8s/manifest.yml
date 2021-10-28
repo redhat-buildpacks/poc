@@ -65,6 +65,19 @@ spec:
           hostPath:
             path: /
       initContainers:
+        - name: check-before
+          image: busybox:1.28
+          command: [ "/bin/sh","-c" ]
+          args:
+            - |
+              echo "### Check if Node exists"
+              node -v || true
+              which node || true
+          volumeMounts:
+            #- name: host
+            #  mountPath: /
+            - name: layers
+              mountPath: /layers
         - name: buildah-bud
           image: registry.local:5000/snowdrop/buildah-poc
           env:
@@ -109,17 +122,20 @@ spec:
           imagePullPolicy: Always
           securityContext:
             privileged: true
-        - name: check-new
+        - name: check-after
           image: busybox:1.28
           command: [ "/bin/sh","-c" ]
           args:
             - |
               echo "### Check if Node exists"
               node -v || true
-              which node || true
+              which node ||
+
+              echo "## Use node from the layer extracted"
+              /layers/usr/bin/node -V || true
           volumeMounts:
-            - name: host
-              mountPath: /
+            #- name: host
+            #  mountPath: /
             - name: layers
               mountPath: /layers
           securityContext:
