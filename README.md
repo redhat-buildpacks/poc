@@ -50,6 +50,39 @@ To clean up the project on kubernetes
 kubectl delete -f k8s/manifest.yml
 ```
 
+## Python utility tool to list, unpack layer
+
+See: https://blog.oddbit.com/post/2015-02-13-unpacking-docker-images/
+
+To list the files of an image
+```
+docker save busybox | ./undocker.py -v --layers
+```
+End to end test using as FROM image `alpine` and the following Dockerfile
+```bash
+cat <EOF > Dockerfile
+FROM alpine
+
+RUN apk add wget
+EOF
+
+docker build -f Dockerfile my-alpine .
+IMAGE_ID=$(docker images --format="{{.Repository}} {{.ID}}" | awk '/none/ { print $2; }')
+docker tag $IMAGE_ID my-alpine
+LAST_LAYER_ID=$( docker save localhost/my-alpine | ./undocker.py --layers | tail -n1)
+docker save my-alpine | ./undocker.py -i -o my-alpine-wget -l $LAST_LAYER_ID
+
+Example: 
+e2eb06d8af8218cfec8210147357a68b7e13f7c485b991c288c2d01dc228bb68 # Original image
+b67c5a78b01d62b9eb65c0a8d46480c7b1882828b658ae8ddd5fc0601b2db3f9 # what I added with the RUN cmd
+
+docker save my-alpine |
+  ./undocker.py -vi -o my-alpine-wget -l f35d9c7ad180a77b0969ca4e87e6f9655098d577cc29f64cae5c300d9c33d753
+  
+Check the tree of the folder created locally
+tree my-alpine-wget   
+```
+
 ## MacOS
 
 It is not possible for the moment to develop on a Mac as it is not a real Linux platform !
