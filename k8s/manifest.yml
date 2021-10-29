@@ -65,18 +65,15 @@ spec:
     - name: layers
       persistentVolumeClaim:
         claimName: buildah-layers
-    - name: host
-      hostPath:
-        path: /
   initContainers:
     - name: check-before
       image: busybox:1.28
       command: [ "/bin/sh","-c" ]
       args:
         - |
-          echo "### Check if Node exists"
-          node -v || true
-          which node || true
+          echo "## Check if Node exists within the /layers volume"
+          echo "## /layers/usr/bin/node -v"
+          /layers/usr/bin/node -v || true
       volumeMounts:
         - name: layers
           mountPath: /layers
@@ -93,11 +90,12 @@ spec:
         - |
           set -e
 
-          echo "### Check if Node exists"
-          node -v || true
-          which node || true
-
-          echo "## Execute buildah bud"
+          echo "## Execute the go application able to "
+          echo "## - Read a dockerfile"
+          echo "## - Create locally an image"
+          echo "## - Extract the layers created to the volume mounted /layers"
+          echo "## Remark: Only one layer is extracted for the moment"
+          echo buildah bud"
           cp /Dockerfile $WORKSPACE_DIR/
           cp /undocker.py $WORKSPACE_DIR/
           /bud
@@ -129,12 +127,8 @@ spec:
       command: [ "/bin/sh","-c" ]
       args:
         - |
-          #!/usr/bin/env bash
-          echo "## Check if Node exists within the container FS /"
-          node -v || true
-          which node || true
-
-          echo "## Change /layers path to check if node exists"
+          echo "## Check if Node exists"
+          echo "## Append /layers/usr/bin to the path"
           export PATH="/layers/usr/bin:$PATH"
           echo $PATH
           type -a node
