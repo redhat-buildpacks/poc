@@ -67,23 +67,30 @@ spec:
         claimName: buildah-layers
   initContainers:
     - name: check-before
-      image: busybox:1.28
+      image: registry.access.redhat.com/ubi8:8.4-211
+      env:
+        - name: LAYERS_DIR
+          value: "/layers"
       command: [ "/bin/sh","-c" ]
       args:
         - |
           echo "## Check if Node exists within the /layers volume"
-          echo "## /layers/usr/bin/node -v"
-          /layers/usr/bin/node -v || true
+          echo "## $LAYERS_DIR/usr/bin/node -v"
+          $LAYERS_DIR/usr/bin/node -v || true
       volumeMounts:
         - name: layers
           mountPath: /layers
     - name: buildah-bud
       image: registry.local:5000/snowdrop/buildah-poc
       env:
+        - name: LAYERS_DIR
+          value: "/layers"
         - name: WORKSPACE_DIR
           value: "/workspace"
-        - name: STORAGE_DRIVER
+        - name: GRAPH_DRIVER
           value: "vfs"
+        - name: STORAGE_DIR
+          value: "/var/lib/containers/storage"
       workingDir: /workspace
       command: [ "/bin/sh","-c" ]
       args:
@@ -95,25 +102,31 @@ spec:
           echo "## - Create locally an image"
           echo "## - Extract the layers created to the volume mounted /layers"
           echo "## Remark: Only one layer is extracted for the moment"
-          echo buildah bud"
+          echo "## A layer corresponds to a command executed such as RUN"
           cp /Dockerfile $WORKSPACE_DIR/
           cp /undocker.py $WORKSPACE_DIR/
           /bud
 
-          echo -e "## Check if the image has been created locally"
-          GRAPH_DRIVER="vfs"
-          STORAGE_DIR=/var/lib/containers/storage
+          echo "## Check if the image has been created locally"
           buildah --storage-driver $GRAPH_DRIVER images
 
-          EXTRACT_DIR="/layers"
-          alias docker=podman
           REPO="localhost/buildpack-buildah"
-          echo "## Extract the layer to $EXTRACT_DIR ####"
-
+          echo "## Extract the layer to $LAYERS_DIR ##"
+          echo "## Get the tag of the image created ##"
+          buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}'
           TAG=$(buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
-          LAST_LAYER_ID=$(docker save $REPO:$TAG | ./undocker.py --layers | tail -n1)
+
+          echo "## Docker save ..."
+          alias docker=podman
+          STORAGE_DRIVER=$GRAPH_DRIVER
+          echo "## Storage driver to be used for podman: $STORAGE_DRIVER"
+
+          echo "## Get the last layer ID for the image $REPO:$TAG ##"
+          LAST_LAYER_ID=$(docker --storage-driver $STORAGE_DRIVER save $REPO:$TAG | ./undocker.py --layers | tail -n1)
           echo "Layer ID: $LAST_LAYER_ID"
-          docker save $REPO:$TAG | ./undocker.py -iv -o $EXTRACT_DIR -l $LAST_LAYER_ID
+
+          echo "## Extract the content of the layer: $LAST_LAYER_ID ##"
+          docker --storage-driver $STORAGE_DRIVER save $REPO:$TAG | ./undocker.py -ivd -o $LAYERS_DIR -l $LAST_LAYER_ID
       volumeMounts:
         - name: cache-dir
           mountPath: /workspace
@@ -124,12 +137,15 @@ spec:
         privileged: true
     - name: check-after
       image: registry.access.redhat.com/ubi8:8.4-211 # busybox:1.28
+      env:
+        - name: LAYERS_DIR
+          value: "/layers"
       command: [ "/bin/sh","-c" ]
       args:
         - |
-          echo "## Check if Node exists"
-          echo "## Append /layers/usr/bin to the path"
-          export PATH="/layers/usr/bin:$PATH"
+          echo "## Check if Node exists and version"
+          echo "## Append $LAYERS_DIR/usr/bin to the path"
+          export PATH="$LAYERS_DIR/usr/bin:$PATH"
           echo $PATH
           type -a node
           node -v
