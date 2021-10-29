@@ -142,7 +142,8 @@ cat $IMAGE_ID/blobs/sha256/$DIGEST_SHA | python -m json.tool
 
 LAST_LAYER_ID=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq .layers[-1].digest | cut -d: -f2 | sed 's/.$//')
 echo "LAST LAYER SHA: $LAST_LAYER_ID"
-tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID | less
+echo "## Display the content of the layer containing the package added ..."
+tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID
 
 popd
 ```
