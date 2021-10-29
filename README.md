@@ -76,8 +76,14 @@ using a different `initContainer` which is only used to copy the files coming fr
 
 ## How to get from an image, its index.json, manifest and digest files and content of a layer
 
-The following instrcutions will help us to figure out how we can get the layers using the manifest file of the image created
-to check of the content of the files added during the execution of the `dockerfiles` using `buildah bud.
+The following instructions will help us to figure out how we:
+- Apply a dockerfile to an image
+- Get locally the image built
+- Extract from the image its index.json, manifest file 
+- Access the content of a layer
+- Extract or check the content of the files added during the execution of the `dockerfiles`
+
+**REMARK**: I commented the line using the tool umoci but if needed it could also be investigated
 
 ```bash
 sudo rm -rf _temp && mkdir -p _temp
