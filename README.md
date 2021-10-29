@@ -74,6 +74,51 @@ volumeMounts:
 The consequence is that we need to find a way to copy the content of the subpath `/host` to the `/`
 using a different `initContainer` which is only used to copy the files coming from the layers !
 
+## How to get from an image, its index.json, manifest and digest files and content of a layer
+
+The following instrcutions will help us to figure out how we can get the layers using the manifest file of the image created
+to check of the content of the files added during the execution of the `dockerfiles` using `buildah bud.
+
+```bash
+sudo rm -rf _temp && mkdir -p _temp
+REPO="buildpack-poc"
+sudo podman rmi localhost/$REPO
+pushd _temp  
+
+cat <<'EOF' > Dockerfile
+FROM registry.access.redhat.com/ubi8:8.4-211
+
+RUN yum install -y --setopt=tsflags=nodocs nodejs && \
+	rpm -V nodejs && \
+	yum -y clean all
+EOF
+
+sudo buildah bud -q -f Dockerfile -t $REPO . > /dev/null 2>&1
+
+GRAPH_DRIVER="overlay"
+TAG=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
+IMAGE_ID=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $3;}')
+sudo skopeo copy -q containers-storage:$IMAGE_ID oci:$(pwd)/$IMAGE_ID:$TAG > /dev/null 2>&1
+
+# TOOL able to unpack the FS from an image (https://github.com/opencontainers/umoci)
+# sudo ../umoci unpack --image $IMAGE_ID:$TAG bundle
+
+cat $IMAGE_ID/index.json
+MANIFEST_SHA=$(cat $IMAGE_ID/index.json | jq .manifests[0].digest | cut -d: -f2 | sed 's/.$//')
+echo "MANIFEST SHA: $MANIFEST_SHA"
+cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | python -m json.tool
+
+DIGEST_SHA=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq .config.digest | cut -d: -f2 | sed 's/.$//')
+echo "DIGEST SHA: $DIGEST_SHA"
+cat $IMAGE_ID/blobs/sha256/$DIGEST_SHA | python -m json.tool
+
+LAST_LAYER_ID=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq .layers[-1].digest | cut -d: -f2 | sed 's/.$//')
+echo "LAST LAYER SHA: $LAST_LAYER_ID"
+echo "## Display the content of the layer containing the package added ..."
+tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID
+
+popd
+```
 ## Python utility tool to list, unpack layer
 
 See: https://blog.oddbit.com/post/2015-02-13-unpacking-docker-images/
@@ -105,47 +150,6 @@ docker save my-alpine |
   
 Check the tree of the folder created locally
 tree my-alpine-wget   
-```
-
-## How to get from an image, its index.json, manifest and digest files
-```bash
-sudo rm -rf _temp && mkdir -p _temp
-sudo podman 
-pushd _temp  
-
-cat <<'EOF' > Dockerfile
-FROM registry.access.redhat.com/ubi8:8.4-211
-
-RUN yum install -y --setopt=tsflags=nodocs nodejs && \
-	rpm -V nodejs && \
-	yum -y clean all
-EOF
-
-REPO="buildpack-poc"
-sudo buildah bud -f Dockerfile -t $REPO .
-
-GRAPH_DRIVER="overlay"
-TAG=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
-IMAGE_ID=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $3;}')
-sudo skopeo copy containers-storage:$IMAGE_ID oci:$(pwd)/$IMAGE_ID:$TAG
-
-# sudo ../umoci unpack --image $IMAGE_ID:$TAG bundle
-
-cat $IMAGE_ID/index.json
-MANIFEST_SHA=$(cat $IMAGE_ID/index.json | jq .manifests[0].digest | cut -d: -f2 | sed 's/.$//')
-echo "MANIFEST SHA: $MANIFEST_SHA"
-cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | python -m json.tool
-
-DIGEST_SHA=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq .config.digest | cut -d: -f2 | sed 's/.$//')
-echo "DIGEST SHA: $DIGEST_SHA"
-cat $IMAGE_ID/blobs/sha256/$DIGEST_SHA | python -m json.tool
-
-LAST_LAYER_ID=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq .layers[-1].digest | cut -d: -f2 | sed 's/.$//')
-echo "LAST LAYER SHA: $LAST_LAYER_ID"
-echo "## Display the content of the layer containing the package added ..."
-tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID
-
-popd
 ```
 
 ## MacOS
