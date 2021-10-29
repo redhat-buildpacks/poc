@@ -78,8 +78,6 @@ spec:
           node -v || true
           which node || true
       volumeMounts:
-        #- name: host
-        #  mountPath: /
         - name: layers
           mountPath: /layers
     - name: buildah-bud
@@ -127,25 +125,21 @@ spec:
       securityContext:
         privileged: true
     - name: check-after
-      image: busybox:1.28
+      image: registry.access.redhat.com/ubi8:8.4-211 # busybox:1.28
       command: [ "/bin/sh","-c" ]
       args:
         - |
-          echo "## Check if Node exists"
+          #!/usr/bin/env bash
+          echo "## Check if Node exists within the container FS /"
           node -v || true
-          which node ||
+          which node || true
 
-          echo "## PATH"
+          echo "## Change /layers path to check if node exists"
           export PATH="/layers/usr/bin:$PATH"
           echo $PATH
-
-          echo "## Use node from the layer extracted"
-          ls -la /layers/usr/bin/n*
-          ./layers/usr/bin/node -v || true
-          node -v || true
+          type -a node
+          node -v
       volumeMounts:
-        #- name: host
-        #  mountPath: /
         - name: layers
           mountPath: /layers
       securityContext:
