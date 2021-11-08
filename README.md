@@ -11,7 +11,7 @@ Next, you can build the project and launch it there
 
 ```bash
 cd poc
-go build -o out/bud ./bud
+go build -tags exclude_graphdriver_devicemapper -o out/bud ./bud
 
 sudo WORKSPACE_DIR="/home/vagrant/wks" ./out/bud
 INFO[0000] WORKSPACE DIR: %!(EXTRA string=/home/vagrant) 

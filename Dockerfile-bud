@@ -1,7 +1,7 @@
 FROM redhat/buildpacks-builder-quarkus-jvm
 
 USER root
-RUN microdnf install buildah podman python3
+RUN microdnf install buildah python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 COPY ./undocker.py /
