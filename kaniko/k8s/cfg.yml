@@ -1,0 +1,10 @@
+# kind create cluster --config ./k8s/cfg.yml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraMounts:
+    - hostPath: /Users/cmoullia/code/redhat-buildpacks/poc/kaniko/wks
+      containerPath: /workspace
+    - hostPath: /Users/cmoullia/code/redhat-buildpacks/poc/kaniko/snapshot
+      containerPath: /cache

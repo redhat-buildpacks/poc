@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kaniko
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+  namespace: kaniko
+spec:
+  volumes:
+    - name: cache-dir
+      hostPath:
+        path: /cache
+    - name: wks-dir
+      hostPath:
+        path: /workspace
+  initContainers:
+  - name: build
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+    - '--dockerfile=/workspace/Dockerfile'
+    - '--context=/workspace/'
+    - '--verbosity=info'
+    - '--no-push'
+    - '--cache=true'
+    - '--cache-dir=/cache'
+    - '--cache-repo=/cache'
+    # command: [ "/bin/sh","-c" ]
+    # args:
+    #   - |
+    #     set -e
+    #     echo -e "Launch kaniko executor ..."
+    #     /kaniko/executor --dockerfile=/workspace/Dockerfile --context=/workspace/ --verbosity=info --no-push
+    #     echo "Check if file created exists ..."
+    #     ls -la /
+    #     ls -la /kaniko
+    #     ls -la /workspace
+    volumeMounts:
+    - name: wks-dir
+      mountPath: /workspace
+    - name: cache-dir
+      mountPath: /cache
+  - name: check-content
+    image: alpine:3.14
+    command: [ "/bin/sh","-c" ]
+    args:
+      - |
+        set -e
+        echo -e "Check about hello.txt file ..."
+        ls -la /
+        ls -la /workspace
+        ls -la /cache
+    volumeMounts:
+    - name: cache-dir
+      mountPath: /cache
+    - name: wks-dir
+      mountPath: /workspace
+  containers:
+  - name: completion
+    image: alpine:3.14
+    command: [ "/bin/sh","-c" ]
+    args:
+      - |
+        echo "## Build completed successfully"
