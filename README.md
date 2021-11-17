@@ -1,40 +1,62 @@
 # Poc development
 
 This project has been designed in order to validate if we can build an image using
-`buildah go lib` and `Dockerfiles`.
+`buildah go lib` and `Dockerfiles` and next to access the content of the new layer(s)
+created as part of the container FS.
+
+## Kaniko 
+
+See Kaniko [readme.md](./kaniko/README.md)
+
+## Buildah
 
 As it is needed to use a Linux environment to test the go executable, we will use Vagrant as tool
 to launch a Linux VM locally which contains the needed tools (github, podman, buildah, ...) , go framework, ...
 
 Open a terminal where you will be able to bump the VM using the command `vagrant up` and `vagrant ssh`.
-Next, you can build the project and launch it there
+Next, you can build the project and launch it within the vm
 
 ```bash
-cd poc
+cd poc/buildah
 go build -tags exclude_graphdriver_devicemapper -o out/bud ./bud
-
-sudo WORKSPACE_DIR="/home/vagrant/wks" ./out/bud
-INFO[0000] WORKSPACE DIR: %!(EXTRA string=/home/vagrant) 
-INFO[0000] Buildah tempdir : %!(EXTRA string=/home/vagrant/buildah-poc-3853289916) 
-INFO[0000] Dockerfile name: %!(EXTRA string=/home/vagrant/poc/Dockerfile, string=/home/vagrant/poc/Dockerfile) 
-INFO[0003] Image id: %!(EXTRA string=f8cce29a1b02c26b62dee5d7fad3dfd3e9474ca4c0205de626bc681b04b3f014)  
 ```
-The image created is available under the temp buildah folder creates:
+
+Copy the `dockerfile` to be parsed to the `/home/vagrant/wks` folder
 ```bash
-sudo ls -la /root/buildah-poc-3011355348/root/overlay-images/
-total 16
-drwx------. 4 root root  188 Oct 27 11:52 .
-drwx------. 8 root root  155 Oct 27 11:52 ..
-drwx------. 2 root root 4096 Oct 27 11:52 cf2a2d19642401ea6af3a51cfc5f5190fca39734409fb2f7f4f4c5173da9d70e
-drwx------. 2 root root 4096 Oct 27 11:52 f8cce29a1b02c26b62dee5d7fad3dfd3e9474ca4c0205de626bc681b04b3f014
--rw-------. 1 root root 3558 Oct 27 11:52 images.json
--rw-r--r--. 1 root root   64 Oct 27 11:52 images.lock
+cp $HOME/poc/buildah/Dockerfile $HOME/wks
+```
+
+To parse the [Dockerfile](buildah/Dockerfile) pushed under the `WORKSPACE_DIR`, simply execute the
+`bud` go application. It will process it and will generate an image
+```bash
+[vagrant@centos7 buildah]$ sudo WORKSPACE_DIR="/home/vagrant/wks" $HOME/poc/buildah/out/bud
+WARN[0000] Failed to decode the keys ["storage.options.override_kernel_check"] from "/etc/containers/storage.conf". 
+INFO[0000] WORKSPACE DIR: /home/vagrant/wks             
+INFO[0000] GRAPH_DRIVER: vfs                            
+INFO[0000] STORAGE ROOT PATH: /var/lib/containers/storage 
+INFO[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage 
+INFO[0000] Buildah tempdir: /home/vagrant/wks/buildah-layers 
+INFO[0000] Dockerfile: /home/vagrant/wks/Dockerfile     
+INFO[0027] Image id: bf4b432845dc71930dfcb9905d9a3de25c76f14763c0b69b97d87504ea228979 
+INFO[0027] Image built successfully :-) 
+```
+The image created is available under the folder `/var/lib/containers/storage` using the appropriate grafh driver
+```bash
+sudo ls -la /var/lib/containers/storage/vfs-images/
+total 44
+drwx------.  8 root root  4096 Nov 17 17:01 .
+drwx------. 14 root root   251 Oct 29 14:33 ..
+drwx------.  2 root root  4096 Nov 17 17:01 9d69b1d0c28801834a8752b85de0a8d1b480ccc08e0696c241009e22db6729b9
+drwx------.  2 root root  4096 Nov 17 16:50 bf4b432845dc71930dfcb9905d9a3de25c76f14763c0b69b97d87504ea228979
+-rw-------.  1 root root 10079 Nov 17 17:01 images.json
+-rw-r--r--.  1 root root    64 Nov 17 17:01 images.lock
+
 ```
 **NOTE**: From your local machine, sync the files with the VM using the command `vagrant rsync`
 
-## Kubernetes
+### Kubernetes
 
-To test the POC on kubernetes, build a container image from your local machine (containing the poc bud executable).
+To test the POC on a kubernetes cluster, build a container image from your local machine (containing the poc bud executable).
 
 ```bash
 REPO=quay.io/snowdrop/buildah-poc
@@ -126,6 +148,7 @@ tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID
 
 popd
 ```
+
 ## Python utility tool to list, unpack layer
 
 See: https://blog.oddbit.com/post/2015-02-13-unpacking-docker-images/
