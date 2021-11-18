@@ -43,7 +43,7 @@ func exportTarball() {
 		DockerfilePath: workspaceDir + "/Dockerfile",
 		IgnoreVarRun:   true,
 		NoPush:         true,
-		SrcContext:     "dir://" + workspaceDir,
+		SrcContext:     workspaceDir,
 		SnapshotMode:   "full",
 	}
 

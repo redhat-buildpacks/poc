@@ -6,7 +6,8 @@ The [kaniko app](./code/main.go) is a simple application able to build an image 
 
 During the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image.
 
-Kaniko will create different layers under the folder `/kaniko` as `sha256:xxxxx.tgz` files where `xxxxxx` corresponds the [layer.digest](https://pkg.go.dev/github.com/google/go-containerregistry@v0.7.0/pkg/name#Digest).
+Kaniko will create different layers under the folder `/kaniko` as `sha256:xxxxx.tgz` files where `xxxxxx` corresponds the [layer.digest](https://pkg.go.dev/github.com/google/go-containerregistry@v0.7.0/pkg/name#Digest)
+which is the hash of the compressed layer.
 
 The layer files will be then copied to the mounted volume `/cache`.
 
