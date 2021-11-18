@@ -3,14 +3,17 @@
 ## Dummy kaniko app
 
 The [kaniko app](./code/main.go) is a simple application able to build an image using kaniko and a [Dockerfile](./workspace/Dockerfile).
+
 During the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image.
-Kaniko will create different layers under the folder `/kaniko` as `sha256:xxxxx.tgz` files. The layer files will be then copied to the mounted volume `/cache`.
+
+Kaniko will create different layers under the folder `/kaniko` as `sha256:xxxxx.tgz` files where `xxxxxx` corresponds the [layer.digest](https://pkg.go.dev/github.com/google/go-containerregistry@v0.7.0/pkg/name#Digest).
+
+The layer files will be then copied to the mounted volume `/cache`.
 
 When the `kaniko-app` is launched, then the following [Dockerfile](./workspace/Dockerfile) is parsed. This dockerfile will install some missing packages: `wget, curl`
 ```dockerfile
 FROM alpine
 
-RUN echo "Hello World" > hello.txt
 RUN apk add wget curl
 ```
 then we can read the content of the layer tar file crated to verify if they have been added:
