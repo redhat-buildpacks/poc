@@ -1,6 +1,6 @@
 # Kaniko POC
 
-## Dummy kaniko app
+## kaniko go app
 
 The [kaniko app](./code/main.go) is a simple application able to build an image using kaniko and a [Dockerfile](./workspace/Dockerfile).
 
@@ -80,7 +80,10 @@ docker run \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
-To deploy it as a pod, some additional steps are required and described hereafter.
+
+### Using a Kubernetes cluster
+
+To run the `kaniko-app` as a kubernetes pod, some additional steps are required and described hereafter.
 
 Create a k8s cluster having access to your local workspace and cache folders. This step can be achieved easily using kind
 and the following [bash script](./k8s/kind-reg.sh) where the following config can be defined to access your local folders
