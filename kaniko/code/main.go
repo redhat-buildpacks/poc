@@ -22,7 +22,6 @@ const ( // TODO: derive or pass in
 	cacheDir				   = "/cache"
 	workspaceDir			   = "/workspace"
 	outputDir                  = kanikoDir
-	ubuntuBionicTopLayerDigest = "sha256:284055322776031bac33723839acb0db2d063a525ba4fa1fd268a831c7553b26"
 )
 
 var (
@@ -70,8 +69,18 @@ func exportTarball() {
 	defer c.Close()
 	err = json.NewEncoder(c).Encode(*configJSON)
 
-	// Print the image json config
+	// Log the image json config
 	readFileContent(c)
+
+	// Log the raw manifest of the image
+	rawManifest, err := image.RawManifest()
+	if err != nil {
+		panic(err)
+	}
+	err = ioutil.WriteFile(cacheDir + "/manifest.json", rawManifest, 0644)
+	if err != nil {
+		panic(err)
+	}
 
 	// Get layers
 	layers, err := image.Layers()
@@ -81,14 +90,11 @@ func exportTarball() {
 	logrus.Infof("Generated %d layers\n", len(layers))
 	for _, layer := range layers {
 		digest, err := layer.Digest()
+		digest.MarshalText()
 		if err != nil {
 			panic(err)
 		}
-		digestStr := digest.String()
-		if digestStr == ubuntuBionicTopLayerDigest {
-			continue
-		}
-		layerPath = filepath.Join(outputDir, digestStr+".tgz")
+		layerPath = filepath.Join(outputDir, digest.String()+".tgz")
 		logrus.Infof("Tar layer file: %s\n",layerPath)
 		err = saveLayer(layer, layerPath)
 		if err != nil {
