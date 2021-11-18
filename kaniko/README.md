@@ -22,15 +22,16 @@ docker run \
 ```  
 The content of the `dockerfile` which has been processed by the `Kaniko` build is available under the `./cache` folder
 ```bash
-ls -la
-total 5560
-drwxr-xr-x   8 cmoullia  staff      256 Nov 18 13:54 .
-drwxr-xr-x  10 cmoullia  staff      320 Nov 18 13:55 ..
+drwxr-xr-x  10 cmoullia  staff      320 Nov 18 14:00 .
+drwxr-xr-x  10 cmoullia  staff      320 Nov 18 13:56 ..
 -rw-r--r--@  1 cmoullia  staff     6148 Nov 18 13:54 .DS_Store
+-rw-------   1 cmoullia  staff  4383232 Nov 18 13:58 425529682
+-rw-------   1 cmoullia  staff     1024 Nov 18 13:58 544414207
 -rw-------   1 cmoullia  staff     1024 Nov 18 13:50 577703017
--rw-r--r--   1 cmoullia  staff      942 Nov 18 13:53 config.json
--rw-r--r--   1 cmoullia  staff       12 Nov 18 13:50 hello.txt
--rw-r--r--@  1 cmoullia  staff  2822981 Nov 18 13:50 sha256:97518928ae5f3d52d4164b314a7e73654eb686ecd8aafa0b79acd980773a740d.tgz
+-rw-r--r--   1 cmoullia  staff      933 Nov 18 13:58 config.json
+-rw-r--r--   1 cmoullia  staff       12 Nov 18 13:58 hello.txt
+-rw-r--r--@  1 cmoullia  staff  2822981 Nov 18 13:58 sha256:97518928ae5f3d52d4164b314a7e73654eb686ecd8aafa0b79acd980773a740d.tgz
+-rw-r--r--   1 cmoullia  staff  3175266 Nov 18 13:58 sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
 ```
 
 To use the dlv remote debugger       
