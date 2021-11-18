@@ -99,7 +99,7 @@ func exportTarball() {
 	logrus.Infof("Reading dir content of: %s",kanikoDir)
 	readFilesFromPath(kanikoDir)
 
-	// Copy /kaniko content to the cache
+	// Copy the content of the kanikoDir to the cacheDir
 	Dir(kanikoDir,cacheDir)
 
 	// Read the content of the tgz file

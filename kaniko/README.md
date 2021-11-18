@@ -80,28 +80,33 @@ docker run \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
-or deploy it as a k8s pod
-```bash
+To deploy it as a pod, some additional steps are required and described hereafter.
 
+Create a k8s cluster having access to your local workspace and cache folders. This step can be achieved easily using kind
+and the following [bash script](./k8s/kind-reg.sh) where the following config can be defined to access your local folders
+```yaml
+  extraMounts:
+    - hostPath: $(pwd)/kaniko/workspace # PLEASE CHANGE ME
+      containerPath: /workspace
+    - hostPath: $(pwd)/kaniko/cache # PLEASE CHANGE ME
+      containerPath: /cache
+```
+Next, create the cluster using the command `./k8s/kind-reg.sh`
+
+When the cluster is up and running like the registry, we can push the image:
+```bash
+REGISTRY="localhost:5000"
+docker tag kaniko-app $REGISTRY/kaniko-app
+docker push $REGISTRY/kaniko-app
 ```
 
-## Test case using kaniko image on k8s
+and then deploy the kaniko pod
+```bash
+kubectl apply -f k8s/manifest.yml 
+```
+**NOTE**: Check the content of the pod initContainers logs using [k9s](https://k9scli.io/) or another tool :-)
 
-- To test kaniko using a k8s cluster, create it using `kind`
-- Before to create the cluster, change the `hostPath` within the `./k8s/cfg.yml` cfg file to point to your local folders
-  ```yaml
-  extraMounts:
-    - hostPath: /Users/cmoullia/code/redhat-buildpacks/poc/kaniko/wks # PLEASE CHANGE ME
-      containerPath: /workspace
-    - hostPath: /Users/cmoullia/code/redhat-buildpacks/poc/kaniko/snapshot # PLEASE CHANGE ME
-      containerPath: /cache
-  ```
-- Next, create the cluster
-  ```bash
-  kind create cluster --config ./k8s/cfg.yml 
-  ```
-- When the cluster is up and running, we can deploy the kaniko pod able to process the `./wks/Dockerfile`  
-  ```bash
-  kc delete -f k8s/manifest.yml --force && kc apply -f k8s/manifest.yml 
-  ```
-- Check the content of the pod initContainers logs using [k9s](https://k9scli.io/) or another tool :-)
+To delete the pod, do
+```bash
+kubectl delete -f k8s/manifest.yml
+```

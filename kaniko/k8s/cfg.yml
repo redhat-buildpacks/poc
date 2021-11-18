@@ -4,7 +4,7 @@ apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
   - role: control-plane
     extraMounts:
-    - hostPath: /Users/cmoullia/code/redhat-buildpacks/poc/kaniko/wks # PLEASE CHANGE ME
+    - hostPath: $(pwd)/kaniko/workspace
       containerPath: /workspace
-    - hostPath: /Users/cmoullia/code/redhat-buildpacks/poc/kaniko/snapshot # PLEASE CHANGE ME
+    - hostPath: $(pwd)/kaniko/cache
       containerPath: /cache
