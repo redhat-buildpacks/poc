@@ -17,7 +17,7 @@ FROM alpine
 
 RUN apk add wget curl
 ```
-then we can read the content of the layer tar file crated to verify if they have been added:
+then we can read the content of the layer tar file crated to verify if `wget, curl, ...` have been added:
 ```bash
 tar -tvf sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
 ...
@@ -35,6 +35,8 @@ drwxr-xr-x  0 0      0           0 Nov 18 14:22 usr/bin/
 -rwxr-xr-x  0 0      0      465912 Jan 12  2021 usr/bin/wget ## <-- wget app
 ...
 ```
+**NOTE**: You can also use the search_files bash [script](./scripts/search_files.sh) which will scan the content of the `tgz` files :-)
+
 ### How to build and run the application
 
 To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
@@ -86,7 +88,7 @@ docker run \
 To run the `kaniko-app` as a kubernetes pod, some additional steps are required and described hereafter.
 
 Create a k8s cluster having access to your local workspace and cache folders. This step can be achieved easily using kind
-and the following [bash script](./k8s/kind-reg.sh) where the following config can be defined to access your local folders
+and the following [bash script](scripts/kind-reg.sh) where the following config can be defined to access your local folders
 ```yaml
   extraMounts:
     - hostPath: $(pwd)/workspace  # PLEASE CHANGE ME
