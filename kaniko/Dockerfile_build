@@ -16,19 +16,20 @@ WORKDIR /go/src/kaniko-app
 COPY ./code/ .
 
 # Build the kaniko app using compilation flags
-RUN go build -gcflags "all=-N -l" -o /kaniko-app
+RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app
 
 #####################################
 # Setup the env to run the kaniko app
 #####################################
 FROM alpine:3
 
-ARG ext
-
 COPY --from=debugger /go/bin/dlv /usr/local/bin
 COPY --from=builder /kaniko-app /kaniko-app
+COPY --from=builder /go/src/kaniko-app/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 RUN mkdir -p /kaniko
 WORKDIR /workspace
 
-ENTRYPOINT ["/entrypoint-$ext.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

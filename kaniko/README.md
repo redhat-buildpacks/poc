@@ -2,13 +2,28 @@
 
 ## Local code
 
-Build the container image of the `kaniko-app`
+First download the dependencies using `go mod vendor` to 
+avoid that for every docker build, docker reloads all the dependencies
 ```bash
+cd kaniko/code
+go mod vendor
+```
+Build the container image of the `kaniko-app` using docker.
+```bash
+cd kaniko
 docker build -t kaniko-app -f Dockerfile_build .
 ```
-Run it locally 
+Launch the container
 ```bash
-docker run --arg ext=app \
+docker run \
+       -v $(pwd)/workspace:/workspace \
+       -it kaniko-app
+```       
+To use the dlv remote debugger       
+```bash
+docker run \
+       -e DEBUG=true \
+       -p 4000:4000 \
        -v $(pwd)/workspace:/workspace \
        -it kaniko-app
 ```

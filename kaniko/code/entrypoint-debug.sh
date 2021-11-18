@@ -1,1 +1,0 @@
-/usr/local/bin/dlv --continue --listen=:4000 --headless=true --api-version=2 --accept-multiclient exec /kaniko-app

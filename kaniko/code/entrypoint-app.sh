@@ -1,1 +1,0 @@
-/kaniko-app
