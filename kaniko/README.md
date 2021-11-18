@@ -1,22 +1,23 @@
 # Kaniko POC
 
-## Local code
+## Dummy kaniko app
 
-First download the dependencies using `go mod vendor` to 
-avoid that for every docker build, docker reloads all the dependencies
+First download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
+The commands reported hereafter should be executed in your terminal under: `$(pwd)/kaniko`
 ```bash
-cd kaniko/code
+cd code
 go mod vendor
+cd ..
 ```
 Build the container image of the `kaniko-app` using docker.
 ```bash
-cd kaniko
 docker build -t kaniko-app -f Dockerfile_build .
 ```
-Launch the container
+Launch the `kaniko-app` container
 ```bash
 docker run \
        -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```       
 To use the dlv remote debugger       

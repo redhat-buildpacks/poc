@@ -4,3 +4,5 @@ out
 .DS_Store
 /layer_cmd/
 /out.txt
+/kaniko/code/vendor/
+/kaniko/cache/
