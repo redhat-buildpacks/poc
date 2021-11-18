@@ -5,11 +5,14 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
+	"github.com/moby/buildkit/frontend/dockerfile/instructions"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/executor"
@@ -18,17 +21,16 @@ import (
 )
 
 const ( // TODO: derive or pass in
-	kanikoDir				   = "/kaniko"
-	cacheDir				   = "/cache"
-	workspaceDir			   = "/workspace"
-	outputDir                  = kanikoDir
+	kanikoDir    = "/kaniko"
+	cacheDir     = "/cache"
+	workspaceDir = "/workspace"
+	outputDir    = kanikoDir
 )
 
 var (
-	layerPath   string
-	tarPath     string
+	layerPath string
+	tarPath   string
 )
-
 
 func main() {
 	logrus.Info("Build the Dockerfile, populate a tarball...")
@@ -46,8 +48,48 @@ func exportTarball() {
 		SnapshotMode:   "full",
 	}
 
+	// Move to the kanikoDir
 	if err := os.Chdir(kanikoDir); err != nil {
 		panic(err)
+	}
+
+	stages, metaArgs, err := dockerfile.ParseStages(opts)
+	if err != nil {
+		panic(err)
+	}
+
+	kanikoStages, err := dockerfile.MakeKanikoStages(opts, stages, metaArgs)
+	if err != nil {
+		panic(err)
+	}
+
+	// Check the baseImage
+	targetStage, err := targetStage(stages, opts.Target)
+	for index, stage := range stages {
+		if len(stage.Name) > 0 {
+			logrus.Infof("Resolved base name %s to %s", stage.BaseName, stage.Name)
+		}
+		baseImageIndex := baseImageIndex(index, stages)
+		kanikoStages = append(kanikoStages, config.KanikoStage{
+			Stage:                  stage,
+			BaseImageIndex:         baseImageIndex,
+			BaseImageStoredLocally: (baseImageIndex != -1),
+			SaveStage:              saveStage(index, stages),
+			Final:                  index == targetStage,
+			MetaArgs:               metaArgs,
+			Index:                  index,
+		})
+		if index == targetStage {
+			break
+		}
+	}
+
+	// Log the baseImage
+	for _, kanikoStage := range kanikoStages {
+		logrus.Infof("Kaniko stage is: %s, index: %s", kanikoStage.BaseName, kanikoStage.Index)
+		if kanikoStage.BaseImageStoredLocally {
+			logrus.Infof("BaseImage is: %s", kanikoStage.BaseName)
+		}
 	}
 
 	// Do kaniko build
@@ -77,7 +119,7 @@ func exportTarball() {
 	if err != nil {
 		panic(err)
 	}
-	err = ioutil.WriteFile(cacheDir + "/manifest.json", rawManifest, 0644)
+	err = ioutil.WriteFile(cacheDir+"/manifest.json", rawManifest, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -95,18 +137,18 @@ func exportTarball() {
 			panic(err)
 		}
 		layerPath = filepath.Join(outputDir, digest.String()+".tgz")
-		logrus.Infof("Tar layer file: %s\n",layerPath)
+		logrus.Infof("Tar layer file: %s\n", layerPath)
 		err = saveLayer(layer, layerPath)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	logrus.Infof("Reading dir content of: %s",kanikoDir)
+	logrus.Infof("Reading dir content of: %s", kanikoDir)
 	readFilesFromPath(kanikoDir)
 
 	// Copy the content of the kanikoDir to the cacheDir
-	Dir(kanikoDir,cacheDir)
+	Dir(kanikoDir, cacheDir)
 
 	// Read the content of the tgz file
 	//logrus.Infof("Read the layer tgz file generated: %s",layerPath)
@@ -146,7 +188,7 @@ func untarFile(tgzFile string) (err error) {
 	// UnGzip first the tgz file
 	gzf, err := unGzip(tgzFile, kanikoDir)
 	if err != nil {
-		logrus.Panicf("Something wrong happened ... %s",err)
+		logrus.Panicf("Something wrong happened ... %s", err)
 	}
 
 	// Open the tar file
@@ -161,20 +203,20 @@ func untarFile(tgzFile string) (err error) {
 			return err
 		}
 		// determine proper file path info
-		logrus.Infof("File extracted: %s",hdr.Name)
+		logrus.Infof("File extracted: %s", hdr.Name)
 	}
 	return nil
 }
 
 func unGzip(gzipFile, tarPath string) (gzf io.Reader, err error) {
-	logrus.Infof("Opening the gzip file: %s",gzipFile)
+	logrus.Infof("Opening the gzip file: %s", gzipFile)
 	f, err := os.Open(gzipFile)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 
-	logrus.Infof("Creating a gzip reader for: %s",f.Name())
+	logrus.Infof("Creating a gzip reader for: %s", f.Name())
 	gzf, err = gzip.NewReader(f)
 	if err != nil {
 		panic(err)
@@ -182,7 +224,7 @@ func unGzip(gzipFile, tarPath string) (gzf io.Reader, err error) {
 	return gzf, nil
 }
 
-func readFilesFromPath(path string) (error) {
+func readFilesFromPath(path string) error {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
@@ -251,4 +293,53 @@ func File(src, dst string) error {
 		return err
 	}
 	return os.Chmod(dst, srcinfo.Mode())
+}
+
+// targetStage returns the index of the target stage kaniko is trying to build
+func targetStage(stages []instructions.Stage, target string) (int, error) {
+	if target == "" {
+		return len(stages) - 1, nil
+	}
+	for i, stage := range stages {
+		if stage.Name == target {
+			return i, nil
+		}
+	}
+	return -1, fmt.Errorf("%s is not a valid target build stage", target)
+}
+
+// SaveStage returns true if the current stage will be needed later in the Dockerfile
+func saveStage(index int, stages []instructions.Stage) bool {
+	currentStageName := stages[index].Name
+
+	for stageIndex, stage := range stages {
+		if stageIndex <= index {
+			continue
+		}
+
+		if strings.ToLower(stage.BaseName) == currentStageName {
+			if stage.BaseName != "" {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// baseImageIndex returns the index of the stage the current stage is built off
+// returns -1 if the current stage isn't built off a previous stage
+func baseImageIndex(currentStage int, stages []instructions.Stage) int {
+	currentStageBaseName := strings.ToLower(stages[currentStage].BaseName)
+
+	for i, stage := range stages {
+		if i > currentStage {
+			break
+		}
+		if stage.Name == currentStageBaseName {
+			return i
+		}
+	}
+
+	return -1
 }
