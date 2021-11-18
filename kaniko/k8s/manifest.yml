@@ -5,6 +5,25 @@ metadata:
   name: kaniko
 ---
 apiVersion: v1
+kind: Secret
+metadata:
+  name: local-registry
+  namespace: kaniko
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJyZWdpc3RyeS5sb2NhbDo1MDAwIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJwYXNzd29yZCI6InNub3dkcm9wIiwiYXV0aCI6IllXUnRhVzQ2YzI1dmQyUnliM0E9In19fQ==
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kaniko
+  namespace: kaniko
+secrets:
+  - name: local-registry
+imagePullSecrets:
+  - name: local-registry
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: kaniko
@@ -19,25 +38,23 @@ spec:
         path: /workspace
   initContainers:
   - name: build
-    image: gcr.io/kaniko-project/executor:latest
+    image:  registry.local:5000/kaniko-project/executor:alpine #gcr.io/kaniko-project/executor:1.0
+    #args:
+    #- '--dockerfile=/workspace/Dockerfile'
+    #- '--context=/workspace/'
+    #- '--verbosity=info'
+    #- '--no-push'
+    command: [ "/bin/sh","-c" ]
     args:
-    - '--dockerfile=/workspace/Dockerfile'
-    - '--context=/workspace/'
-    - '--verbosity=info'
-    - '--no-push'
-    - '--cache=true'
-    - '--cache-dir=/cache'
-    - '--cache-repo=/cache'
-    # command: [ "/bin/sh","-c" ]
-    # args:
-    #   - |
-    #     set -e
-    #     echo -e "Launch kaniko executor ..."
-    #     /kaniko/executor --dockerfile=/workspace/Dockerfile --context=/workspace/ --verbosity=info --no-push
-    #     echo "Check if file created exists ..."
-    #     ls -la /
-    #     ls -la /kaniko
-    #     ls -la /workspace
+      - |
+        set -e
+        echo -e "Launch kaniko executor ..."
+        /kaniko/executor --dockerfile=/workspace/Dockerfile --context=/workspace/ --verbosity=info --no-push
+        echo "Check if file created exists ..."
+        ls -la /
+        ls -la /kaniko
+        ls -la /workspace
+    imagePullPolicy: Always
     volumeMounts:
     - name: wks-dir
       mountPath: /workspace
@@ -65,3 +82,4 @@ spec:
     args:
       - |
         echo "## Build completed successfully"
+  serviceAccountName: kaniko
