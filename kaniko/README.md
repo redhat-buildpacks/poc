@@ -6,7 +6,7 @@ The [kaniko app](./code/main.go) is a simple application able to build an image 
 During the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image.
 Kaniko will create different layers under the folder `/kaniko` as `sha256:xxxxx.tgz` files. The layer files will be then copied to the mounted volume `/cache`.
 
-If our `kaniko-app` is executed and parse the following `Dockerfile` (to install some missing packages: `wget, curl`)
+When the `kaniko-app` is launched, then the following [Dockerfile](./workspace/Dockerfile) is parsed. This dockerfile will install some missing packages: `wget, curl`
 ```dockerfile
 FROM alpine
 
