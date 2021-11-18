@@ -19,7 +19,20 @@ docker run \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
-```       
+```  
+The content of the `dockerfile` which has been processed by the `Kaniko` build is available under the `./cache` folder
+```bash
+ls -la
+total 5560
+drwxr-xr-x   8 cmoullia  staff      256 Nov 18 13:54 .
+drwxr-xr-x  10 cmoullia  staff      320 Nov 18 13:55 ..
+-rw-r--r--@  1 cmoullia  staff     6148 Nov 18 13:54 .DS_Store
+-rw-------   1 cmoullia  staff     1024 Nov 18 13:50 577703017
+-rw-r--r--   1 cmoullia  staff      942 Nov 18 13:53 config.json
+-rw-r--r--   1 cmoullia  staff       12 Nov 18 13:50 hello.txt
+-rw-r--r--@  1 cmoullia  staff  2822981 Nov 18 13:50 sha256:97518928ae5f3d52d4164b314a7e73654eb686ecd8aafa0b79acd980773a740d.tgz
+```
+
 To use the dlv remote debugger       
 ```bash
 docker run \
