@@ -10,7 +10,7 @@ So, if we install a new application such as wget using the following dockerfile
 FROM alpine
 
 RUN echo "Hello World" > hello.txt
-RUN apk add wget
+RUN apk add wget curl
 ```
 then the layer created will include it 
 ```bash
@@ -20,28 +20,24 @@ x .
 x etc/
 x etc/apk/
 x etc/apk/world
-x etc/wgetrc
-x lib/
-x lib/apk/
-x lib/apk/db/
-x lib/apk/db/installed
-x lib/apk/db/scripts.tar
-x lib/apk/db/triggers
+...
 x usr/
 x usr/bin/
+x usr/bin/c_rehash
+x usr/bin/curl
 x usr/bin/idn2
 x usr/bin/wget
 x usr/lib/
-x usr/lib/libidn2.so.0
-x usr/lib/libidn2.so.0.3.7
-x usr/lib/libunistring.so.2
-x usr/lib/libunistring.so.2.1.0
-x var/
-x var/cache/
-x var/cache/apk/
-x var/cache/apk/APKINDEX.406b1341.tar.gz
-x var/cache/apk/APKINDEX.a251b1f2.tar.gz
-x var/cache/misc/
+x usr/lib/libbrotlicommon.so.1
+x usr/lib/libbrotlicommon.so.1.0.9
+x usr/lib/libbrotlidec.so.1
+x usr/lib/libbrotlidec.so.1.0.9
+x usr/lib/libbrotlienc.so.1
+x usr/lib/libbrotlienc.so.1.0.9
+x usr/lib/libcurl.so.4
+x usr/lib/libcurl.so.4.7.0
+x usr/local/
+...
 ```
 
 To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
