@@ -3,16 +3,17 @@
 ## Dummy kaniko app
 
 The [kaniko app](./code/main.go) is a simple application able to build an image using kaniko and a [Dockerfile](./workspace/Dockerfile).
-during the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image
+During the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image.
+Kaniko will create different layers under the folder `/kaniko` as `sha256:xxxxx.tgz` files. The layer files will be then copied to the mounted volume `/cache`.
 
-So, if we install some new applications such as `wget, curl` using the following `Dockerfile`
+If our `kaniko-app` is executed and parse the following `Dockerfile` (to install some missing packages: `wget, curl`)
 ```dockerfile
 FROM alpine
 
 RUN echo "Hello World" > hello.txt
 RUN apk add wget curl
 ```
-then the latest layer created by kaniko will include the applications. That could be veirfied if tar the content of the layer file  
+then we can read the content of the layer tar file crated to verify if they have been added:
 ```bash
 tar -tvf sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
 ...
@@ -25,11 +26,12 @@ drwxr-xr-x  0 0      0           0 Nov 18 14:22 lib/apk/db/
 drwxr-xr-x  0 0      0           0 Nov 12 10:18 usr/
 drwxr-xr-x  0 0      0           0 Nov 18 14:22 usr/bin/
 -rwxr-xr-x  0 0      0       14232 Oct 25  2020 usr/bin/c_rehash
--rwxr-xr-x  0 0      0      239568 Sep 22 20:50 usr/bin/curl
+-rwxr-xr-x  0 0      0      239568 Sep 22 20:50 usr/bin/curl ## <-- curl app
 -rwxr-xr-x  0 0      0       59864 May 17  2021 usr/bin/idn2
--rwxr-xr-x  0 0      0      465912 Jan 12  2021 usr/bin/wget
+-rwxr-xr-x  0 0      0      465912 Jan 12  2021 usr/bin/wget ## <-- wget app
 ...
 ```
+### How to build and run the application
 
 To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
 ```bash
@@ -79,7 +81,7 @@ or deploy it as a k8s pod
 
 ```
 
-## Test case using kaiko image on k8s
+## Test case using kaniko image on k8s
 
 - To test kaniko using a k8s cluster, create it using `kind`
 - Before to create the cluster, change the `hostPath` within the `./k8s/cfg.yml` cfg file to point to your local folders
