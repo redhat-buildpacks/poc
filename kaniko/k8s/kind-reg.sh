@@ -31,9 +31,9 @@ containerdConfigPatches:
 nodes:
 - role: control-plane
   extraMounts:
-  - hostPath: $(pwd)/kaniko/workspace
+  - hostPath: $(pwd)/workspace
     containerPath: /workspace
-  - hostPath: $(pwd)/kaniko/cache
+  - hostPath: $(pwd)/cache
     containerPath: /cache
   kubeadmConfigPatches:
   - |

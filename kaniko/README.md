@@ -86,9 +86,9 @@ Create a k8s cluster having access to your local workspace and cache folders. Th
 and the following [bash script](./k8s/kind-reg.sh) where the following config can be defined to access your local folders
 ```yaml
   extraMounts:
-    - hostPath: $(pwd)/kaniko/workspace # PLEASE CHANGE ME
+    - hostPath: $(pwd)/workspace  # PLEASE CHANGE ME
       containerPath: /workspace
-    - hostPath: $(pwd)/kaniko/cache # PLEASE CHANGE ME
+    - hostPath: $(pwd)/cache      # PLEASE CHANGE ME
       containerPath: /cache
 ```
 Next, create the cluster using the command `./k8s/kind-reg.sh`
