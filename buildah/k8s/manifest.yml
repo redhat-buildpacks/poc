@@ -2,7 +2,8 @@
 # REG_USERNAME="admin"
 # REG_PASWORD="snowdrop"
 # REG_SERVER="registry.local:5000"
-# kubectl create secret docker-registry local-registry -n fs --docker-server=$REG_SERVER --docker-username=$REG_USERNAME --docker-password=$REG_PASWORD
+# kubectl create ns buildpack
+# kubectl create secret docker-registry local-registry -n buildpack --docker-server=$REG_SERVER --docker-username=$REG_USERNAME --docker-password=$REG_PASWORD
 ---
 apiVersion: v1
 kind: Namespace

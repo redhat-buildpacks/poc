@@ -1,0 +1,34 @@
+#########################
+## Get the Delve debugger
+#########################
+FROM golang:1.16-alpine as debugger
+ENV CGO_ENABLED 0
+
+RUN go get -u github.com/go-delve/delve/cmd/dlv@v1.7.3
+
+###################
+## Build the go app
+###################
+FROM golang:1.16-alpine as builder
+ENV CGO_ENABLED 0
+
+WORKDIR /go/src/kaniko-app
+COPY ./code/ .
+
+# Build the kaniko app using compilation flags
+RUN go build -gcflags "all=-N -l" -o /kaniko-app
+
+#####################################
+# Setup the env to run the kaniko app
+#####################################
+FROM alpine:3
+
+ARG ext
+
+COPY --from=debugger /go/bin/dlv /usr/local/bin
+COPY --from=builder /kaniko-app /kaniko-app
+
+RUN mkdir -p /kaniko
+WORKDIR /workspace
+
+ENTRYPOINT ["/entrypoint-$ext.sh"]

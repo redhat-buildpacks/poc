@@ -59,6 +59,7 @@ drwx------.  2 root root  4096 Nov 17 16:50 bf4b432845dc71930dfcb9905d9a3de25c76
 To test the POC on a kubernetes cluster, build a container image from your local machine (containing the poc bud executable).
 
 ```bash
+cd buildah
 REPO=quay.io/snowdrop/buildah-poc
 docker build -t $REPO -f Dockerfile-bud .
 docker push $REPO
