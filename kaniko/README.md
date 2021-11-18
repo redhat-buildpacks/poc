@@ -2,7 +2,49 @@
 
 ## Dummy kaniko app
 
-First download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
+The [kaniko app](./code/main.go) is a simple application able to build an image using kaniko and a [Dockerfile](./workspace/Dockerfile).
+during the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image
+
+So, if we install a new application such as wget using the following dockerfile
+```dockerfile
+FROM alpine
+
+RUN echo "Hello World" > hello.txt
+RUN apk add wget
+```
+then the layer created will include it 
+```bash
+tar -vxf sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
+tar: Removing leading '/' from member names
+x .
+x etc/
+x etc/apk/
+x etc/apk/world
+x etc/wgetrc
+x lib/
+x lib/apk/
+x lib/apk/db/
+x lib/apk/db/installed
+x lib/apk/db/scripts.tar
+x lib/apk/db/triggers
+x usr/
+x usr/bin/
+x usr/bin/idn2
+x usr/bin/wget
+x usr/lib/
+x usr/lib/libidn2.so.0
+x usr/lib/libidn2.so.0.3.7
+x usr/lib/libunistring.so.2
+x usr/lib/libunistring.so.2.1.0
+x var/
+x var/cache/
+x var/cache/apk/
+x var/cache/apk/APKINDEX.406b1341.tar.gz
+x var/cache/apk/APKINDEX.a251b1f2.tar.gz
+x var/cache/misc/
+```
+
+To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
 The commands reported hereafter should be executed in your terminal under: `$(pwd)/kaniko`
 ```bash
 cd code
