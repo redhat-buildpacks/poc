@@ -5,49 +5,42 @@
 The [kaniko app](./code/main.go) is a simple application able to build an image using kaniko and a [Dockerfile](./workspace/Dockerfile).
 during the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image
 
-So, if we install a new application such as wget using the following dockerfile
+So, if we install some new applications such as `wget, curl` using the following `Dockerfile`
 ```dockerfile
 FROM alpine
 
 RUN echo "Hello World" > hello.txt
 RUN apk add wget curl
 ```
-then the layer created will include it 
+then the latest layer created by kaniko will include the applications. That could be veirfied if tar the content of the layer file  
 ```bash
-tar -vxf sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
-tar: Removing leading '/' from member names
-x .
-x etc/
-x etc/apk/
-x etc/apk/world
+tar -tvf sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
 ...
-x usr/
-x usr/bin/
-x usr/bin/c_rehash
-x usr/bin/curl
-x usr/bin/idn2
-x usr/bin/wget
-x usr/lib/
-x usr/lib/libbrotlicommon.so.1
-x usr/lib/libbrotlicommon.so.1.0.9
-x usr/lib/libbrotlidec.so.1
-x usr/lib/libbrotlidec.so.1.0.9
-x usr/lib/libbrotlienc.so.1
-x usr/lib/libbrotlienc.so.1.0.9
-x usr/lib/libcurl.so.4
-x usr/lib/libcurl.so.4.7.0
-x usr/local/
+drwxr-xr-x  0 0      0           0 Nov 18 14:22 lib/
+drwxr-xr-x  0 0      0           0 Nov 12 10:18 lib/apk/
+drwxr-xr-x  0 0      0           0 Nov 18 14:22 lib/apk/db/
+-rw-r--r--  0 0      0       28213 Nov 18 14:22 lib/apk/db/installed
+-rw-r--r--  0 0      0       13312 Nov 18 14:22 lib/apk/db/scripts.tar
+-rw-r--r--  0 0      0         212 Nov 18 14:22 lib/apk/db/triggers
+drwxr-xr-x  0 0      0           0 Nov 12 10:18 usr/
+drwxr-xr-x  0 0      0           0 Nov 18 14:22 usr/bin/
+-rwxr-xr-x  0 0      0       14232 Oct 25  2020 usr/bin/c_rehash
+-rwxr-xr-x  0 0      0      239568 Sep 22 20:50 usr/bin/curl
+-rwxr-xr-x  0 0      0       59864 May 17  2021 usr/bin/idn2
+-rwxr-xr-x  0 0      0      465912 Jan 12  2021 usr/bin/wget
 ...
 ```
 
 To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
-The commands reported hereafter should be executed in your terminal under: `$(pwd)/kaniko`
 ```bash
 cd code
 go mod vendor
 cd ..
 ```
-Build the container image of the `kaniko-app` using docker.
+
+**NOTE**: The commands reported hereafter should be executed in your terminal under: `$(pwd)/kaniko`
+
+Build next the container image of the `kaniko-app`.
 ```bash
 docker build -t kaniko-app -f Dockerfile_build .
 ```
@@ -78,6 +71,7 @@ docker run \
        -e DEBUG=true \
        -p 4000:4000 \
        -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
 or deploy it as a k8s pod
