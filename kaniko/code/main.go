@@ -16,6 +16,7 @@ import (
 
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/executor"
+	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	logrus "github.com/sirupsen/logrus"
 )
@@ -63,32 +64,26 @@ func exportTarball() {
 		panic(err)
 	}
 
-	// Check the baseImage
-	targetStage, err := targetStage(stages, opts.Target)
-	for index, stage := range stages {
-		if len(stage.Name) > 0 {
-			logrus.Infof("Resolved base name %s to %s", stage.BaseName, stage.Name)
-		}
-		baseImageIndex := baseImageIndex(index, stages)
-		kanikoStages = append(kanikoStages, config.KanikoStage{
-			Stage:                  stage,
-			BaseImageIndex:         baseImageIndex,
-			BaseImageStoredLocally: (baseImageIndex != -1),
-			SaveStage:              saveStage(index, stages),
-			Final:                  index == targetStage,
-			MetaArgs:               metaArgs,
-			Index:                  index,
-		})
-		if index == targetStage {
-			break
-		}
-	}
-
-	// Log the baseImage
+	// Check the baseImage and Log the layer digest
 	for _, kanikoStage := range kanikoStages {
-		logrus.Infof("Kaniko stage is: %s, index: %s", kanikoStage.BaseName, kanikoStage.Index)
-		if kanikoStage.BaseImageStoredLocally {
-			logrus.Infof("BaseImage is: %s", kanikoStage.BaseName)
+		var baseImage v1.Image
+		logrus.Infof("Kaniko stage is: %s, index: %d", kanikoStage.BaseName, kanikoStage.Index)
+		baseImage, err = image_util.RetrieveSourceImage(kanikoStage, opts)
+		configJSON, err := baseImage.ConfigFile()
+		if err != nil {
+			panic(err)
+		}
+		logrus.Infof("Base image from config: %s",configJSON.Config.Image)
+		layers, err := baseImage.Layers()
+		if err != nil {
+			panic(err)
+		}
+		for _, l := range layers {
+			digest, err := l.Digest()
+			if err != nil {
+				panic(err)
+			}
+			logrus.Infof("Layer digest of base image is: %s",digest)
 		}
 	}
 
