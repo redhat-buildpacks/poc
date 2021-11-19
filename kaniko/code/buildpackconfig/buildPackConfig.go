@@ -139,7 +139,10 @@ func (b *BuildPackConfig) ExtractTGZFile(baseHash v1.Hash) {
 	for _, tarFile := range b.TarPaths {
 		if (tarFile.Name != baseHash.String()) {
 			logrus.Infof("Tgz file to be extracted %s",tarFile.Name)
-			b.untarFile(tarFile.Path,b.HomeDir)
+			err := b.untarFile(tarFile.Path,b.HomeDir)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
