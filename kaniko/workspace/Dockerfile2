@@ -1,0 +1,5 @@
+FROM redhat/ubi8:latest
+
+COPY ./hello.txt /workspace
+
+RUN dnf install -y wget curl
