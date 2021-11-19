@@ -24,6 +24,8 @@ spec:
     env:
       - name: "EXTRACT_LAYERS"
         value: "true"
+      - name: "FILES_TO_SEARCH"
+        value: "hello.txt,curl"
       - name: "LOGGING_LEVEL"
         value: "info"
       - name: "LOGGING_FORMAT"
