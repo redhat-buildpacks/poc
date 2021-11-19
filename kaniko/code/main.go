@@ -54,7 +54,7 @@ func main() {
 	logrus.Infof("Dockerfile name: %s",b.DockerFileName)
 
 	// Build the Dockerfile
-	logrus.Debugf("Building the %s",b.DockerFileName)
+	logrus.Infof("Building the %s",b.DockerFileName)
 	err := b.BuildDockerFile()
 	if err != nil {
 		panic(err)
@@ -65,10 +65,17 @@ func main() {
 	b.SaveImageRawManifest()
 
 	// Log the content of the Kaniko dir
-	logrus.Debugf("Reading dir content of: %s", b.KanikoDir)
+	logrus.Infof("Reading dir content of: %s", b.KanikoDir)
 	util.ReadFilesFromPath(b.KanikoDir)
 
-	// Export the layers as tar gzip files under the cache dir
-	logrus.Debugf("Export the layers as tar gzip files under the %s ...",b.CacheDir)
-	b.CopyLayersTarFileToCacheDir(b.NewImage)
+	// Export the layers from the new Image as tar gzip file under the Kaniko dir
+	logrus.Infof("Export the layers as tar gzip files under the %s ...",b.CacheDir)
+	b.ExtractLayersFromNewImageToKanikoDir()
+
+	// Copy the files created from the Kaniko dir to the Cache dir
+	logrus.Infof("Copy the files created from the Kaniko dir to the %s dir ...",b.CacheDir)
+	b.CopyTGZFilesToCacheDir()
+
+	// Explode the layers created under the container / filesystem
+	logrus.Info("Explode the layers created under the container / filesystem ...")
 }

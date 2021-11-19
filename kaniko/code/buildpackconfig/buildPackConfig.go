@@ -7,6 +7,7 @@ import (
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/executor"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/redhat-buildpacks/poc/kaniko/store"
 	"github.com/redhat-buildpacks/poc/kaniko/util"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -25,7 +26,6 @@ const (
 
 type BuildPackConfig struct {
 	LayerPath       string
-	TarPath         string
 	CacheDir        string
 	KanikoDir       string
 	WorkspaceDir    string
@@ -34,15 +34,15 @@ type BuildPackConfig struct {
 	NewImage   		v1.Image
 	BuildArgs  		[]string
 	CnbEnvVars 		map[string]string
+	TarPaths		[]string
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
 	return &BuildPackConfig{
-		LayerPath: "",
-		TarPath: "",
-		CacheDir: cacheDir,
+		LayerPath:    "",
+		CacheDir:     cacheDir,
 		WorkspaceDir: workspaceDir,
-		KanikoDir: kanikoDir,
+		KanikoDir:    kanikoDir,
 	}
 }
 
@@ -95,27 +95,41 @@ func (b *BuildPackConfig) BuildDockerFile() (err error) {
 	return err
 }
 
-func (b *BuildPackConfig) CopyLayersTarFileToCacheDir(image v1.Image) {
+func (b *BuildPackConfig) ExtractLayersFromNewImageToKanikoDir() {
 	// Get layers
 	layers, err := b.NewImage.Layers()
 	if err != nil {
 		panic(err)
 	}
-	logrus.Infof("Generated %d layers\n", len(layers))
+	logrus.Infof("Generated %d layers", len(layers))
+
+	tarFiles := []store.TarFile{}
+
 	for _, layer := range layers {
 		digest, err := layer.Digest()
 		digest.MarshalText()
 		if err != nil {
 			panic(err)
 		}
-		b.LayerPath = filepath.Join(b.KanikoDir, digest.String()+".tgz")
-		logrus.Infof("Tar layer file: %s\n", b.LayerPath)
-		err = saveLayer(layer, b.LayerPath)
+
+		tarFile := store.TarFile{
+			Name: digest.String(),
+			Path: filepath.Join(b.KanikoDir, digest.String()+".tgz"),
+		}
+		logrus.Infof("Tar layer file: %s", tarFile.Path)
+
+		// Add the tgz file to the list of the tgz files
+		tarFiles = append(tarFiles, tarFile)
+
+		// Save the tgz layer file within the Kaniko dir
+		err = saveLayer(layer, tarFile.Path)
 		if err != nil {
 			panic(err)
 		}
 	}
+}
 
+func (b *BuildPackConfig) CopyTGZFilesToCacheDir() {
 	// Copy the content of the kanikoDir to the cacheDir
 	util.Dir(b.KanikoDir, b.CacheDir)
 }
