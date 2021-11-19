@@ -204,13 +204,12 @@ func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err e
 			break
 		}
 		if err != nil {
-			logrus.Fatalf("ExtractTarGz: Next() failed: %s", err.Error())
-			return err
+			logrus.Fatalf("ExtractTarGz: Next() failed: %v", err)
 		}
 
 		// the target location where the dir/file should be created
 		target := filepath.Join(targetDir, hdr.Name)
-		logrus.Infof("File to be extracted: %s", target)
+		logrus.Debugf("File to be extracted: %s", target)
 
 		if (b.ExtractLayers) {
 			switch hdr.Typeflag {
@@ -234,11 +233,12 @@ func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err e
 				}
 				// manually close here after each file operation; defering would cause each file close
 				// to wait until all operations have completed.
+				logrus.Debugf("File extracted to %s",outFile.Name())
 				outFile.Close()
 
 			default:
-				logrus.Fatalf(
-					"ExtractTarGz: uknown type: %s in %s",
+				logrus.Debugf(
+					"ExtractTarGz: unknown type: %c in %s",
 					hdr.Typeflag,
 					hdr.Name)
 			}

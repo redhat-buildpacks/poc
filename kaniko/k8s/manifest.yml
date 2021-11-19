@@ -22,6 +22,8 @@ spec:
     image:  localhost:5000/kaniko-app
     command: [ "/kaniko-app" ]
     env:
+      - name: "EXTRACT_LAYERS"
+        value: "true"
       - name: "LOGGING_LEVEL"
         value: "info"
       - name: "LOGGING_FORMAT"

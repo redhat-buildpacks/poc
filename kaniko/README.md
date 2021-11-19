@@ -5,6 +5,7 @@ Table of Contents
 * [How to build and run the application](#how-to-build-and-run-the-application)
 * [CNB Build args](#cnb-build-args)
 * [Extract layer files](#extract-layer-files)
+* [Verify if files exist](#verify-if-files-exist)
 * [Cache content](#cache-content)
 * [Remote debugging](#remote-debugging)
 * [Using Kubernetes](#using-kubernetes)
@@ -113,7 +114,7 @@ of the compressed tgz files will be logged.
 To extract the layers files, enable the following ENV var `EXTRACT_LAYERS=true`
 
 ```bash
- docker run \
+docker run \
        -e EXTRACT_LAYERS=true \
        -e LOGGING_FORMAT=color \
        -e DOCKER_FILE_NAME="Dockerfile" \
@@ -121,6 +122,26 @@ To extract the layers files, enable the following ENV var `EXTRACT_LAYERS=true`
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
+
+## Verify if files exist
+
+To check/control if files added from the layers exist under the root filesystem, please use the following `ENV` var `FILES_TO_SEARCH`
+
+```bash
+docker run \
+       -e EXTRACT_LAYERS=true \
+       -e FILES_TO_SEARCH="hello.txt,curl" \
+       -e LOGGING_LEVEL=debug \
+       -e LOGGING_FORMAT=color \
+       -e DOCKER_FILE_NAME="Dockerfile" \
+       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
+       -it kaniko-app
+...
+DEBU[0009] File found: /usr/bin/curl                    
+DEBU[0009] File found: /workspace/hello.txt          
+```
+
 
 ## Cache content
 

@@ -6,27 +6,35 @@ import (
 	util "github.com/redhat-buildpacks/poc/kaniko/util"
 	logrus "github.com/sirupsen/logrus"
 	"strconv"
+	"strings"
 )
 
 const (
-	LOGGING_LEVEL_ENV_NAME       = "LOGGING_LEVEL"
-	LOGGING_FORMAT_ENV_NAME      = "LOGGING_FORMAT"
-	LOGGING_TIMESTAMP_ENV_NAME   = "LOGGING_TIMESTAMP"
-	EXTRACT_LAYERS_ENV_NAME		 = "EXTRACT_LAYERS"
+	LOGGING_LEVEL_ENV_NAME     = "LOGGING_LEVEL"
+	LOGGING_FORMAT_ENV_NAME    = "LOGGING_FORMAT"
+	LOGGING_TIMESTAMP_ENV_NAME = "LOGGING_TIMESTAMP"
+	EXTRACT_LAYERS_ENV_NAME    = "EXTRACT_LAYERS"
+	FILES_TO_SEARCH_ENV_NAME   = "FILES_TO_SEARCH"
 
-	DefaultLevel              = "info"
-	DefaultLogTimestamp       = false
-	DefaultLogFormat          = "text"
+	DefaultLevel        = "info"
+	DefaultLogTimestamp = false
+	DefaultLogFormat    = "text"
 )
 
 var (
-	logLevel	  string // Log level (trace, debug, info, warn, error, fatal, panic)
-	logFormat     string // Log format (text, color, json)
-	logTimestamp  bool   // Timestamp in log output
-	extractLayers bool // Extract layers from tgz files. Defaul is false
+	logLevel      string   // Log level (trace, debug, info, warn, error, fatal, panic)
+	logFormat     string   // Log format (text, color, json)
+	logTimestamp  bool     // Timestamp in log output
+	extractLayers bool     // Extract layers from tgz files. Defaul is false
+	filesToSearch []string // List of files to search to check if they exist under the updated FS
 )
 
 func init() {
+	envVal := util.GetValFromEnVar(FILES_TO_SEARCH_ENV_NAME)
+	if envVal != "" {
+		filesToSearch = strings.Split(envVal, ",")
+	}
+
 	logLevel = util.GetValFromEnVar(LOGGING_LEVEL_ENV_NAME)
 	if logLevel == "" {
 		logLevel = DefaultLevel
@@ -42,7 +50,7 @@ func init() {
 		logTimestamp = DefaultLogTimestamp
 	} else {
 		v, err := strconv.ParseBool(loggingTimeStampStr)
-		if (err != nil) {
+		if err != nil {
 			logrus.Fatalf("logTimestamp bool assignment failed %s", err)
 		} else {
 			logTimestamp = v
@@ -55,7 +63,7 @@ func init() {
 		extractLayers = false
 	} else {
 		v, err := strconv.ParseBool(extractLayersStr)
-		if (err != nil) {
+		if err != nil {
 			logrus.Fatalf("extractLayers bool assignment failed %s", err)
 		} else {
 			extractLayers = v
@@ -77,14 +85,14 @@ func main() {
 	b.InitDefaults()
 	b.ExtractLayers = extractLayers
 
-	logrus.Infof("Kaniko      dir: %s",b.KanikoDir)
-	logrus.Infof("Workspace   dir: %s",b.WorkspaceDir)
-	logrus.Infof("Cache       dir: %s",b.CacheDir)
-	logrus.Infof("Dockerfile name: %s",b.DockerFileName)
-	logrus.Infof("Extract layer files ? %v",extractLayers)
+	logrus.Infof("Kaniko      dir: %s", b.KanikoDir)
+	logrus.Infof("Workspace   dir: %s", b.WorkspaceDir)
+	logrus.Infof("Cache       dir: %s", b.CacheDir)
+	logrus.Infof("Dockerfile name: %s", b.DockerFileName)
+	logrus.Infof("Extract layer files ? %v", extractLayers)
 
 	// Build the Dockerfile
-	logrus.Infof("Building the %s",b.DockerFileName)
+	logrus.Infof("Building the %s", b.DockerFileName)
 	err := b.BuildDockerFile()
 	if err != nil {
 		panic(err)
@@ -99,11 +107,11 @@ func main() {
 	util.ReadFilesFromPath(b.KanikoDir)
 
 	// Export the layers from the new Image as tar gzip file under the Kaniko dir
-	logrus.Infof("Export the layers as tar gzip files under the %s ...",b.CacheDir)
+	logrus.Infof("Export the layers as tar gzip files under the %s ...", b.CacheDir)
 	b.ExtractLayersFromNewImageToKanikoDir()
 
 	// Copy the files created from the Kaniko dir to the Cache dir
-	logrus.Infof("Copy the files created from the Kaniko dir to the %s dir ...",b.CacheDir)
+	logrus.Infof("Copy the files created from the Kaniko dir to the %s dir ...", b.CacheDir)
 	b.CopyTGZFilesToCacheDir()
 
 	// Find the digest/hash of the Base Image
@@ -113,4 +121,8 @@ func main() {
 	logrus.Info("Extract the content of the tgz file the / filesystem ...")
 	b.ExtractTGZFile(baseImageHash)
 
+	// Check if files exist
+	if (len(filesToSearch) > 0) {
+		util.FindFiles([]string{"hello.txt", "curl"})
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -110,6 +111,35 @@ func ReadFilesFromPath(path string) error {
 
 	for _, file := range files {
 		fmt.Println(file.Name(), file.IsDir())
+	}
+	return nil
+}
+
+func FindFiles(filesToSearch []string) error {
+	var files []string
+	root := "/"
+
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+
+		for _, s := range filesToSearch {
+			logrus.Tracef("File searched is : %s",info.Name())
+			if !info.IsDir() && info.Name() == s {
+				files = append(files, path)
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	for _, file := range files {
+		logrus.Debugf("File found: %s", file)
 	}
 	return nil
 }
