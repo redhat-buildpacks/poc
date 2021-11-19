@@ -39,6 +39,7 @@ type BuildPackConfig struct {
 	CnbEnvVars 		map[string]string
 	TarPaths		[]store.TarFile
 	HomeDir			string
+	ExtractLayers	bool
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
@@ -197,17 +198,52 @@ func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err e
 	// Open the tar file from the tgz reader
 	tr := tar.NewReader(gzf)
 	// Get each tar segment
-	for {
+	for true {
 		hdr, err := tr.Next()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
+			logrus.Fatalf("ExtractTarGz: Next() failed: %s", err.Error())
 			return err
 		}
-		// determine proper file path info
-		logrus.Infof("File extracted: %s", hdr.Name)
-		// TODO: Extract the file content
+
+		// the target location where the dir/file should be created
+		target := filepath.Join(targetDir, hdr.Name)
+		logrus.Infof("File to be extracted: %s", target)
+
+		if (b.ExtractLayers) {
+			switch hdr.Typeflag {
+			case tar.TypeDir:
+				if _, err := os.Stat(target); err != nil {
+					// TODO: Should we define a const for the permission
+					if err := os.Mkdir(target, 0755); err != nil {
+						logrus.Fatalf("ExtractTarGz: Mkdir() failed: %s", err.Error())
+						return err
+					}
+				}
+			case tar.TypeReg:
+				outFile, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(hdr.Mode))
+				if err != nil {
+					logrus.Fatalf("ExtractTarGz: Create() failed: %s", err.Error())
+					return err
+				}
+				if _, err := io.Copy(outFile, tr); err != nil {
+					logrus.Fatalf("ExtractTarGz: Copy() failed: %s", err.Error())
+					return err
+				}
+				// manually close here after each file operation; defering would cause each file close
+				// to wait until all operations have completed.
+				outFile.Close()
+
+			default:
+				logrus.Fatalf(
+					"ExtractTarGz: uknown type: %s in %s",
+					hdr.Typeflag,
+					hdr.Name)
+			}
+		}
+
 	}
 	return nil
 }
@@ -256,8 +292,6 @@ func unGzip(gzipFilePath string) (gzf io.Reader, err error) {
 	if err != nil {
 		panic(err)
 	}
-	defer f.Close()
-
 	logrus.Infof("Creating a gzip reader for: %s", f.Name())
 	gzf, err = gzip.NewReader(f)
 	if err != nil {

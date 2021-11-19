@@ -98,11 +98,29 @@ docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
        -e CNB_BaseImage="ubuntu:bionic" \
-       -e DOCKER_FILE_NAME="Dockerfile1" \
+       -e DOCKER_FILE_NAME="Dockerfile" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
+
+## Extract layer files
+
+By default, the layer tgz files are not extracted to the home dir of the container's filesystem. Nevertheless, the files part
+of the compressed tgz files will be logged.
+
+To extract the layers files, enable the following ENV var `EXTRACT_LAYERS=true`
+
+```bash
+ docker run \
+       -e EXTRACT_LAYERS=true \
+       -e LOGGING_FORMAT=color \
+       -e DOCKER_FILE_NAME="Dockerfile" \
+       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
+       -it kaniko-app
+```
+
 ## Cache content
 
 The content of the `dockerfile` which has been processed by the `Kaniko` build is available under the `./cache` folder

@@ -5,11 +5,14 @@ import (
 	"github.com/redhat-buildpacks/poc/kaniko/logging"
 	util "github.com/redhat-buildpacks/poc/kaniko/util"
 	logrus "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 const (
 	LOGGING_LEVEL_ENV_NAME       = "LOGGING_LEVEL"
 	LOGGING_FORMAT_ENV_NAME      = "LOGGING_FORMAT"
+	LOGGING_TIMESTAMP_ENV_NAME   = "LOGGING_TIMESTAMP"
+	EXTRACT_LAYERS_ENV_NAME		 = "EXTRACT_LAYERS"
 
 	DefaultLevel              = "info"
 	DefaultLogTimestamp       = false
@@ -17,9 +20,10 @@ const (
 )
 
 var (
-	logLevel	 string // Log level (trace, debug, info, warn, error, fatal, panic)
-	logFormat    string // Log format (text, color, json)
-	logTimestamp bool   // Timestamp in log output
+	logLevel	  string // Log level (trace, debug, info, warn, error, fatal, panic)
+	logFormat     string // Log format (text, color, json)
+	logTimestamp  bool   // Timestamp in log output
+	extractLayers bool // Extract layers from tgz files. Defaul is false
 )
 
 func init() {
@@ -33,8 +37,31 @@ func init() {
 		logFormat = DefaultLogFormat
 	}
 
-	// TODO: Check how to process bool env var
-	logTimestamp = DefaultLogTimestamp
+	loggingTimeStampStr := util.GetValFromEnVar(LOGGING_TIMESTAMP_ENV_NAME)
+	if loggingTimeStampStr == "" {
+		logTimestamp = DefaultLogTimestamp
+	} else {
+		v, err := strconv.ParseBool(loggingTimeStampStr)
+		if (err != nil) {
+			logrus.Fatalf("logTimestamp bool assignment failed %s", err)
+		} else {
+			logTimestamp = v
+		}
+	}
+
+	extractLayersStr := util.GetValFromEnVar(EXTRACT_LAYERS_ENV_NAME)
+	if extractLayersStr == "" {
+		logrus.Info("The layered tzg files will NOT be extracted to the home dir ...")
+		extractLayers = false
+	} else {
+		v, err := strconv.ParseBool(extractLayersStr)
+		if (err != nil) {
+			logrus.Fatalf("extractLayers bool assignment failed %s", err)
+		} else {
+			extractLayers = v
+			logrus.Info("The layered tzg files will be extracted to the home dir ...")
+		}
+	}
 
 	if err := logging.Configure(logLevel, logFormat, logTimestamp); err != nil {
 		panic(err)
@@ -48,10 +75,13 @@ func main() {
 	logrus.Info("Initialize the BuildPackConfig and set the defaults values ...")
 	b := cfg.NewBuildPackConfig()
 	b.InitDefaults()
+	b.ExtractLayers = extractLayers
+
 	logrus.Infof("Kaniko      dir: %s",b.KanikoDir)
 	logrus.Infof("Workspace   dir: %s",b.WorkspaceDir)
 	logrus.Infof("Cache       dir: %s",b.CacheDir)
 	logrus.Infof("Dockerfile name: %s",b.DockerFileName)
+	logrus.Infof("Extract layer files ? %v",extractLayers)
 
 	// Build the Dockerfile
 	logrus.Infof("Building the %s",b.DockerFileName)
