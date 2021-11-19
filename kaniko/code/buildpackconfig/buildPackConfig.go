@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	homeDir						 = "/"
 	kanikoDir                    = "/kaniko"
 	cacheDir                     = "/cache"
 	workspaceDir                 = "/workspace"
@@ -37,6 +38,7 @@ type BuildPackConfig struct {
 	BuildArgs  		[]string
 	CnbEnvVars 		map[string]string
 	TarPaths		[]store.TarFile
+	HomeDir			string
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
@@ -45,6 +47,7 @@ func NewBuildPackConfig() *BuildPackConfig {
 		CacheDir:     cacheDir,
 		WorkspaceDir: workspaceDir,
 		KanikoDir:    kanikoDir,
+		HomeDir:      homeDir,
 	}
 }
 
@@ -136,6 +139,7 @@ func (b *BuildPackConfig) ExtractTGZFile(baseHash v1.Hash) {
 	for _, tarFile := range b.TarPaths {
 		if (tarFile.Name != baseHash.String()) {
 			logrus.Infof("Tgz file to be extracted %s",tarFile.Name)
+			b.untarFile(tarFile.Path,b.HomeDir)
 		}
 	}
 }
@@ -179,14 +183,15 @@ func (b *BuildPackConfig) SaveImageJSONConfig() {
 	// readFileContent(c)
 }
 
-func (b *BuildPackConfig) untarFile(tgzFile string) (err error) {
-	// UnGzip first the tgz file
-	gzf, err := unGzip(tgzFile, b.KanikoDir)
+func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err error) {
+
+	// create a Reader of the gzip file
+	gzf, err := unGzip(tgzFilePath)
 	if err != nil {
 		logrus.Panicf("Something wrong happened ... %s", err)
 	}
 
-	// Open the tar file
+	// Open the tar file from the tgz reader
 	tr := tar.NewReader(gzf)
 	// Get each tar segment
 	for {
@@ -199,6 +204,7 @@ func (b *BuildPackConfig) untarFile(tgzFile string) (err error) {
 		}
 		// determine proper file path info
 		logrus.Infof("File extracted: %s", hdr.Name)
+		// TODO: Extract the file content
 	}
 	return nil
 }
@@ -241,9 +247,9 @@ func (b *BuildPackConfig) FindBaseImageDigest() v1.Hash {
 
 }
 
-func unGzip(gzipFile, tarPath string) (gzf io.Reader, err error) {
-	logrus.Infof("Opening the gzip file: %s", gzipFile)
-	f, err := os.Open(gzipFile)
+func unGzip(gzipFilePath string) (gzf io.Reader, err error) {
+	logrus.Infof("Opening the gzip file: %s", gzipFilePath)
+	f, err := os.Open(gzipFilePath)
 	if err != nil {
 		panic(err)
 	}
