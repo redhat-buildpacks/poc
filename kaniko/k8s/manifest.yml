@@ -27,11 +27,11 @@ spec:
       - name: "FILES_TO_SEARCH"
         value: "hello.txt,curl"
       - name: "LOGGING_LEVEL"
-        value: "info"
+        value: "debug"
       - name: "LOGGING_FORMAT"
         value: "color"
       - name: "DOCKER_FILE_NAME"
-        value: "Dockerfile"
+        value: "Dockerfile2"
     imagePullPolicy: Always
     volumeMounts:
     - name: wks-dir
