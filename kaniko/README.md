@@ -4,6 +4,7 @@ Table of Contents
 * [kaniko go app](#kaniko-go-app)
 * [How to build and run the application](#how-to-build-and-run-the-application)
 * [CNB Build args](#cnb-build-args)
+* [Extract layer files](#extract-layer-files)
 * [Cache content](#cache-content)
 * [Remote debugging](#remote-debugging)
 * [Using Kubernetes](#using-kubernetes)
