@@ -3,10 +3,10 @@ Table of Contents
 
 * [kaniko go app](#kaniko-go-app)
 * [How to build and run the application](#how-to-build-and-run-the-application)
+* [CNB Build args](#cnb-build-args)
 * [Cache content](#cache-content)
 * [Remote debugging](#remote-debugging)
 * [Using Kubernetes](#using-kubernetes)
-
 
 ## kaniko go app
 
@@ -84,14 +84,21 @@ docker run \
 ```
 ## CNB Build args
 
-# TODO: Add  test case to test if CNB* ENV vars are passed and convert them as BuildArgs
+When the Dockerfile contains some `ARG arg` commands
+
+```dockerfile
+ARG CNB_BaseImage
+FROM ${CNB_BaseImage}
+...
+```
+then, we must pass them as `ENV vars` to the container. Our application will then convert the ENV var into a Kaniko `BuildArgs` array of `[]string`
 
 ```bash
-docker run \                                    
+docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
-       -e CNB_BaseImage="ubtuntu:bionic" \
-       -e DOCKER_FILE_NAME=Dockerfile1 \
+       -e CNB_BaseImage="ubuntu:bionic" \
+       -e DOCKER_FILE_NAME="Dockerfile1" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app

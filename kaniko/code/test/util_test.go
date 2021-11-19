@@ -1,9 +1,11 @@
-package util
+package test
 
 import (
+	cfg "github.com/redhat-buildpacks/poc/kaniko/buildpackconfig"
+	"github.com/redhat-buildpacks/poc/kaniko/util"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"github.com/stretchr/testify/assert"
 )
 
 var envTests = []struct {
@@ -19,9 +21,12 @@ var envTests = []struct {
 		expectedBuildArgs:   []string{"CNB_foo=bar"},
 	},
 }
+
+// TODO: To be reviewed and improved as we cannot build it on macos due to error
+// ../vendor/github.com/docker/docker/builder/dockerfile/internals.go:193:19: undefined: parseChownFlag
 func TestEnvToBuildArgs(t *testing.T) {
 
-	//b := newBuildPackConfig()
+	b := cfg.NewBuildPackConfig()
 
 	for _, test := range envTests {
 		t.Run(test.name, func(t *testing.T) {
@@ -30,7 +35,7 @@ func TestEnvToBuildArgs(t *testing.T) {
 			os.Setenv(test.envKey, test.envVal)
 
 			// Read the env vars
-			//b.cnbEnvVars = util.GetCNBEnvVar()
+			b.CnbEnvVars = util.GetCNBEnvVar()
 
 			assert.Equal(t,"1","1")
 		})
