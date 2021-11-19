@@ -4,123 +4,134 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
-	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
-	"github.com/moby/buildkit/frontend/dockerfile/instructions"
+	"github.com/GoogleContainerTools/kaniko/pkg/config"
+	"github.com/GoogleContainerTools/kaniko/pkg/executor"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/redhat-buildpacks/poc/kaniko/logging"
+	util "github.com/redhat-buildpacks/poc/kaniko/util"
+	logrus "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
-
-	"github.com/GoogleContainerTools/kaniko/pkg/config"
-	"github.com/GoogleContainerTools/kaniko/pkg/executor"
-	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
-	v1 "github.com/google/go-containerregistry/pkg/v1"
-	logrus "github.com/sirupsen/logrus"
 )
 
-const ( // TODO: derive or pass in
-	kanikoDir    = "/kaniko"
-	cacheDir     = "/cache"
-	workspaceDir = "/workspace"
-	outputDir    = kanikoDir
+const (
+	kanikoDir                 = "/kaniko"
+	cacheDir                  = "/cache"
+	workspaceDir              = "/workspace"
+	defaultDockerFileName     = "Dockerfile"
+	DOCKER_FILE_NAME_ENV_NAME = "DOCKER_FILE_NAME"
+	LOGGING_LEVEL_ENV_NAME    = "LOGGING_LEVEL"
 )
 
 var (
-	layerPath string
-	tarPath   string
+	logLevel	 string // Log level (trace, debug, info, warn, error, fatal, panic)
+	logFormat    string // Log format (text, color, json)
+	logTimestamp bool   // Timestamp in log output
 )
 
-func main() {
-	logrus.Info("Build the Dockerfile, populate a tarball...")
-	exportTarball()
+type buildPackConfig struct {
+	layerPath       string
+	tarPath         string
+	cacheDir       	string
+	kanikoDir       string
+	workspaceDir    string
+	dockerFileName	string
+	opts            config.KanikoOptions
+	newImage		v1.Image
 }
 
-func exportTarball() {
-	// create Kaniko config
-	opts := &config.KanikoOptions{ // TODO: see which of these options are truly needed
+func init() {
+	logLevel = util.GetValFromEnVar(LOGGING_LEVEL_ENV_NAME)
+	if logLevel != "" {
+		logLevel = "info"
+	}
+
+	if err := logging.Configure(logLevel, logFormat, logTimestamp); err != nil {
+		panic(err)
+	}
+}
+
+func (b *buildPackConfig) main() {
+	logrus.Info("Kaniko application able to build a Dockerfile is running ...")
+
+	// Create a buildPackConfig and set the default values
+	logrus.Info("Initialize the BuildPackConfig and set the defaults values ...")
+	newBuildPackConfig()
+	b.initDefaults()
+	logrus.Infof("Kaniko      dir: ",b.kanikoDir)
+	logrus.Infof("Workspace   dir: ",b.workspaceDir)
+	logrus.Infof("Cache       dir: ",b.cacheDir)
+	logrus.Infof("Dockerfile name: ",b.dockerFileName)
+
+	// Build the Dockerfile
+	logrus.Debugf("Building the %s",b.dockerFileName)
+	err := b.buildDockerFile()
+	if err != nil {
+		panic(err)
+	}
+
+	// Save the Config and Manifest files of the new image created
+	b.saveImageJSONConfig()
+	b.saveImageRawManifest()
+
+	// Log the content of the Kaniko dir
+	logrus.Debugf("Reading dir content of: %s", kanikoDir)
+	util.ReadFilesFromPath(kanikoDir)
+
+	// Export the layers as tar gzip files under the cache dir
+	logrus.Debugf("Export the layers as tar gzip files under the %s ...",b.cacheDir)
+	b.copyLayersTarFileToCacheDir(b.newImage)
+}
+
+func newBuildPackConfig() *buildPackConfig {
+	return &buildPackConfig{
+		layerPath: "",
+		tarPath: "",
+		cacheDir: cacheDir,
+		workspaceDir: workspaceDir,
+		kanikoDir: kanikoDir,
+	}
+}
+
+func (b *buildPackConfig) initDefaults() {
+	logrus.Debug("Checking if the DOCKER_FILE_NAME env is defined...")
+	b.dockerFileName = util.GetValFromEnVar(DOCKER_FILE_NAME_ENV_NAME)
+	if b.dockerFileName != "" {
+		b.dockerFileName = defaultDockerFileName
+	}
+	logrus.Debugf("DockerfileName is: %s", b.dockerFileName)
+
+	dockerFilePath := b.workspaceDir + "/" + b.dockerFileName
+
+	b.opts = config.KanikoOptions{
 		CacheOptions:   config.CacheOptions{CacheDir: cacheDir},
-		DockerfilePath: workspaceDir + "/Dockerfile",
+		DockerfilePath: dockerFilePath,
 		IgnoreVarRun:   true,
 		NoPush:         true,
-		SrcContext:     workspaceDir,
+		SrcContext:     b.workspaceDir,
 		SnapshotMode:   "full",
 	}
 
-	// Move to the kanikoDir
-	if err := os.Chdir(kanikoDir); err != nil {
+	logrus.Debug("KanikoOptions defined")
+}
+
+func (b *buildPackConfig) buildDockerFile() (err error) {
+
+	logrus.Debugf("Moving to kaniko home dir: %s", b.kanikoDir)
+	if err := os.Chdir(b.kanikoDir); err != nil {
 		panic(err)
 	}
 
-	stages, metaArgs, err := dockerfile.ParseStages(opts)
-	if err != nil {
-		panic(err)
-	}
+	logrus.Debugf("Building the %s ...", b.dockerFileName)
+	b.newImage, err = executor.DoBuild(&b.opts)
+	return err
+}
 
-	kanikoStages, err := dockerfile.MakeKanikoStages(opts, stages, metaArgs)
-	if err != nil {
-		panic(err)
-	}
-
-	// Check the baseImage and Log the layer digest
-	for _, kanikoStage := range kanikoStages {
-		var baseImage v1.Image
-		logrus.Infof("Kaniko stage is: %s, index: %d", kanikoStage.BaseName, kanikoStage.Index)
-		baseImage, err = image_util.RetrieveSourceImage(kanikoStage, opts)
-		configJSON, err := baseImage.ConfigFile()
-		if err != nil {
-			panic(err)
-		}
-		logrus.Infof("Base image from config: %s",configJSON.Config.Image)
-		layers, err := baseImage.Layers()
-		if err != nil {
-			panic(err)
-		}
-		for _, l := range layers {
-			digest, err := l.Digest()
-			if err != nil {
-				panic(err)
-			}
-			logrus.Infof("Layer digest of base image is: %s",digest)
-		}
-	}
-
-	// Do kaniko build
-	image, err := executor.DoBuild(opts)
-	if err != nil {
-		panic(err)
-	}
-
-	// Get the Image config file
-	configJSON, err := image.ConfigFile()
-	if err != nil {
-		panic(err)
-	}
-	configPath := filepath.Join(outputDir, "config.json")
-	c, err := os.Create(configPath)
-	if err != nil {
-		panic(err)
-	}
-	defer c.Close()
-	err = json.NewEncoder(c).Encode(*configJSON)
-
-	// Log the image json config
-	readFileContent(c)
-
-	// Log the raw manifest of the image
-	rawManifest, err := image.RawManifest()
-	if err != nil {
-		panic(err)
-	}
-	err = ioutil.WriteFile(cacheDir+"/manifest.json", rawManifest, 0644)
-	if err != nil {
-		panic(err)
-	}
-
+func (b *buildPackConfig) copyLayersTarFileToCacheDir(image v1.Image) {
 	// Get layers
-	layers, err := image.Layers()
+	layers, err := b.newImage.Layers()
 	if err != nil {
 		panic(err)
 	}
@@ -131,57 +142,55 @@ func exportTarball() {
 		if err != nil {
 			panic(err)
 		}
-		layerPath = filepath.Join(outputDir, digest.String()+".tgz")
-		logrus.Infof("Tar layer file: %s\n", layerPath)
-		err = saveLayer(layer, layerPath)
+		b.layerPath = filepath.Join(b.kanikoDir, digest.String()+".tgz")
+		logrus.Infof("Tar layer file: %s\n", b.layerPath)
+		err = saveLayer(layer, b.layerPath)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	logrus.Infof("Reading dir content of: %s", kanikoDir)
-	readFilesFromPath(kanikoDir)
-
 	// Copy the content of the kanikoDir to the cacheDir
-	Dir(kanikoDir, cacheDir)
-
-	// Read the content of the tgz file
-	//logrus.Infof("Read the layer tgz file generated: %s",layerPath)
-	//err = untarFile(layerPath)
-	//if err != nil {
-	//	logrus.Panicf("Reading the tgz file failed: %s", err)
-	//}
+	util.Dir(kanikoDir, cacheDir)
 }
 
-func saveLayer(layer v1.Layer, path string) error {
-	layerReader, err := layer.Compressed()
+func (b *buildPackConfig) saveImageRawManifest() {
+	rawManifest, err := b.newImage.RawManifest()
+	rawManifestFilePath := b.cacheDir + "/manifest.json"
+	err = ioutil.WriteFile(rawManifestFilePath, rawManifest, 0644)
 	if err != nil {
-		return err
+		panic(err)
 	}
-	l, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer l.Close()
-	_, err = io.Copy(l, layerReader)
-	if err != nil {
-		return err
-	}
-	return nil
+	logrus.Debugf("Manifest file of the new image stored at %s",rawManifestFilePath)
 }
 
-func readFileContent(f *os.File) {
-	data, err := ioutil.ReadFile(f.Name())
+func (b *buildPackConfig) saveImageJSONConfig() {
+	// Get the Image config file
+	configJSON, err := b.newImage.ConfigFile()
 	if err != nil {
-		logrus.Errorf("Failed reading data from file: %s", err)
+		panic(err)
 	}
-	logrus.Infof("\nFile Name: %s", f.Name())
-	logrus.Infof("\nData: %s", data)
+	configPath := filepath.Join(b.kanikoDir, "config.json")
+	c, err := os.Create(configPath)
+	if err != nil {
+		panic(err)
+	}
+	defer c.Close()
+
+	err = json.NewEncoder(c).Encode(*configJSON)
+	if err != nil {
+		panic(err)
+	}
+	logrus.Debugf("Image JSON config file stored at %s",configPath)
+
+	// Log the image json config
+	// TODO: Add a debug opt to log if needed
+	// readFileContent(c)
 }
 
-func untarFile(tgzFile string) (err error) {
+func (b *buildPackConfig) untarFile(tgzFile string) (err error) {
 	// UnGzip first the tgz file
-	gzf, err := unGzip(tgzFile, kanikoDir)
+	gzf, err := unGzip(tgzFile, b.kanikoDir)
 	if err != nil {
 		logrus.Panicf("Something wrong happened ... %s", err)
 	}
@@ -219,122 +228,19 @@ func unGzip(gzipFile, tarPath string) (gzf io.Reader, err error) {
 	return gzf, nil
 }
 
-func readFilesFromPath(path string) error {
-	files, err := ioutil.ReadDir(path)
+func saveLayer(layer v1.Layer, path string) error {
+	layerReader, err := layer.Compressed()
 	if err != nil {
 		return err
 	}
-
-	for _, file := range files {
-		fmt.Println(file.Name(), file.IsDir())
+	l, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer l.Close()
+	_, err = io.Copy(l, layerReader)
+	if err != nil {
+		return err
 	}
 	return nil
-}
-
-func Dir(src string, dst string) error {
-	var err error
-	var fds []os.FileInfo
-	var srcinfo os.FileInfo
-
-	if srcinfo, err = os.Stat(src); err != nil {
-		return err
-	}
-
-	if err = os.MkdirAll(dst, srcinfo.Mode()); err != nil {
-		return err
-	}
-
-	if fds, err = ioutil.ReadDir(src); err != nil {
-		return err
-	}
-	for _, fd := range fds {
-		srcfp := path.Join(src, fd.Name())
-		dstfp := path.Join(dst, fd.Name())
-
-		if fd.IsDir() {
-			if err = Dir(srcfp, dstfp); err != nil {
-				fmt.Println(err)
-			}
-		} else {
-			if err = File(srcfp, dstfp); err != nil {
-				fmt.Println(err)
-			}
-		}
-	}
-	return nil
-}
-
-// File copies a single file from src to dst
-func File(src, dst string) error {
-	var err error
-	var srcfd *os.File
-	var dstfd *os.File
-	var srcinfo os.FileInfo
-
-	if srcfd, err = os.Open(src); err != nil {
-		return err
-	}
-	defer srcfd.Close()
-
-	if dstfd, err = os.Create(dst); err != nil {
-		return err
-	}
-	defer dstfd.Close()
-
-	if _, err = io.Copy(dstfd, srcfd); err != nil {
-		return err
-	}
-	if srcinfo, err = os.Stat(src); err != nil {
-		return err
-	}
-	return os.Chmod(dst, srcinfo.Mode())
-}
-
-// targetStage returns the index of the target stage kaniko is trying to build
-func targetStage(stages []instructions.Stage, target string) (int, error) {
-	if target == "" {
-		return len(stages) - 1, nil
-	}
-	for i, stage := range stages {
-		if stage.Name == target {
-			return i, nil
-		}
-	}
-	return -1, fmt.Errorf("%s is not a valid target build stage", target)
-}
-
-// SaveStage returns true if the current stage will be needed later in the Dockerfile
-func saveStage(index int, stages []instructions.Stage) bool {
-	currentStageName := stages[index].Name
-
-	for stageIndex, stage := range stages {
-		if stageIndex <= index {
-			continue
-		}
-
-		if strings.ToLower(stage.BaseName) == currentStageName {
-			if stage.BaseName != "" {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-// baseImageIndex returns the index of the stage the current stage is built off
-// returns -1 if the current stage isn't built off a previous stage
-func baseImageIndex(currentStage int, stages []instructions.Stage) int {
-	currentStageBaseName := strings.ToLower(stages[currentStage].BaseName)
-
-	for i, stage := range stages {
-		if i > currentStage {
-			break
-		}
-		if stage.Name == currentStageBaseName {
-			return i
-		}
-	}
-
-	return -1
 }

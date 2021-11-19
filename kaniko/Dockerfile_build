@@ -16,7 +16,7 @@ WORKDIR /go/src/kaniko-app
 COPY ./code/ .
 
 # Build the kaniko app using compilation flags
-RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app
+RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app *.go
 
 #####################################
 # Setup the env to run the kaniko app

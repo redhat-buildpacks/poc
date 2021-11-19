@@ -58,7 +58,19 @@ docker run \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
-```  
+```
+The following ENV variables can be defined:
+`LOGGING_LEVEL`    Log level: trace, debug, **info**, warn, error, fatal, panic
+`DOCKER_FILE_NAME` Dockerfile to be parsed: **Dockerfile** is the default name
+
+```bash
+docker run \
+       -e DOCKER_FILE_NAME=Dockerfile1 \
+       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
+       -it kaniko-app
+```
+
 The content of the `dockerfile` which has been processed by the `Kaniko` build is available under the `./cache` folder
 ```bash
 drwxr-xr-x  10 cmoullia  staff      320 Nov 18 14:00 .

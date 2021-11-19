@@ -1,4 +1,4 @@
-module me.snowdrop.kaniko
+module github.com/redhat-buildpacks/poc/kaniko
 
 require (
 	github.com/GoogleContainerTools/kaniko v1.6.0
