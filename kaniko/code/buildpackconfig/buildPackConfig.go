@@ -5,7 +5,9 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
+	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
 	"github.com/GoogleContainerTools/kaniko/pkg/executor"
+	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/redhat-buildpacks/poc/kaniko/store"
 	"github.com/redhat-buildpacks/poc/kaniko/util"
@@ -34,7 +36,7 @@ type BuildPackConfig struct {
 	NewImage   		v1.Image
 	BuildArgs  		[]string
 	CnbEnvVars 		map[string]string
-	TarPaths		[]string
+	TarPaths		[]store.TarFile
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
@@ -127,6 +129,15 @@ func (b *BuildPackConfig) ExtractLayersFromNewImageToKanikoDir() {
 			panic(err)
 		}
 	}
+	b.TarPaths = tarFiles
+}
+
+func (b *BuildPackConfig) ExtractTGZFile(baseHash v1.Hash) {
+	for _, tarFile := range b.TarPaths {
+		if (tarFile.Name != baseHash.String()) {
+			logrus.Infof("Tgz file to be extracted %s",tarFile.Name)
+		}
+	}
 }
 
 func (b *BuildPackConfig) CopyTGZFilesToCacheDir() {
@@ -190,6 +201,44 @@ func (b *BuildPackConfig) untarFile(tgzFile string) (err error) {
 		logrus.Infof("File extracted: %s", hdr.Name)
 	}
 	return nil
+}
+
+func (b *BuildPackConfig) FindBaseImageDigest() v1.Hash {
+	var digest v1.Hash
+
+	stages, metaArgs, err := dockerfile.ParseStages(&b.Opts)
+	if err != nil {
+		panic(err)
+	}
+
+	kanikoStages, err := dockerfile.MakeKanikoStages(&b.Opts, stages, metaArgs)
+	if err != nil {
+		panic(err)
+	}
+
+	// Check the baseImage and Log the layer digest
+	for _, kanikoStage := range kanikoStages {
+		var baseImage v1.Image
+		logrus.Infof("Kaniko stage is: %s, index: %d", kanikoStage.BaseName, kanikoStage.Index)
+
+		// Retrieve the SourceImage
+		baseImage, err = image_util.RetrieveSourceImage(kanikoStage, &b.Opts)
+
+		// Get the layers of the Base Image
+		layers, err := baseImage.Layers()
+		if err != nil {
+			panic(err)
+		}
+		for _, l := range layers {
+			digest, err = l.Digest()
+			if err != nil {
+				panic(err)
+			}
+			logrus.Infof("Layer digest of base image is: %s",digest)
+		}
+	}
+	return digest
+
 }
 
 func unGzip(gzipFile, tarPath string) (gzf io.Reader, err error) {

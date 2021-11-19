@@ -76,6 +76,11 @@ func main() {
 	logrus.Infof("Copy the files created from the Kaniko dir to the %s dir ...",b.CacheDir)
 	b.CopyTGZFilesToCacheDir()
 
+	// Find the digest/hash of the Base Image
+	baseImageHash := b.FindBaseImageDigest()
+
 	// Explode the layers created under the container / filesystem
-	logrus.Info("Explode the layers created under the container / filesystem ...")
+	logrus.Info("Extract the content of the tgz file the / filesystem ...")
+	b.ExtractTGZFile(baseImageHash)
+
 }
