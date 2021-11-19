@@ -30,7 +30,7 @@ COPY --from=builder /go/src/kaniko-app/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
-RUN mkdir -p /kaniko
+RUN mkdir -p /kaniko /workspace /cache
 WORKDIR /workspace
 
 ENTRYPOINT ["/entrypoint.sh"]
