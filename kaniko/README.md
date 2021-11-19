@@ -1,4 +1,12 @@
-# Kaniko POC
+Table of Contents
+=================
+
+* [kaniko go app](#kaniko-go-app)
+* [How to build and run the application](#how-to-build-and-run-the-application)
+* [Cache content](#cache-content)
+* [Remote debugging](#remote-debugging)
+* [Using Kubernetes](#using-kubernetes)
+
 
 ## kaniko go app
 
@@ -37,7 +45,7 @@ drwxr-xr-x  0 0      0           0 Nov 18 14:22 usr/bin/
 ```
 **NOTE**: You can also use the search_files bash [script](./scripts/search_files.sh) which will scan the content of the `tgz` files :-)
 
-### How to build and run the application
+## How to build and run the application
 
 To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
 ```bash
@@ -73,6 +81,7 @@ docker run \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
+## Cache content
 
 The content of the `dockerfile` which has been processed by the `Kaniko` build is available under the `./cache` folder
 ```bash
@@ -88,7 +97,9 @@ drwxr-xr-x  10 cmoullia  staff      320 Nov 18 13:56 ..
 -rw-r--r--   1 cmoullia  staff  3175266 Nov 18 13:58 sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
 ```
 
-To use the dlv remote debugger       
+## Remote debugging
+
+To use the dlv remote debugger, simply pass as `ENV` var `DEBUG=true` and the port `4000` to access it using your favorite IDE (Visual studio, IntelliJ, ...)      
 ```bash
 docker run \
        -e DEBUG=true \
@@ -98,7 +109,7 @@ docker run \
        -it kaniko-app
 ```
 
-### Using a Kubernetes cluster
+## Using Kubernetes
 
 To run the `kaniko-app` as a kubernetes pod, some additional steps are required and described hereafter.
 
