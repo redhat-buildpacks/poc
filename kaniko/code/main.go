@@ -112,7 +112,7 @@ func newBuildPackConfig() *buildPackConfig {
 func (b *buildPackConfig) initDefaults() {
 	logrus.Debug("Checking if the DOCKER_FILE_NAME env is defined...")
 	b.dockerFileName = util.GetValFromEnVar(DOCKER_FILE_NAME_ENV_NAME)
-	if b.dockerFileName != "" {
+	if b.dockerFileName == "" {
 		b.dockerFileName = defaultDockerFileName
 	}
 	logrus.Debugf("DockerfileName is: %s", b.dockerFileName)
