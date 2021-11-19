@@ -1,5 +1,5 @@
-ARG base_image
-FROM ${base_image}
+ARG CNB_BaseImage
+FROM ${CNB_BaseImage}
 
 ARG some_arg
 RUN echo ${some_arg} > /opt/arg.txt

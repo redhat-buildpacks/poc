@@ -76,7 +76,22 @@ The following ENV variables can be defined:
 docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
-       -e DOCKER_FILE_NAME=my_Dockerfile \
+       -e base_image="ubtuntu:bionic" \
+       -e DOCKER_FILE_NAME=Dockerfile1 \
+       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
+       -it kaniko-app
+```
+## CNB Build args
+
+# TODO: Add  test case to test if CNB* ENV vars are passed and convert them as BuildArgs
+
+```bash
+docker run \                                    
+       -e LOGGING_LEVEL=debug \
+       -e LOGGING_FORMAT=color \
+       -e CNB_BaseImage="ubtuntu:bionic" \
+       -e DOCKER_FILE_NAME=Dockerfile1 \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app

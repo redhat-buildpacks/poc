@@ -46,6 +46,8 @@ type buildPackConfig struct {
 	dockerFileName	string
 	opts            config.KanikoOptions
 	newImage		v1.Image
+	buildArgs       []string
+	cnbEnvVars		map[string]string
 }
 
 func init() {
@@ -110,15 +112,29 @@ func newBuildPackConfig() *buildPackConfig {
 }
 
 func (b *buildPackConfig) initDefaults() {
-	logrus.Debug("Checking if the DOCKER_FILE_NAME env is defined...")
+
+	logrus.Debug("Check if DOCKER_FILE_NAME env is defined...")
 	b.dockerFileName = util.GetValFromEnVar(DOCKER_FILE_NAME_ENV_NAME)
 	if b.dockerFileName == "" {
 		b.dockerFileName = defaultDockerFileName
 	}
 	logrus.Debugf("DockerfileName is: %s", b.dockerFileName)
 
+	logrus.Debug("Checking if CNB_* env var have been declared ...")
+	b.cnbEnvVars = util.GetCNBEnvVar()
+	logrus.Debugf("CNB ENV var is: %s", b.cnbEnvVars)
+
+	// Convert the CNB ENV vars to Kaniko BuildArgs
+	for k, v := range b.cnbEnvVars {
+		logrus.Debugf("CNB env key: %s, value: %s", k, v)
+		arg := k + "=" + v
+		b.buildArgs = append(b.buildArgs, arg)
+	}
+
+	// setup the path to access the Dockerfile within the workspace dir
 	dockerFilePath := b.workspaceDir + "/" + b.dockerFileName
 
+	// init the Kaniko options
 	b.opts = config.KanikoOptions{
 		CacheOptions:   config.CacheOptions{CacheDir: cacheDir},
 		DockerfilePath: dockerFilePath,
@@ -126,6 +142,7 @@ func (b *buildPackConfig) initDefaults() {
 		NoPush:         true,
 		SrcContext:     b.workspaceDir,
 		SnapshotMode:   "full",
+		BuildArgs:      b.buildArgs,
 	}
 
 	logrus.Debug("KanikoOptions defined")

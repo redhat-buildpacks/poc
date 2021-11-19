@@ -3,7 +3,10 @@ module github.com/redhat-buildpacks/poc/kaniko
 require (
 	github.com/GoogleContainerTools/kaniko v1.6.0
 	github.com/google/go-containerregistry v0.4.1-0.20210128200529-19c2b639fab1
-	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.8.1
+	github.com/stretchr/testify v1.6.1
+	gotest.tools v2.2.0+incompatible // indirect
 )
 
 replace (

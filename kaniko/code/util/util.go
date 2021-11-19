@@ -7,7 +7,21 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 )
+
+func GetCNBEnvVar() (map[string]string) {
+	kvs := map[string]string{}
+	envs := os.Environ()
+
+	for _, env := range envs {
+		if strings.Contains(env,"CNB") {
+			str := strings.Split(env,"=")
+			kvs[str[0]] = str[1]
+		}
+	}
+	return kvs
+}
 
 func GetValFromEnVar(envVar string) (val string) {
 	val, ok := os.LookupEnv(envVar)
