@@ -8,11 +8,6 @@ import (
 )
 
 const (
-	// Default log level
-	DefaultLevel = "info"
-	// Default timestamp in logs
-	DefaultLogTimestamp = false
-
 	// Text format
 	FormatText = "text"
 	// Colored text format

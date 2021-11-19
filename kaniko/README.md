@@ -65,7 +65,8 @@ The following ENV variables can be defined:
 
 ```bash
 docker run \
-       -e DOCKER_FILE_NAME=Dockerfile1 \
+       -e LOGGING_LEVEL=debug \
+       -e DOCKER_FILE_NAME=my_Dockerfile \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app

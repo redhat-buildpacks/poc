@@ -12,10 +12,10 @@ import (
 func GetValFromEnVar(envVar string) (val string) {
 	val, ok := os.LookupEnv(envVar)
 	if !ok {
-		logrus.Debugf("%s not set\n", envVar)
+		logrus.Debugf("%s not set", envVar)
 		return ""
 	} else {
-		logrus.Debugf("%s=%s\n", envVar, val)
+		logrus.Debugf("%s=%s", envVar, val)
 		return val
 	}
 }

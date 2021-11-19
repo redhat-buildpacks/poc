@@ -17,12 +17,18 @@ import (
 )
 
 const (
-	kanikoDir                 = "/kaniko"
-	cacheDir                  = "/cache"
-	workspaceDir              = "/workspace"
-	defaultDockerFileName     = "Dockerfile"
-	DOCKER_FILE_NAME_ENV_NAME = "DOCKER_FILE_NAME"
-	LOGGING_LEVEL_ENV_NAME    = "LOGGING_LEVEL"
+	kanikoDir                    = "/kaniko"
+	cacheDir                     = "/cache"
+	workspaceDir                 = "/workspace"
+	defaultDockerFileName        = "Dockerfile"
+	DOCKER_FILE_NAME_ENV_NAME    = "DOCKER_FILE_NAME"
+	LOGGING_LEVEL_ENV_NAME       = "LOGGING_LEVEL"
+	LOGGING_FORMAT_ENV_NAME      = "LOGGING_FORMAT"
+	LOGGING_TIMESTAMP_ENV_NAME   = "LOG_TIMESTAMP"
+
+	DefaultLevel              = "info"
+	DefaultLogTimestamp       = false
+	DefaultLogFormat          = "text"
 )
 
 var (
@@ -44,26 +50,34 @@ type buildPackConfig struct {
 
 func init() {
 	logLevel = util.GetValFromEnVar(LOGGING_LEVEL_ENV_NAME)
-	if logLevel != "" {
-		logLevel = "info"
+	if logLevel == "" {
+		logLevel = DefaultLevel
 	}
+
+	logFormat = util.GetValFromEnVar(LOGGING_FORMAT_ENV_NAME)
+	if logFormat == "" {
+		logFormat = DefaultLogFormat
+	}
+
+	// TODO: Check how to process bool env var
+	logTimestamp = DefaultLogTimestamp
 
 	if err := logging.Configure(logLevel, logFormat, logTimestamp); err != nil {
 		panic(err)
 	}
 }
 
-func (b *buildPackConfig) main() {
-	logrus.Info("Kaniko application able to build a Dockerfile is running ...")
+func main() {
+	logrus.Info("Starting the Kaniko application to process a Dockerfile ...")
 
 	// Create a buildPackConfig and set the default values
 	logrus.Info("Initialize the BuildPackConfig and set the defaults values ...")
-	newBuildPackConfig()
+	b := newBuildPackConfig()
 	b.initDefaults()
-	logrus.Infof("Kaniko      dir: ",b.kanikoDir)
-	logrus.Infof("Workspace   dir: ",b.workspaceDir)
-	logrus.Infof("Cache       dir: ",b.cacheDir)
-	logrus.Infof("Dockerfile name: ",b.dockerFileName)
+	logrus.Infof("Kaniko      dir: %s",b.kanikoDir)
+	logrus.Infof("Workspace   dir: %s",b.workspaceDir)
+	logrus.Infof("Cache       dir: %s",b.cacheDir)
+	logrus.Infof("Dockerfile name: %s",b.dockerFileName)
 
 	// Build the Dockerfile
 	logrus.Debugf("Building the %s",b.dockerFileName)
