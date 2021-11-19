@@ -1,4 +1,4 @@
-module me.snowdrop
+module github.com/redhat-buildpacks/poc/buildah
 
 go 1.16
 
