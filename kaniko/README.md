@@ -61,11 +61,13 @@ docker run \
 ```
 The following ENV variables can be defined:
 `LOGGING_LEVEL`    Log level: trace, debug, **info**, warn, error, fatal, panic
+`LOGGING_FORMAT`   Logging format: **text**, color, json
 `DOCKER_FILE_NAME` Dockerfile to be parsed: **Dockerfile** is the default name
 
 ```bash
 docker run \
        -e LOGGING_LEVEL=debug \
+       -e LOGGING_FORMAT=color \
        -e DOCKER_FILE_NAME=my_Dockerfile \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \

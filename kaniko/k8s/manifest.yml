@@ -21,6 +21,13 @@ spec:
   - name: build
     image:  localhost:5000/kaniko-app
     command: [ "/kaniko-app" ]
+    env:
+      - name: "LOGGING_LEVEL"
+        value: "info"
+      - name: "LOGGING_FORMAT"
+        value: "color"
+      - name: "DOCKER_FILE_NAME"
+        value: "Dockerfile"
     imagePullPolicy: Always
     volumeMounts:
     - name: wks-dir
