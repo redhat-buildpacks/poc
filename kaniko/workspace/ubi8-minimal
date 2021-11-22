@@ -4,4 +4,4 @@ COPY ./hello.txt /workspace
 
 LABEL "website.name"="geeksforgeeks website"
 
-RUN dnf install -y wget python3
+RUN microdnf install -y wget python3
