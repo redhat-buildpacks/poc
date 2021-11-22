@@ -21,8 +21,7 @@ RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app *.go
 #####################################
 # Setup the env to run the kaniko app
 #####################################
-#FROM alpine:3
-FROM redhat/ubi8:latest
+FROM alpine:3
 
 COPY --from=debugger /go/bin/dlv /usr/local/bin
 COPY --from=builder /kaniko-app /kaniko-app

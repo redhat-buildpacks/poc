@@ -25,13 +25,13 @@ spec:
       - name: "EXTRACT_LAYERS"
         value: "true"
       - name: "FILES_TO_SEARCH"
-        value: "hello.txt,curl"
+        value: "hello.txt,curl,wget"
       - name: "LOGGING_LEVEL"
         value: "debug"
       - name: "LOGGING_FORMAT"
         value: "color"
       - name: "DOCKER_FILE_NAME"
-        value: "Dockerfile2"
+        value: "alpine"
     imagePullPolicy: Always
     volumeMounts:
     - name: wks-dir

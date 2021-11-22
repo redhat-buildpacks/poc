@@ -1,0 +1,7 @@
+FROM registry.access.redhat.com/ubi8-minimal
+
+COPY ./hello.txt /workspace
+
+LABEL "website.name"="geeksforgeeks website"
+
+RUN dnf install -y wget python3

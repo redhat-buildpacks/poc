@@ -12,7 +12,7 @@ Table of Contents
 
 ## kaniko go app
 
-The [kaniko app](./code/main.go) is a simple application able to build an image using kaniko and a [Dockerfile](./workspace/Dockerfile).
+The [kaniko app](./code/main.go) is a simple application able to build an image using kaniko and a [Dockerfile](./workspace/alpine).
 
 During the build, kaniko will parse the Dockerfile, execute the different docker commands (RUN, COPY, ...) and the resulting content will be pushed into an image.
 
@@ -21,7 +21,7 @@ which is the hash of the compressed layer.
 
 The layer files will be then copied to the mounted volume `/cache`.
 
-When the `kaniko-app` is launched, then the following [Dockerfile](./workspace/Dockerfile) is parsed. This dockerfile will install some missing packages: `wget, curl`
+When the `kaniko-app` is launched, then the following [Dockerfile](./workspace/alpine) is parsed. This dockerfile will install some missing packages: `wget, curl`
 ```dockerfile
 FROM alpine
 
@@ -78,8 +78,8 @@ The following ENV variables can be defined:
 docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
-       -e base_image="ubtuntu:bionic" \
-       -e DOCKER_FILE_NAME=Dockerfile1 \
+       -e CNB_BaseImage="ubuntu:bionic" \
+       -e DOCKER_FILE_NAME="base-image-arg" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
@@ -100,7 +100,7 @@ docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
        -e CNB_BaseImage="ubuntu:bionic" \
-       -e DOCKER_FILE_NAME="Dockerfile" \
+       -e DOCKER_FILE_NAME="base-image-arg" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
@@ -117,7 +117,7 @@ To extract the layers files, enable the following ENV var `EXTRACT_LAYERS=true`
 docker run \
        -e EXTRACT_LAYERS=true \
        -e LOGGING_FORMAT=color \
-       -e DOCKER_FILE_NAME="Dockerfile" \
+       -e DOCKER_FILE_NAME="alpine" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
@@ -133,7 +133,7 @@ docker run \
        -e FILES_TO_SEARCH="hello.txt,curl" \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
-       -e DOCKER_FILE_NAME="Dockerfile" \
+       -e DOCKER_FILE_NAME="alpine" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
