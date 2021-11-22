@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 )
 
@@ -115,6 +116,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	err = reapChildProcesses()
+	if err != nil {
+		panic(err)
+	}
 
 	// Save the Config and Manifest files of the new image created
 	b.SaveImageJSONConfig()
@@ -143,4 +148,40 @@ func main() {
 	if (len(filesToSearch) > 0) {
 		util.FindFiles([]string{"hello.txt", "curl"})
 	}
+}
+
+func reapChildProcesses() error {
+	procDir, err := os.Open("/proc")
+	if err != nil {
+		return err
+	}
+
+	procDirs, err := procDir.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+
+	tid := os.Getpid()
+
+	var wg sync.WaitGroup
+	for _, dirName := range procDirs {
+		pid, err := strconv.Atoi(dirName)
+		if err == nil && pid != 1 && pid != tid {
+			p, err := os.FindProcess(pid)
+			if err != nil {
+				continue
+			}
+			err = p.Signal(syscall.SIGTERM)
+			if err != nil {
+				continue
+			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				p.Wait()
+			}()
+		}
+	}
+	wg.Wait()
+	return nil
 }
