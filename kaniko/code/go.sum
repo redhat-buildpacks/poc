@@ -68,6 +68,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/GoogleCloudPlatform/k8s-cloud-provider v0.0.0-20200415212048-7901bc822317/go.mod h1:DF8FZRxMHMGv/vP2lQP6h+dYzzjpuRn24VeRiYn3qjQ=
 github.com/GoogleContainerTools/kaniko v1.6.0 h1:bD76vmMQe2PjbPqGNXOPviamUWSgxrz6QR+nQ6EYr78=
 github.com/GoogleContainerTools/kaniko v1.6.0/go.mod h1:wn/PwJes1B0D2WCFdz2CsZWFn24dMSTAX+QdWBAd67o=
+github.com/GoogleContainerTools/kaniko v1.7.0 h1:fkaibt8WSMLaSxJTs2/eKwv8tsGtRiIUU5r1kiNwp8k=
+github.com/GoogleContainerTools/kaniko v1.7.0/go.mod h1:wn/PwJes1B0D2WCFdz2CsZWFn24dMSTAX+QdWBAd67o=
 github.com/Microsoft/go-winio v0.4.11/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcyvVC4A4RozmA=
 github.com/Microsoft/go-winio v0.4.14 h1:+hMXMk01us9KgxGb7ftKQt2Xpf5hH/yky+TDA+qxleU=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
