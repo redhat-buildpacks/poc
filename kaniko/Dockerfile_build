@@ -18,6 +18,9 @@ COPY ./code/ .
 # Build the kaniko app using compilation flags
 RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app *.go
 
+################################
+## Install the CA Red Hat certificates
+################################
 FROM registry.access.redhat.com/ubi8-minimal AS certs
 
 RUN \
@@ -31,15 +34,22 @@ RUN \
 #####################################
 FROM scratch
 
-ENV HOME /root
-ENV USER root
-ENV SSL_CERT_DIR=/kaniko/ssl/certs
-
 COPY --from=certs /ca-certificates.crt /kaniko/ssl/certs/
 COPY --from=debugger /go/bin/dlv /usr/local/bin/
 COPY --from=builder /kaniko-app /kaniko-app
+COPY --from=busybox:1.32.0 /bin /busybox
+# Declare /busybox as a volume to get it automatically in the path to ignore
+VOLUME /busybox
+
+ENV HOME /root
+ENV USER root
+ENV SSL_CERT_DIR=/kaniko/ssl/certs
+ENV PATH /usr/local/bin:/busybox
 
 WORKDIR /workspace
+RUN ["/busybox/mkdir", "-p", "/bin"]
+RUN ["/busybox/mkdir", "-p", "/kaniko"]
+RUN ["/busybox/ln", "-s", "/busybox/sh", "/bin/sh"]
 
 EXPOSE 2345
 
