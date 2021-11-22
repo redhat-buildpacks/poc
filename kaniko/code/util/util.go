@@ -1,7 +1,9 @@
 package util
 
 import (
+	"compress/gzip"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -143,3 +145,24 @@ func FindFiles(filesToSearch []string) error {
 	}
 	return nil
 }
+
+
+func UnGzip(gzipFilePath string) (gzf io.Reader, err error) {
+	logrus.Infof("Opening the gzip file: %s", gzipFilePath)
+	f, err := os.Open(gzipFilePath)
+	if err != nil {
+		panic(err)
+	}
+	logrus.Infof("Creating a gzip reader for: %s", f.Name())
+	gzf, err = gzip.NewReader(f)
+	if err != nil {
+		panic(err)
+	}
+	return gzf, nil
+}
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
+}
+
