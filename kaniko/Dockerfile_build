@@ -37,19 +37,16 @@ FROM scratch
 COPY --from=certs /ca-certificates.crt /kaniko/ssl/certs/
 COPY --from=debugger /go/bin/dlv /usr/local/bin/
 COPY --from=builder /kaniko-app /kaniko-app
-COPY --from=busybox:1.32.0 /bin /busybox
+COPY --from=busybox:1.32.0 /bin/mkdir /busybox/mkdir
 # Declare /busybox as a volume to get it automatically in the path to ignore
 VOLUME /busybox
 
 ENV HOME /root
 ENV USER root
 ENV SSL_CERT_DIR=/kaniko/ssl/certs
-ENV PATH /usr/local/bin:/busybox
 
 WORKDIR /workspace
-RUN ["/busybox/mkdir", "-p", "/bin"]
 RUN ["/busybox/mkdir", "-p", "/kaniko"]
-RUN ["/busybox/ln", "-s", "/busybox/sh", "/bin/sh"]
 
 EXPOSE 2345
 
