@@ -145,6 +145,6 @@ func main() {
 
 	// Check if files exist
 	if (len(filesToSearch) > 0) {
-		util.FindFiles([]string{"hello.txt", "curl"})
+		util.FindFiles(filesToSearch)
 	}
 }
