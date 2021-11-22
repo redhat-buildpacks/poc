@@ -2,7 +2,6 @@ package buildpackconfig
 
 import (
 	"archive/tar"
-	"compress/gzip"
 	"encoding/json"
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
@@ -21,31 +20,31 @@ import (
 )
 
 const (
-	homeDir						 = "/"
-	kanikoDir                    = "/kaniko"
-	cacheDir                     = "/cache"
-	workspaceDir                 = "/workspace"
-	defaultDockerFileName        = "Dockerfile"
-	DOCKER_FILE_NAME_ENV_NAME    = "DOCKER_FILE_NAME"
-	IGNORE_PATHS_ENV_NAME		 = "IGNORE_PATHS"
+	homeDir                   = "/"
+	kanikoDir                 = "/kaniko"
+	cacheDir                  = "/cache"
+	workspaceDir              = "/workspace"
+	defaultDockerFileName     = "Dockerfile"
+	DOCKER_FILE_NAME_ENV_NAME = "DOCKER_FILE_NAME"
+	IGNORE_PATHS_ENV_NAME     = "IGNORE_PATHS"
 )
 
-var ignorePaths					 = []string{""}
+var ignorePaths = []string{""}
 
 type BuildPackConfig struct {
-	LayerPath       string
-	CacheDir        string
-	KanikoDir       string
-	WorkspaceDir    string
-	DockerFileName  string
-	Opts      		config.KanikoOptions
-	NewImage   		v1.Image
-	BuildArgs  		[]string
-	CnbEnvVars 		map[string]string
-	TarPaths		[]store.TarFile
-	HomeDir			string
-	ExtractLayers	bool
-	IgnorePaths	    []string
+	LayerPath      string
+	CacheDir       string
+	KanikoDir      string
+	WorkspaceDir   string
+	DockerFileName string
+	Opts           config.KanikoOptions
+	NewImage       v1.Image
+	BuildArgs      []string
+	CnbEnvVars     map[string]string
+	TarPaths       []store.TarFile
+	HomeDir        string
+	ExtractLayers  bool
+	IgnorePaths    []string
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
@@ -73,7 +72,7 @@ func (b *BuildPackConfig) InitDefaults() {
 	if result == "" {
 		b.IgnorePaths = ignorePaths
 	} else {
-		b.IgnorePaths = strings.Split(result,",")
+		b.IgnorePaths = strings.Split(result, ",")
 	}
 	logrus.Debugf("Additional paths to be ignored: %s", b.IgnorePaths)
 	for _, p := range b.IgnorePaths {
@@ -161,9 +160,9 @@ func (b *BuildPackConfig) ExtractLayersFromNewImageToKanikoDir() {
 
 func (b *BuildPackConfig) ExtractTGZFile(baseHash v1.Hash) {
 	for _, tarFile := range b.TarPaths {
-		if (tarFile.Name != baseHash.String()) {
-			logrus.Infof("Tgz file to be extracted %s",tarFile.Name)
-			err := b.untarFile(tarFile.Path,b.HomeDir)
+		if tarFile.Name != baseHash.String() {
+			logrus.Infof("Tgz file to be extracted %s", tarFile.Name)
+			err := b.untarFile(tarFile.Path, b.HomeDir)
 			if err != nil {
 				panic(err)
 			}
@@ -183,7 +182,7 @@ func (b *BuildPackConfig) SaveImageRawManifest() {
 	if err != nil {
 		panic(err)
 	}
-	logrus.Debugf("Manifest file of the new image stored at %s",rawManifestFilePath)
+	logrus.Debugf("Manifest file of the new image stored at %s", rawManifestFilePath)
 }
 
 func (b *BuildPackConfig) SaveImageJSONConfig() {
@@ -203,7 +202,7 @@ func (b *BuildPackConfig) SaveImageJSONConfig() {
 	if err != nil {
 		panic(err)
 	}
-	logrus.Debugf("Image JSON config file stored at %s",configPath)
+	logrus.Debugf("Image JSON config file stored at %s", configPath)
 
 	// Log the image json config
 	// TODO: Add a debug opt to log if needed
@@ -213,7 +212,7 @@ func (b *BuildPackConfig) SaveImageJSONConfig() {
 func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err error) {
 
 	// create a Reader of the gzip file
-	gzf, err := unGzip(tgzFilePath)
+	gzf, err := util.UnGzip(tgzFilePath)
 	if err != nil {
 		logrus.Panicf("Something wrong happened ... %s", err)
 	}
@@ -234,7 +233,7 @@ func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err e
 		target := filepath.Join(targetDir, hdr.Name)
 		logrus.Debugf("File to be extracted: %s", target)
 
-		if (b.ExtractLayers) {
+		if b.ExtractLayers {
 			switch hdr.Typeflag {
 			case tar.TypeDir:
 				if _, err := os.Stat(target); err != nil {
@@ -245,19 +244,24 @@ func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err e
 					}
 				}
 			case tar.TypeReg:
-				outFile, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(hdr.Mode))
-				if err != nil {
-					logrus.Fatalf("ExtractTarGz: Create() failed: %s", err.Error())
-					return err
+				pathExists := util.FileExists(target)
+				if pathExists {
+					logrus.Debugf("ExtractTarGz: %s exists: %t\n", target, pathExists)
+				} else {
+					outFile, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(hdr.Mode))
+					if err != nil {
+						logrus.Fatalf("ExtractTarGz: Create() failed: %s", err.Error())
+						return err
+					}
+					if _, err := io.Copy(outFile, tr); err != nil {
+						logrus.Fatalf("ExtractTarGz: Copy() failed: %s", err.Error())
+						return err
+					}
+					// manually close here after each file operation; defering would cause each file close
+					// to wait until all operations have completed.
+					logrus.Debugf("File extracted to %s", outFile.Name())
+					outFile.Close()
 				}
-				if _, err := io.Copy(outFile, tr); err != nil {
-					logrus.Fatalf("ExtractTarGz: Copy() failed: %s", err.Error())
-					return err
-				}
-				// manually close here after each file operation; defering would cause each file close
-				// to wait until all operations have completed.
-				logrus.Debugf("File extracted to %s",outFile.Name())
-				outFile.Close()
 
 			default:
 				logrus.Debugf(
@@ -302,25 +306,10 @@ func (b *BuildPackConfig) FindBaseImageDigest() v1.Hash {
 			if err != nil {
 				panic(err)
 			}
-			logrus.Infof("Layer digest of base image is: %s",digest)
+			logrus.Infof("Layer digest of base image is: %s", digest)
 		}
 	}
 	return digest
-
-}
-
-func unGzip(gzipFilePath string) (gzf io.Reader, err error) {
-	logrus.Infof("Opening the gzip file: %s", gzipFilePath)
-	f, err := os.Open(gzipFilePath)
-	if err != nil {
-		panic(err)
-	}
-	logrus.Infof("Creating a gzip reader for: %s", f.Name())
-	gzf, err = gzip.NewReader(f)
-	if err != nil {
-		panic(err)
-	}
-	return gzf, nil
 }
 
 func saveLayer(layer v1.Layer, path string) error {
@@ -339,4 +328,3 @@ func saveLayer(layer v1.Layer, path string) error {
 	}
 	return nil
 }
-
