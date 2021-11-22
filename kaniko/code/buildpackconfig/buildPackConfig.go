@@ -7,6 +7,7 @@ import (
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
 	"github.com/GoogleContainerTools/kaniko/pkg/executor"
+	fs_util "github.com/GoogleContainerTools/kaniko/pkg/util"
 	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/redhat-buildpacks/poc/kaniko/store"
@@ -74,7 +75,13 @@ func (b *BuildPackConfig) InitDefaults() {
 	} else {
 		b.IgnorePaths = strings.Split(result,",")
 	}
-	logrus.Debugf("Paths to be ignored: %s", b.IgnorePaths)
+	logrus.Debugf("Additional paths to be ignored: %s", b.IgnorePaths)
+	for _, p := range b.IgnorePaths {
+		fs_util.AddToDefaultIgnoreList(fs_util.IgnoreListEntry{
+			Path:            p,
+			PrefixMatchOnly: false,
+		})
+	}
 
 	logrus.Debug("Checking if CNB_* env var have been declared ...")
 	b.CnbEnvVars = util.GetCNBEnvVar()
