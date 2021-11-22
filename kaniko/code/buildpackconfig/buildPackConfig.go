@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -25,7 +26,10 @@ const (
 	workspaceDir                 = "/workspace"
 	defaultDockerFileName        = "Dockerfile"
 	DOCKER_FILE_NAME_ENV_NAME    = "DOCKER_FILE_NAME"
+	IGNORE_PATHS_ENV_NAME		 = "IGNORE_PATHS"
 )
+
+var ignorePaths					 = []string{""}
 
 type BuildPackConfig struct {
 	LayerPath       string
@@ -40,6 +44,7 @@ type BuildPackConfig struct {
 	TarPaths		[]store.TarFile
 	HomeDir			string
 	ExtractLayers	bool
+	IgnorePaths	    []string
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
@@ -60,6 +65,16 @@ func (b *BuildPackConfig) InitDefaults() {
 		b.DockerFileName = defaultDockerFileName
 	}
 	logrus.Debugf("DockerfileName is: %s", b.DockerFileName)
+
+	logrus.Debug("Check if IGNORE_PATHS env is defined...")
+
+	result := util.GetValFromEnVar(IGNORE_PATHS_ENV_NAME)
+	if result == "" {
+		b.IgnorePaths = ignorePaths
+	} else {
+		b.IgnorePaths = strings.Split(result,",")
+	}
+	logrus.Debugf("Paths to be ignored: %s", b.IgnorePaths)
 
 	logrus.Debug("Checking if CNB_* env var have been declared ...")
 	b.CnbEnvVars = util.GetCNBEnvVar()
@@ -84,6 +99,7 @@ func (b *BuildPackConfig) InitDefaults() {
 		SrcContext:     b.WorkspaceDir,
 		SnapshotMode:   "full",
 		BuildArgs:      b.BuildArgs,
+		IgnorePaths:    b.IgnorePaths,
 	}
 
 	logrus.Debug("KanikoOptions defined")

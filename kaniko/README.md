@@ -3,11 +3,12 @@ Table of Contents
 
 * [kaniko go app](#kaniko-go-app)
 * [How to build and run the application](#how-to-build-and-run-the-application)
+* [Remote debugging](#remote-debugging)
 * [CNB Build args](#cnb-build-args)
+* [Ignore Paths](#ignore-paths)
 * [Extract layer files](#extract-layer-files)
 * [Verify if files exist](#verify-if-files-exist)
 * [Cache content](#cache-content)
-* [Remote debugging](#remote-debugging)
 * [Using Kubernetes](#using-kubernetes)
 
 ## kaniko go app
@@ -84,6 +85,18 @@ docker run \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
+## Remote debugging
+
+To use the dlv remote debugger, simply pass as `ENV` var `DEBUG=true` and the port `4000` to access it using your favorite IDE (Visual studio, IntelliJ, ...)
+```bash
+docker run \
+       -e DEBUG=true \
+       -p 4000:4000 \
+       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
+       -it kaniko-app
+```
+
 ## CNB Build args
 
 When the Dockerfile contains some `ARG arg` commands
@@ -105,6 +118,27 @@ docker run \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
+
+## Ignore Paths
+
+To ignore some paths during the process to create the new image, then use the following `IGNORE_PATHS` env var which is used by [kaniko](https://github.com/GoogleContainerTools/kaniko#--ignore-path).
+Multiple paths can be defined using as separator `,`.
+
+```bash
+docker run \
+       -e EXTRACT_LAYERS=false \
+       -e IGNORE_PATHS="/var/spool/mail" \
+       -e FILES_TO_SEARCH="hello.txt,curl" \
+       -e LOGGING_LEVEL=debug \
+       -e LOGGING_FORMAT=color \
+       -e DOCKER_FILE_NAME="alpine" \
+       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/cache:/cache \
+       -it kaniko-app
+```
+
+**NOTE**: If the ENV var is not set, then an empty array of string is passed to Kaniko Opts
+
 
 ## Extract layer files
 
@@ -157,18 +191,6 @@ drwxr-xr-x  10 cmoullia  staff      320 Nov 18 13:56 ..
 -rw-r--r--   1 cmoullia  staff       12 Nov 18 13:58 hello.txt
 -rw-r--r--@  1 cmoullia  staff  2822981 Nov 18 13:58 sha256:97518928ae5f3d52d4164b314a7e73654eb686ecd8aafa0b79acd980773a740d.tgz
 -rw-r--r--   1 cmoullia  staff  3175266 Nov 18 13:58 sha256:aa2ad9d70c8b9b0b0c885ba0a81d71f5414dcac97bee8f5753ec03f92425c540.tgz
-```
-
-## Remote debugging
-
-To use the dlv remote debugger, simply pass as `ENV` var `DEBUG=true` and the port `4000` to access it using your favorite IDE (Visual studio, IntelliJ, ...)      
-```bash
-docker run \
-       -e DEBUG=true \
-       -p 4000:4000 \
-       -v $(pwd)/workspace:/workspace \
-       -v $(pwd)/cache:/cache \
-       -it kaniko-app
 ```
 
 ## Using Kubernetes
