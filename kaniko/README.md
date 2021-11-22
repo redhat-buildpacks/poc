@@ -91,7 +91,7 @@ To use the dlv remote debugger, simply pass as `ENV` var `DEBUG=true` and the po
 ```bash
 docker run \
        -e DEBUG=true \
-       -p 4000:4000 \
+       -p 2345:2345 \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
