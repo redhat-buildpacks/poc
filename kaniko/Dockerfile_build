@@ -18,18 +18,29 @@ COPY ./code/ .
 # Build the kaniko app using compilation flags
 RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app *.go
 
+FROM registry.access.redhat.com/ubi8-minimal AS certs
+
+RUN \
+  microdnf update && \
+  microdnf install ca-certificates && \
+  microdnf clean all && \
+  cat /etc/ssl/certs/* > /ca-certificates.crt
+
 #####################################
 # Setup the env to run the kaniko app
 #####################################
-FROM alpine:3
+FROM scratch
 
-COPY --from=debugger /go/bin/dlv /usr/local/bin
+ENV HOME /root
+ENV USER root
+ENV SSL_CERT_DIR=/kaniko/ssl/certs
+
+COPY --from=certs /ca-certificates.crt /kaniko/ssl/certs/
+COPY --from=debugger /go/bin/dlv /usr/local/bin/
 COPY --from=builder /kaniko-app /kaniko-app
-COPY --from=builder /go/src/kaniko-app/entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
-
-RUN mkdir -p /kaniko /workspace /cache
 WORKDIR /workspace
 
-ENTRYPOINT ["/entrypoint.sh"]
+EXPOSE 2345
+
+ENTRYPOINT ["/kaniko-app"]
