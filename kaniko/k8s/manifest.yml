@@ -24,35 +24,22 @@ spec:
     env:
       - name: "EXTRACT_LAYERS"
         value: "true"
+      - name: "IGNORE_PATHS"
+        value: "/var/run"
       - name: "FILES_TO_SEARCH"
-        value: "hello.txt,curl,wget"
+        value: "hello.txt,node"
       - name: "LOGGING_LEVEL"
-        value: "debug"
+        value: "info"
       - name: "LOGGING_FORMAT"
         value: "color"
       - name: "DOCKER_FILE_NAME"
-        value: "alpine"
+        value: "ubi8-nodejs"
     imagePullPolicy: Always
     volumeMounts:
     - name: wks-dir
       mountPath: /workspace
     - name: cache-dir
       mountPath: /cache
-  - name: check-content
-    image: alpine:3
-    command: [ "/bin/sh","-c" ]
-    args:
-      - |
-        set -e
-        echo -e "Check about hello.txt file ..."
-        ls -la /
-        ls -la /workspace
-        ls -la /cache
-    volumeMounts:
-    - name: cache-dir
-      mountPath: /cache
-    - name: wks-dir
-      mountPath: /workspace
   containers:
   - name: completion
     image: alpine:3
