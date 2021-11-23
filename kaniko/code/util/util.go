@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+const root = "/"
+
 func GetCNBEnvVar() (map[string]string) {
 	kvs := map[string]string{}
 	envs := os.Environ()
@@ -119,9 +121,13 @@ func ReadFilesFromPath(path string) error {
 
 func FindFiles(filesToSearch []string) error {
 	var files []string
-	root := "/"
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		// TODO. Avoid to hard code the path to ignore
+		if strings.HasPrefix(filepath.ToSlash(path), "/proc") {
+		            return nil
+		    }
+
 		if err != nil {
 			fmt.Println(err)
 			return nil
