@@ -15,13 +15,13 @@ import (
 
 const root = "/"
 
-func GetCNBEnvVar() (map[string]string) {
+func GetCNBEnvVar() map[string]string {
 	kvs := map[string]string{}
 	envs := os.Environ()
 
 	for _, env := range envs {
-		if strings.Contains(env,"CNB") {
-			str := strings.Split(env,"=")
+		if strings.Contains(env, "CNB") {
+			str := strings.Split(env, "=")
 			kvs[str[0]] = str[1]
 		}
 	}
@@ -125,8 +125,8 @@ func FindFiles(filesToSearch []string) error {
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		// TODO. Avoid to hard code the path to ignore
 		if strings.HasPrefix(filepath.ToSlash(path), "/proc") {
-		            return nil
-		    }
+			return nil
+		}
 
 		if err != nil {
 			fmt.Println(err)
@@ -134,7 +134,7 @@ func FindFiles(filesToSearch []string) error {
 		}
 
 		for _, s := range filesToSearch {
-			logrus.Tracef("File searched is : %s",info.Name())
+			logrus.Tracef("File searched is : %s", info.Name())
 			if !info.IsDir() && info.Name() == s {
 				files = append(files, path)
 			}
@@ -147,11 +147,10 @@ func FindFiles(filesToSearch []string) error {
 	}
 
 	for _, file := range files {
-		logrus.Debugf("File found: %s", file)
+		logrus.Infof("File found: %s", file)
 	}
 	return nil
 }
-
 
 func UnGzip(gzipFilePath string) (gzf io.Reader, err error) {
 	logrus.Infof("Opening the gzip file: %s", gzipFilePath)
@@ -171,4 +170,3 @@ func FileExists(path string) bool {
 	_, err := os.Stat(path)
 	return !errors.Is(err, os.ErrNotExist)
 }
-
