@@ -18,20 +18,20 @@ Next, you can build the project and launch it within the vm
 
 ```bash
 cd poc/buildah
-go build -tags exclude_graphdriver_devicemapper -o out/bud ./bud
+go build -tags exclude_graphdriver_devicemapper -o out/bud *.go
 ```
 
 Copy the `dockerfile` to be parsed to the `/home/vagrant/wks` folder
 ```bash
-cp $HOME/poc/buildah/Dockerfile $HOME/wks
+cp $HOME/poc/buildah/wks/Dockerfile $HOME/wks
 ```
 
 To parse the [Dockerfile](buildah/Dockerfile) pushed under the `WORKSPACE_DIR`, simply execute the
 `bud` go application. It will process it and will generate an image
 ```bash
 [vagrant@centos7 buildah]$ sudo WORKSPACE_DIR="/home/vagrant/wks" $HOME/poc/buildah/out/bud
-WARN[0000] Failed to decode the keys ["storage.options.override_kernel_check"] from "/etc/containers/storage.conf". 
-INFO[0000] WORKSPACE DIR: /home/vagrant/wks             
+WARN[0000] Failpwd
+PACE DIR: /home/vagrant/wks             
 INFO[0000] GRAPH_DRIVER: vfs                            
 INFO[0000] STORAGE ROOT PATH: /var/lib/containers/storage 
 INFO[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage 

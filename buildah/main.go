@@ -37,10 +37,13 @@ func main() {
 		panic(err)
 	}
 
-	imageID, _, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, dockerFileName)
+	imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, dockerFileName)
 	if err != nil {
 		logrus.Errorf("Build image failed: %s",err.Error())
 	}
+
 	logrus.Infof("Image id: %s",imageID)
+	logrus.Infof("Image digest : %s",digest.String())
+
 	logrus.Info("Image built successfully :-)" )
 }
