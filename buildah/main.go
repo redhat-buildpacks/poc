@@ -74,7 +74,11 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Error while getting the raw manifest", err)
 	}
-	logrus.Infof("Image manifest: %s",rawManifest)
+
+	out, err := json.MarshalIndent(rawManifest, "", "    ")
+	if err == nil {
+		logrus.Infof("Image manifest: %s\n",string(out))
+	}
 
 	configBlob, err := src.ConfigBlob(ctx)
 	if err != nil {
@@ -86,9 +90,14 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Error parsing OCI Config", err)
 	}
-	out, err := json.MarshalIndent(config, "", "    ")
+	out, err = json.MarshalIndent(config, "", "    ")
 	if err == nil {
-		logrus.Info(out)
+		logrus.Infof("OCI Config: %s\n",string(out))
+	}
+
+	layers := src.LayerInfos()
+	for _, info := range layers {
+		logrus.Infof("Layer: %s\n",info.Digest.String())
 	}
 
 
