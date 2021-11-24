@@ -6,8 +6,8 @@ import (
 	"github.com/containers/buildah/imagebuildah"
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
+	"github.com/redhat-buildpacks/poc/buildah/build"
 	"github.com/sirupsen/logrus"
-	"github.com/redhat-buildpacks/poc/buildah/bud/util"
 	"os"
 	"path/filepath"
 )
@@ -21,7 +21,7 @@ func main() {
 	}
 	unshare.MaybeReexecUsingUserNamespace(false)
 
-	b := util.InitOptions()
+	b := build.InitOptions()
 
 	os.Setenv("BUILDAH_TEMP_DIR", b.TempDir)
 	logrus.Infof("Buildah tempdir: %s",b.TempDir)
