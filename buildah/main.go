@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
@@ -80,6 +81,16 @@ func main() {
 		logrus.Fatalf("Error parsing ImageConfig", err)
 	}
 	logrus.Infof("Image Config: %s",configBlob)
+
+	config, err := src.OCIConfig(ctx)
+	if err != nil {
+		logrus.Fatalf("Error parsing OCI Config", err)
+	}
+	out, err := json.MarshalIndent(config, "", "    ")
+	if err == nil {
+		logrus.Info(out)
+	}
+
 
 	images, err := store.Images()
 	if err != nil {
