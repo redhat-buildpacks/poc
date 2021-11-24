@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -74,29 +75,30 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Error while getting the raw manifest", err)
 	}
-	logrus.Infof("Image manifest: %s\n",rawManifest)
+	var buf bytes.Buffer
+	err = json.Indent(&buf, rawManifest, "", "    ")
+	if err == nil {
+		logrus.Infof("Image manifest: %s\n",&buf)
+	}
 
-	configBlob, err := src.ConfigBlob(ctx)
+	_, err = src.ConfigBlob(ctx)
 	if err != nil {
 		logrus.Fatalf("Error parsing ImageConfig", err)
-	}
-	out, err := json.MarshalIndent(configBlob, "", "    ")
-	if err == nil {
-		logrus.Infof("Image config: %s\n",string(out))
 	}
 
 	config, err := src.OCIConfig(ctx)
 	if err != nil {
 		logrus.Fatalf("Error parsing OCI Config", err)
 	}
-	out, err = json.MarshalIndent(config, "", "    ")
+
+	out, err := json.MarshalIndent(config, "", "    ")
 	if err == nil {
 		logrus.Infof("OCI Config: %s\n",string(out))
 	}
 
 	layers := src.LayerInfos()
 	for _, info := range layers {
-		logrus.Infof("Layer: %s\n",info.Digest.String())
+		logrus.Infof("Layer sha: %s\n",info.Digest.String())
 	}
 
 
