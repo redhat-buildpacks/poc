@@ -7,7 +7,7 @@ import (
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/sirupsen/logrus"
-	"me.snowdrop/bud/util"
+	"github.com/redhat-buildpacks/poc/buildah/bud/util"
 	"os"
 	"path/filepath"
 )
