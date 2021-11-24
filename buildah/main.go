@@ -5,7 +5,10 @@ import (
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
 	"github.com/containers/image/v5/image"
+	imgStorage "github.com/containers/image/v5/storage"
 	"github.com/containers/image/v5/transports/alltransports"
+
+	//"github.com/containers/image/v5/transports/alltransports"
 	"github.com/containers/image/v5/types"
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
@@ -19,7 +22,6 @@ const maxParallelDownloads = 0
 
 func main() {
 	ctx := context.TODO()
-	sys := newSystemContext()
 
 	if buildah.InitReexec() {
 		return
@@ -50,12 +52,17 @@ func main() {
 	logrus.Infof("Image id: %s", imageID)
 	logrus.Infof("Image digest: %s", digest.String())
 
-	rawSource, err := parseImageSource(ctx,digest.String())
+	imgRef, err := parseImageReference(ctx,digest.String())
+	if err != nil {
+		logrus.Fatalf("Error getting the image reference name", err)
+	}
+
+	rawSource, err := parseImageSource(ctx,imgRef.Transport().Name())
 	if err != nil {
 		logrus.Fatalf("Error parsing the image source", err)
 	}
 
-	src, err := image.FromSource(ctx, sys, rawSource)
+	src, err := image.FromSource(ctx, nil, rawSource)
 	if err != nil {
 		logrus.Fatalf("Error getting the image", err)
 	}
@@ -67,7 +74,6 @@ func main() {
 		logrus.Fatalf("Error while getting the raw manifest", err)
 	}
 	logrus.Infof("Img manifest: %s",rawManifest)
-
 
 
 	images, err := store.Images()
@@ -90,6 +96,14 @@ func parseImageSource(ctx context.Context, name string) (types.ImageSource, erro
 		return nil, err
 	}
 	return ref.NewImageSource(ctx, newSystemContext())
+}
+
+func parseImageReference(ctx context.Context, name string) (types.ImageReference, error) {
+	imgRef, err := imgStorage.Transport.ParseReference(name)
+	if err != nil {
+		return nil, err
+	}
+	return imgRef, nil
 }
 
 // newSystemContext returns a *types.SystemContext
