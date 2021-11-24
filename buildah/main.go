@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
+	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/transports/alltransports"
+	"github.com/containers/image/v5/types"
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/redhat-buildpacks/poc/buildah/build"
@@ -17,6 +19,7 @@ const maxParallelDownloads = 0
 
 func main() {
 	ctx := context.TODO()
+	sys := newSystemContext()
 
 	if buildah.InitReexec() {
 		return
@@ -45,22 +48,51 @@ func main() {
 	}
 
 	logrus.Infof("Image id: %s", imageID)
-	logrus.Infof("Image digest : %s", digest.String())
+	logrus.Infof("Image digest: %s", digest.String())
 
-	_, err = alltransports.ParseImageName("docker://" + digest.Name())
+	rawSource, err := parseImageSource(ctx,digest.String())
 	if err != nil {
-		logrus.Fatalf("Error parsing image source name: %s", digest.Name(), err)
+		logrus.Fatalf("Error parsing the image source", err)
 	}
+
+	src, err := image.FromSource(ctx, sys, rawSource)
+	if err != nil {
+		logrus.Fatalf("Error getting the image", err)
+	}
+	defer rawSource.Close()
+	defer src.Close()
+
+	rawManifest, _, err := src.Manifest(ctx)
+	if err != nil {
+		logrus.Fatalf("Error while getting the raw manifest", err)
+	}
+	logrus.Infof("Img manifest: %s",rawManifest)
+
+
 
 	images, err := store.Images()
 	if err != nil {
 		logrus.Fatalf("Error reading store of images", err)
 	}
 	for _, img := range images {
-		logrus.Infof("Image id: %s", img.ID)
-		logrus.Infof("Image metadata: %s",img.Metadata)
-		logrus.Infof("Top layer: %s",img.TopLayer)
+		if (img.ID == imageID) {
+			logrus.Infof("Image metadata: %s",img.Metadata)
+			logrus.Infof("Top layer: %s",img.TopLayer)
+		}
 	}
 
 	logrus.Info("Image built successfully :-)")
+}
+
+func parseImageSource(ctx context.Context, name string) (types.ImageSource, error) {
+	ref, err := alltransports.ParseImageName(name)
+	if err != nil {
+		return nil, err
+	}
+	return ref.NewImageSource(ctx, newSystemContext())
+}
+
+// newSystemContext returns a *types.SystemContext
+func newSystemContext() *types.SystemContext {
+	return &types.SystemContext{}
 }
