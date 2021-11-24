@@ -75,6 +75,11 @@ func main() {
 	}
 	logrus.Infof("Image manifest: %s",rawManifest)
 
+	configBlob, err := src.ConfigBlob(ctx)
+	if err != nil {
+		logrus.Fatalf("Error parsing ImageConfig", err)
+	}
+	logrus.Infof("Image Config: %s",configBlob)
 
 	images, err := store.Images()
 	if err != nil {
