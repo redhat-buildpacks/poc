@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
+	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/redhat-buildpacks/poc/buildah/build"
@@ -12,8 +13,9 @@ import (
 	"path/filepath"
 )
 
-func main() {
+const maxParallelDownloads = 0
 
+func main() {
 	ctx := context.TODO()
 
 	if buildah.InitReexec() {
@@ -24,26 +26,41 @@ func main() {
 	b := build.InitOptions()
 
 	os.Setenv("BUILDAH_TEMP_DIR", b.TempDir)
-	logrus.Infof("Buildah tempdir: %s",b.TempDir)
+	logrus.Infof("Buildah tempdir: %s", b.TempDir)
 
 	dockerFileName := filepath.Join(b.WorkspaceDir, "Dockerfile")
-	logrus.Infof("Dockerfile: %s",dockerFileName)
+	logrus.Infof("Dockerfile: %s", dockerFileName)
 
 	// storeOptions, err := storage.DefaultStoreOptions(false,0)
 
 	store, err := storage.GetStore(b.StoreOptions)
 	if err != nil {
-		logrus.Errorf("error creating buildah storage !",err)
+		logrus.Errorf("error creating buildah storage !", err)
 		panic(err)
 	}
 
 	imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, dockerFileName)
 	if err != nil {
-		logrus.Errorf("Build image failed: %s",err.Error())
+		logrus.Errorf("Build image failed: %s", err.Error())
 	}
 
-	logrus.Infof("Image id: %s",imageID)
-	logrus.Infof("Image digest : %s",digest.String())
+	logrus.Infof("Image id: %s", imageID)
+	logrus.Infof("Image digest : %s", digest.String())
 
-	logrus.Info("Image built successfully :-)" )
+	_, err = alltransports.ParseImageName("docker://" + digest.Name())
+	if err != nil {
+		logrus.Fatalf("Error parsing image source name: %s", digest.Name(), err)
+	}
+
+	images, err := store.Images()
+	if err != nil {
+		logrus.Fatalf("Error reading store of images", err)
+	}
+	for _, img := range images {
+		logrus.Infof("Image id: %s", img.ID)
+		logrus.Infof("Image metadata: %s",img.Metadata)
+		logrus.Infof("Top layer: %s",img.TopLayer)
+	}
+
+	logrus.Info("Image built successfully :-)")
 }
