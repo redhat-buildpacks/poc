@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
 	"github.com/containers/image/v5/image"
-	imgStorage "github.com/containers/image/v5/storage"
 	"github.com/containers/image/v5/transports/alltransports"
 
 	//"github.com/containers/image/v5/transports/alltransports"
@@ -18,7 +18,10 @@ import (
 	"path/filepath"
 )
 
-const maxParallelDownloads = 0
+const (
+	graphDriver = "vfs"
+	repoType	= "containers-storage"
+)
 
 func main() {
 	ctx := context.TODO()
@@ -52,24 +55,25 @@ func main() {
 	logrus.Infof("Image id: %s", imageID)
 	logrus.Infof("Image digest: %s", digest.String())
 
-	//rawSource, err := parseImageSource(ctx,name)
-	rawSource, err := parseImageReference(ctx,digest.Name())
+	storage := fmt.Sprintf("[%s@%s+%s]", graphDriver, b.StorageRootDir, b.StorageRunRootDir)
+	containerStorageName := fmt.Sprintf("%s:%s%s",repoType,storage,imageID)
+	ref, err := parseImageSource(ctx,containerStorageName)
 	if err != nil {
-		logrus.Fatalf("Error parsing the image source", err)
+		logrus.Fatalf("Error parsing the image source: %s", containerStorageName, err)
 	}
 
-	src, err := image.FromSource(ctx, nil, rawSource)
+	src, err := image.FromSource(ctx, nil, ref)
 	if err != nil {
 		logrus.Fatalf("Error getting the image", err)
 	}
-	defer rawSource.Close()
+	defer ref.Close()
 	defer src.Close()
 
 	rawManifest, _, err := src.Manifest(ctx)
 	if err != nil {
 		logrus.Fatalf("Error while getting the raw manifest", err)
 	}
-	logrus.Infof("Img manifest: %s",rawManifest)
+	logrus.Infof("Image manifest: %s",rawManifest)
 
 
 	images, err := store.Images()
@@ -88,14 +92,6 @@ func main() {
 
 func parseImageSource(ctx context.Context, name string) (types.ImageSource, error) {
 	ref, err := alltransports.ParseImageName(name)
-	if err != nil {
-		return nil, err
-	}
-	return ref.NewImageSource(ctx, newSystemContext())
-}
-
-func parseImageReference(ctx context.Context, name string) (types.ImageSource, error) {
-	ref, err := imgStorage.Transport.ParseReference(name)
 	if err != nil {
 		return nil, err
 	}
