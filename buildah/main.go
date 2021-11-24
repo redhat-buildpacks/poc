@@ -52,12 +52,8 @@ func main() {
 	logrus.Infof("Image id: %s", imageID)
 	logrus.Infof("Image digest: %s", digest.String())
 
-	imgRef, err := parseImageReference(ctx,digest.String())
-	if err != nil {
-		logrus.Fatalf("Error getting the image reference name", err)
-	}
-
-	rawSource, err := parseImageSource(ctx,imgRef.Transport().Name())
+	//rawSource, err := parseImageSource(ctx,name)
+	rawSource, err := parseImageReference(ctx,digest.Name())
 	if err != nil {
 		logrus.Fatalf("Error parsing the image source", err)
 	}
@@ -98,12 +94,12 @@ func parseImageSource(ctx context.Context, name string) (types.ImageSource, erro
 	return ref.NewImageSource(ctx, newSystemContext())
 }
 
-func parseImageReference(ctx context.Context, name string) (types.ImageReference, error) {
-	imgRef, err := imgStorage.Transport.ParseReference(name)
+func parseImageReference(ctx context.Context, name string) (types.ImageSource, error) {
+	ref, err := imgStorage.Transport.ParseReference(name)
 	if err != nil {
 		return nil, err
 	}
-	return imgRef, nil
+	return ref.NewImageSource(ctx, newSystemContext())
 }
 
 // newSystemContext returns a *types.SystemContext
