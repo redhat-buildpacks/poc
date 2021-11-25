@@ -63,7 +63,9 @@ sudo buildah bud -q -f Dockerfile -t $REPO . > /dev/null 2>&1
 GRAPH_DRIVER="overlay"
 TAG=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
 IMAGE_ID=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $3;}')
-sudo skopeo copy -q containers-storage:$IMAGE_ID oci:$(pwd)/$IMAGE_ID:$TAG > /dev/null 2>&1
+# This syntax is not correct "sudo skopeo copy -q containers-storage:$IMAGE_ID oci:$(pwd)/$IMAGE_ID:$TAG > /dev/null 2>&1"
+STORAGE="[vfs@/var/lib/containers/storage+/run/containers/storage]"
+sudo skopeo copy -q containers-storage:$STORAGE$IMAGE_ID oci:$(pwd)/$IMAGE_ID:$TAG
 
 cat $IMAGE_ID/index.json
 MANIFEST_SHA=$(cat $IMAGE_ID/index.json | jq .manifests[0].digest | cut -d: -f2 | sed 's/.$//')
