@@ -90,7 +90,7 @@ To test the POC on a kubernetes cluster, build a container image from your local
 ```bash
 cd buildah
 REPO=quay.io/snowdrop/buildah-poc
-docker build -t $REPO -f Dockerfile-bud .
+docker build -t $REPO -f Dockerfile_bud .
 docker push $REPO
 ```
 
