@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/transports/alltransports"
+	"github.com/redhat-buildpacks/poc/buildah/parse"
 
 	//"github.com/containers/image/v5/transports/alltransports"
 	"github.com/containers/image/v5/types"
@@ -22,7 +21,7 @@ import (
 
 const (
 	graphDriver = "vfs"
-	repoType	= "containers-storage"
+	repoType    = "containers-storage"
 )
 
 func main() {
@@ -43,12 +42,21 @@ func main() {
 
 	// storeOptions, err := storage.DefaultStoreOptions(false,0)
 
+	// GetStore attempts to find an already-created Store object matching the
+	// specified location and graph driver, and if it can't, it creates and
+	// initializes a new Store object, and the underlying storage that it controls.
 	store, err := storage.GetStore(b.StoreOptions)
 	if err != nil {
 		logrus.Errorf("error creating buildah storage !", err)
 		panic(err)
 	}
 
+	/* Parse the content of the Dockerfile to execute the different commands: FROM, RUN, ...
+	   Return the:
+	   - imageID: id of the new image created. String of 64 chars.
+	     NOTE: The first 12 chars corresponds to the `id` displayed using `sudo buildah --storage-driver vfs images`
+	   - digest: image repository name prefixed "localhost/". e.g: localhost/buildpack-buildah:TAG@sha256:64_CHAR_SHA
+	*/
 	imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, dockerFileName)
 	if err != nil {
 		logrus.Errorf("Build image failed: %s", err.Error())
@@ -57,13 +65,17 @@ func main() {
 	logrus.Infof("Image id: %s", imageID)
 	logrus.Infof("Image digest: %s", digest.String())
 
-	storage := fmt.Sprintf("[%s@%s+%s]", graphDriver, b.StorageRootDir, b.StorageRunRootDir)
-	containerStorageName := fmt.Sprintf("%s:%s%s",repoType,storage,imageID)
-	ref, err := parseImageSource(ctx,containerStorageName)
+	/* Converts a URL-like image name to a types.ImageReference
+		   and create an imageSource
+	       NOTE: An imageSource is a service, possibly remote (= slow), to download components of a single image or a named image set (manifest list).
+	       This is primarily useful for copying images around; for examining their properties, Image (below)
+	*/
+	ref, err := parseImageSource(ctx, containerStorageName(b, imageID))
 	if err != nil {
 		logrus.Fatalf("Error parsing the image source: %s", containerStorageName, err)
 	}
 
+	// Create a FromSource object to read the image content
 	src, err := image.FromSource(ctx, nil, ref)
 	if err != nil {
 		logrus.Fatalf("Error getting the image", err)
@@ -71,45 +83,35 @@ func main() {
 	defer ref.Close()
 	defer src.Close()
 
+	// Get the Image Manifest and log it as JSON indented string
+	// See spec: https://docs.docker.com/registry/spec/manifest-v2-2/#image-manifest
 	rawManifest, _, err := src.Manifest(ctx)
 	if err != nil {
 		logrus.Fatalf("Error while getting the raw manifest", err)
 	}
-	var buf bytes.Buffer
-	err = json.Indent(&buf, rawManifest, "", "    ")
-	if err == nil {
-		logrus.Infof("Image manifest: %s\n",&buf)
-	}
+	parse.JsonIndent("Image manifest",rawManifest)
 
-	_, err = src.ConfigBlob(ctx)
-	if err != nil {
-		logrus.Fatalf("Error parsing ImageConfig", err)
-	}
-
+	// Get the OCIConfig configuration as per OCI v1 image-spec.
+	// Log it as JSON indented string
 	config, err := src.OCIConfig(ctx)
 	if err != nil {
 		logrus.Fatalf("Error parsing OCI Config", err)
 	}
-
-	out, err := json.MarshalIndent(config, "", "    ")
-	if err == nil {
-		logrus.Infof("OCI Config: %s\n",string(out))
-	}
+	parse.JsonMarshal("OCI Config",config)
 
 	layers := src.LayerInfos()
 	for _, info := range layers {
-		logrus.Infof("Layer sha: %s\n",info.Digest.String())
+		logrus.Infof("Layer sha: %s\n", info.Digest.String())
 	}
-
 
 	images, err := store.Images()
 	if err != nil {
 		logrus.Fatalf("Error reading store of images", err)
 	}
 	for _, img := range images {
-		if (img.ID == imageID) {
-			logrus.Infof("Image metadata: %s",img.Metadata)
-			logrus.Infof("Top layer: %s",img.TopLayer)
+		if img.ID == imageID {
+			logrus.Infof("Image metadata: %s", img.Metadata)
+			logrus.Infof("Top layer: %s", img.TopLayer)
 		}
 	}
 
@@ -127,4 +129,9 @@ func parseImageSource(ctx context.Context, name string) (types.ImageSource, erro
 // newSystemContext returns a *types.SystemContext
 func newSystemContext() *types.SystemContext {
 	return &types.SystemContext{}
+}
+
+func containerStorageName(b *build.BuildahParameters, imageID string) string {
+	storage := fmt.Sprintf("[%s@%s+%s]", graphDriver, b.StorageRootDir, b.StorageRunRootDir)
+	return fmt.Sprintf("%s:%s%s", repoType, storage, imageID)
 }
