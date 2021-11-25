@@ -5,8 +5,8 @@ Table of Contents
   * [Kaniko application](#kaniko-application)
   * [Buildah application](#buildah-application)
   * [Using tools](#using-tools)
-    * [Buildah bud and Skopeo](#buildah-bud-and-skopeo)
-    * [Docker and Python tool](#docker-and-python-tool)
+      * [1. Buildah and Skopeo](#1-buildah-and-skopeo)
+      * [2. Docker and Python tool](#2-docker-and-python-tool)
   * [Deprecated](#deprecated)
     * [Mount root FS](#mount-root-fs)
     * [MacOS](#macos)
@@ -32,7 +32,7 @@ This section contains the instructions to perform different operations using too
 - Get from an image, its index.json, manifest and digest files
 - Extract the layer content
 
-### Buildah and Skopeo
+### 1. Buildah and Skopeo
 
 With the hlp of `buildah bud` and `skopeo` tools, we can perform such an operations:
 - Parse a dockerfile to execute the `commands`
@@ -82,7 +82,7 @@ tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID
 popd
 ```
 
-### Docker and Python tool
+### 2. Docker and Python tool
 
 Using `Docker` and the `undocker.py` [python tool](https://blog.oddbit.com/post/2015-02-13-unpacking-docker-images/), we can:
 - Save locally a container image
