@@ -2,30 +2,30 @@ Table of Contents
 =================
 
 * [Poc development](#poc-development)
-    * [Kaniko](#kaniko)
-    * [Buildah](#buildah)
-    * [HowTo](#howto)
-        * [Buildah bud and Skopeo](#buildah-bud-and-skopeo)
-        * [Docker and Python tool](#docker-and-python-tool)
-    * [Deprecated](#deprecated)
-        * [Mount root FS](#mount-root-fs)
-        * [MacOS](#macos)
+  * [Kaniko application](#kaniko-application)
+  * [Buildah application](#buildah-application)
+  * [Using tools](#using-tools)
+    * [Buildah bud and Skopeo](#buildah-bud-and-skopeo)
+    * [Docker and Python tool](#docker-and-python-tool)
+  * [Deprecated](#deprecated)
+    * [Mount root FS](#mount-root-fs)
+    * [MacOS](#macos)
 
 # Poc development
 
-This project has been designed in order to validate if we can build an image using
-`buildah go lib` and `Dockerfiles` and next to access the content of the new layer(s)
-created as part of the container FS.
+This project has been designed in order to validate if we can parse a `Dockerfile` to build an image locally using
+different go `lib such as `buildah, containers/image, containers/storage, ...` and next to access the content of the new layer(s)
+created as part of the container root FS.
 
-## Kaniko 
+## Kaniko application
 
 See Kaniko [readme.md](./kaniko/README.md)
 
-## Buildah
+## Buildah application
 
 See Kaniko [readme.md](./buildah/README.md)
 
-## HowTo
+## Using tools
 
 This section contains instructions to perform different operations on a container's image, layers such as:
 - Save locally the content of a container image
@@ -37,7 +37,7 @@ This section contains instructions to perform different operations on a containe
 With the hlp of `buildah bud` and `skopeo` tools, we can perform such an operations:
 - Parse a dockerfile to execute the commands using a `FROM` image
 - Get locally the image built
-- Extract from the image its index.json, manifest file 
+- Extract from the image its index.json, manifest file
 - Access the content of a layer (= files from the compressed layer)
 - Extract or check the content of the layer files
 
@@ -90,7 +90,7 @@ Using `Docker` and the `undocker.py` [python tool](https://blog.oddbit.com/post/
 - Save locally a container image
 - List or extract (= unpack) a layer
 
-To validate such a scenario, execute the following instructions 
+To validate such a scenario, execute the following instructions
 
 - Create a dockerfile using as `FROM` an `alpine` image and install a package such as `wget`
 ```bash
