@@ -19,11 +19,11 @@ created under the container root FS.
 
 ## Kaniko application
 
-See Kaniko [readme.md](./kaniko/README.md)
+Go application using mainly `kaniko` as lib to parse the Dockerfile - see [readme.md](./kaniko/README.md)
 
 ## Buildah application
 
-See Kaniko [readme.md](./buildah/README.md)
+Go application using mainly `buildah` and `containers/image` modules as lib to parse the Dockerfile - see [readme.md](./buildah/README.md)
 
 ## Using tools
 
