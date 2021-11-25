@@ -14,8 +14,8 @@ Table of Contents
 # Poc development
 
 This project has been designed in order to validate if we can parse a `Dockerfile` to build an image locally using
-different go `lib such as: buildah, containers/image, containers/storage, ...` and next to access the content of the new layer(s)
-created as part of the container root FS.
+different go modules such as: `kaniko, buildah, containers/image, containers/storage, ...` and next to extract the content of the new layer(s)
+created under the container root FS.
 
 ## Kaniko application
 
