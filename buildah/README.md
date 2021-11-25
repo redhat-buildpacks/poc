@@ -10,14 +10,17 @@ TODO
 
 ## How to build and run
 
+### Vagrant
+
 As it is needed to use a Linux environment to test the go executable, we will use Vagrant as tool
 to launch a Linux VM locally which contains the needed tools (github, podman, buildah, ...), go framework, ...
 
-Open a terminal where you will be able to bump the VM using the command `vagrant up` and `vagrant ssh`.
-Next, you can build the project and launch it within the vm
+- Open locally a terminal and move to the `vagrant` folder
+- Launch the vm - `vagrant up` and ssh - `vagrant ssh`.
+- Within the VM, you can build the project and launch it within the vm
 
 ```bash
-cd poc/buildah
+cd poc/buildah/code
 go build -tags exclude_graphdriver_devicemapper -o out/bud *.go
 ```
 
@@ -53,6 +56,28 @@ drwx------.  2 root root  4096 Nov 17 16:50 bf4b432845dc71930dfcb9905d9a3de25c76
 
 ```
 **NOTE**: From your local machine, sync the files with the VM using the command `vagrant rsync`
+
+### Container
+
+Alternatively, build a container image and follow these instructions
+
+- To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
+```bash
+cd code
+go mod vendor
+cd ..
+```
+
+- Build next the container image of the `kaniko-app`.
+```bash
+docker build -t buildah-app -f Dockerfile_build .
+```
+Launch the `buildah-app` container
+```bash
+docker run \
+       -v $(pwd)/wks:/workspace \
+       -it buildah-app
+```
 
 ### Kubernetes
 

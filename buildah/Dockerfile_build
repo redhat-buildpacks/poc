@@ -1,0 +1,25 @@
+###################
+## Build the go app
+###################
+FROM golang:1.16-alpine as builder
+ENV CGO_ENABLED 0
+
+WORKDIR /go/src/buildah-app
+COPY ./code/ .
+
+# Build the buildah app using compilation flags
+RUN GOOS=linux GOARCH=amd64 go build -o /buildah-app *.go
+
+#####################################
+# Setup the env to run the buildah app
+#####################################
+FROM  registry.access.redhat.com/ubi8-minimal
+
+COPY --from=builder /buildah-app /buildah-app
+
+ENV HOME /root
+ENV USER root
+
+WORKDIR /workspace
+
+ENTRYPOINT ["/buildah-app"]

@@ -10,15 +10,15 @@ import (
 	"github.com/containers/image/v5/manifest"
 	"github.com/containers/image/v5/signature"
 	"github.com/containers/image/v5/transports/alltransports"
+	"github.com/redhat-buildpacks/poc/buildah/build"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
 	"github.com/redhat-buildpacks/poc/buildah/util"
 	"time"
 
-	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/containers/image/v5/types"
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
-	"github.com/redhat-buildpacks/poc/buildah/build"
+	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
@@ -138,7 +138,7 @@ func main() {
 	logrus.Info("Image built successfully :-)")
 
 	// Let's try to copy the layers
-	CopyImage(imageID)
+	// CopyImage(imageID)
 }
 
 func parseImageSource(ctx context.Context, name string) (types.ImageSource, error) {
@@ -211,7 +211,7 @@ func CopyImage(imageID string) {
 		OciEncryptConfig:      nil,
 	})
 	if err != nil {
-		logrus.Fatalf("Image not copied :-(")
+		logrus.Fatalf("Image not copied :-(",err)
 	}
 }
 
