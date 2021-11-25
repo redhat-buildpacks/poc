@@ -12,30 +12,6 @@ See Kaniko [readme.md](./kaniko/README.md)
 
 See Kaniko [readme.md](./buildah/README.md)
 
-## Mount root FS
-
-See the following links where it is discussed `How to mount a root FS`:
-- https://itnext.io/mount-a-kubernetes-workers-root-filesystem-as-a-container-volume-for-fun-and-fortune-53ae492698db
-- https://github.com/kubernetes/kubernetes/issues/101749
-
-The problem that we will have, if we want to mount the root FS, within the pod is that currently
-we cannot mount it under `/` but using a different path as otherwise that will clash
-```yaml
-spec:
-  volumes:
-    - name: host
-      hostPath:
-        path: /
-volumeMounts:
-  - name: cache-dir
-    mountPath: /workspace
-  - name: host
-    mountPath: /host
-```
-
-The consequence is that we need to find a way to copy the content of the subpath `/host` to the `/`
-using a different `initContainer` which is only used to copy the files coming from the layers !
-
 ## How to get from an image, its index.json, manifest and digest files and content of a layer
 
 The following instructions will help us to figure out how we:
@@ -121,11 +97,37 @@ Check the tree of the folder created locally
 tree my-alpine-wget   
 ```
 
-## MacOS
+## Deprecated
+
+### Mount root FS
+
+See the following links where it is discussed `How to mount a root FS`:
+- https://itnext.io/mount-a-kubernetes-workers-root-filesystem-as-a-container-volume-for-fun-and-fortune-53ae492698db
+- https://github.com/kubernetes/kubernetes/issues/101749
+
+The problem that we will have, if we want to mount the root FS, within the pod is that currently
+we cannot mount it under `/` but using a different path as otherwise that will clash
+```yaml
+spec:
+  volumes:
+    - name: host
+      hostPath:
+        path: /
+volumeMounts:
+  - name: cache-dir
+    mountPath: /workspace
+  - name: host
+    mountPath: /host
+```
+
+The consequence is that we need to find a way to copy the content of the subpath `/host` to the `/`
+using a different `initContainer` which is only used to copy the files coming from the layers !
+
+### MacOS
 
 It is not possible for the moment to develop on a Mac as it is not a real Linux platform !
 
-### Prerequisite
+- Prerequisite
 
 The following package is needed otherwise the compilation of the application will fail
 
