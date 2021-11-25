@@ -4,8 +4,9 @@ Table of Contents
 * [Poc development](#poc-development)
     * [Kaniko](#kaniko)
     * [Buildah](#buildah)
-    * [How to get from an image, its index.json, manifest and digest files and content of a layer](#how-to-get-from-an-image-its-indexjson-manifest-and-digest-files-and-content-of-a-layer)
-    * [Python utility tool to list, unpack layer](#python-utility-tool-to-list-unpack-layer)
+    * [HowTo](#howto)
+        * [Buildah bud and Skopeo](#buildah-bud-and-skopeo)
+        * [Docker and Python tool](#docker-and-python-tool)
     * [Deprecated](#deprecated)
         * [Mount root FS](#mount-root-fs)
         * [MacOS](#macos)
@@ -24,16 +25,23 @@ See Kaniko [readme.md](./kaniko/README.md)
 
 See Kaniko [readme.md](./buildah/README.md)
 
-## How to get from an image, its index.json, manifest and digest files and content of a layer
+## HowTo
 
-The following instructions will help us to figure out how we:
-- Apply a dockerfile to an image
+This section contains instructions to perform different operations on a container's image, layers such as:
+- Save locally the content of a container image
+- Get from an image, its index.json, manifest and digest files
+- Extract the layer content
+
+### Buildah bud and Skopeo
+
+With the hlp of `buildah bud` and `skopeo` tools, we can perform such an operations:
+- Parse a dockerfile to execute the commands using a `FROM` image
 - Get locally the image built
 - Extract from the image its index.json, manifest file 
-- Access the content of a layer
-- Extract or check the content of the files added during the execution of the `dockerfiles`
+- Access the content of a layer (= files from the compressed layer)
+- Extract or check the content of the layer files
 
-**REMARK**: I commented the line using the tool umoci but if needed it could also be investigated
+**REMARK**: I commented the line using the tool umoci but if needed it could also be investigated !
 
 ```bash
 sudo rm -rf _temp && mkdir -p _temp
@@ -76,36 +84,44 @@ tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID
 popd
 ```
 
-## Python utility tool to list, unpack layer
+### Docker and Python tool
 
-See: https://blog.oddbit.com/post/2015-02-13-unpacking-docker-images/
+Using `Docker` and the `undocker.py` [python tool](https://blog.oddbit.com/post/2015-02-13-unpacking-docker-images/), we can:
+- Save locally a container image
+- List or extract (= unpack) a layer
 
-To list the files of an image
-```
-docker save busybox | ./undocker.py -v --layers
-```
-End to end test using as FROM image `alpine` and the following Dockerfile
+To validate such a scenario, execute the following instructions 
+
+- Create a dockerfile using as `FROM` an `alpine` image and install a package such as `wget`
 ```bash
 cat <<EOF > Dockerfile-alpine
 FROM alpine
 
 RUN apk add wget
 EOF
+```
 
+- Do a docker build. Next tag the image. Save the image content locally and find the last layer id to extract it
+```bash
 docker build -f Dockerfile my-alpine .
 IMAGE_ID=$(docker images --format="{{.Repository}} {{.ID}}" | awk '/none/ { print $2; }')
 docker tag $IMAGE_ID my-alpine
 LAST_LAYER_ID=$(docker save localhost/my-alpine | ./undocker.py --layers | head -n 1)
 docker save my-alpine | ./undocker.py -i -o my-alpine-wget -l $LAST_LAYER_ID
+```
 
+- Example:
+```bash
 Example: 
 e2eb06d8af8218cfec8210147357a68b7e13f7c485b991c288c2d01dc228bb68 # Original image
 b67c5a78b01d62b9eb65c0a8d46480c7b1882828b658ae8ddd5fc0601b2db3f9 # what I added with the RUN cmd
 
 docker save my-alpine |
   ./undocker.py -vi -o my-alpine-wget -l f35d9c7ad180a77b0969ca4e87e6f9655098d577cc29f64cae5c300d9c33d753
-  
-Check the tree of the folder created locally
+```
+
+- Check the tree of the folder created locally
+```bash
 tree my-alpine-wget   
 ```
 
