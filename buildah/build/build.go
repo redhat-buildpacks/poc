@@ -23,8 +23,8 @@ type BuildahParameters struct {
 	GraphDriverName   string
 }
 
-func InitOptions() BuildahParameters {
-	b := BuildahParameters{}
+func InitOptions() *BuildahParameters {
+	b := &BuildahParameters{}
 
 	b.WorkspaceDir = os.Getenv("WORKSPACE_DIR")
 	if b.WorkspaceDir == "" {
