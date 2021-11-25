@@ -12,6 +12,8 @@ RUN apk add --no-cache \
     gpgme \
     gpgme-dev
 
+RUN go get -u github.com/proglottis/gpgme
+
 # Build the buildah app using compilation flags
 RUN GOOS=linux GOARCH=amd64 go build -o /buildah-app *.go
 
