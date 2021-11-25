@@ -77,10 +77,10 @@ docker build -t buildah-app -f Dockerfile_build .
 ```
 - Launch the `buildah-app` container
 ```bash
- docker run \
-    -e WORKSPACE_DIR=/wks \
-    -v $(pwd)/wks:/wks \
-    -it buildah-app
+docker run \
+  -e WORKSPACE_DIR=/wks \
+  -v $(pwd)/wks:/wks \
+  -it buildah-app
 ```
 
 ### Kubernetes

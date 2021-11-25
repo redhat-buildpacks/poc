@@ -16,5 +16,6 @@ RUN GOOS=linux GOARCH=amd64 go build -tags 'containers_image_openpgp' -o /builda
 FROM registry.access.redhat.com/ubi8-minimal
 
 COPY --from=builder /buildah-app /buildah-app
+COPY --from=builder /etc/containers/policy.json /etc/containers/policy.json
 
 ENTRYPOINT ["/buildah-app"]

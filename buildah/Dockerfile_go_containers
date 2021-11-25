@@ -5,3 +5,6 @@ RUN apk add --no-cache \
     gpgme \
     gpgme-dev \
     libassuan
+
+RUN mkdir -p /etc/containers
+COPY ./config/policy.json /etc/containers/policy.json
