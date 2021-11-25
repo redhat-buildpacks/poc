@@ -27,21 +27,22 @@ See Kaniko [readme.md](./buildah/README.md)
 
 ## Using tools
 
-This section contains instructions to perform different operations on a container's image, layers such as:
+This section contains the instructions to perform different operations using tools (buildah, skopeo, docker client, ...) on a container's image, layers such as:
 - Save locally the content of a container image
 - Get from an image, its index.json, manifest and digest files
 - Extract the layer content
 
-### Buildah bud and Skopeo
+### Buildah and Skopeo
 
 With the hlp of `buildah bud` and `skopeo` tools, we can perform such an operations:
-- Parse a dockerfile to execute the commands using a `FROM` image
+- Parse a dockerfile to execute the `commands`
 - Get locally the image built
 - Extract from the image its index.json, manifest file
 - Access the content of a layer (= files from the compressed layer)
 - Extract or check the content of the layer files
 
-**REMARK**: I commented the line using the tool umoci but if needed it could also be investigated !
+**REMARK**: An interesting project which has not been fully investigated but which could be helpful is `[umoci](https://github.com/opencontainers/umoci)`.
+It allows to `unpack` too, the layers of an image `sudo umoci unpack --image $IMAGE_ID:$TAG bundle`
 
 ```bash
 sudo rm -rf _temp && mkdir -p _temp
@@ -63,9 +64,6 @@ GRAPH_DRIVER="overlay"
 TAG=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
 IMAGE_ID=$(sudo buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $3;}')
 sudo skopeo copy -q containers-storage:$IMAGE_ID oci:$(pwd)/$IMAGE_ID:$TAG > /dev/null 2>&1
-
-# TOOL able to unpack the FS from an image (https://github.com/opencontainers/umoci)
-# sudo ../umoci unpack --image $IMAGE_ID:$TAG bundle
 
 cat $IMAGE_ID/index.json
 MANIFEST_SHA=$(cat $IMAGE_ID/index.json | jq .manifests[0].digest | cut -d: -f2 | sed 's/.$//')
