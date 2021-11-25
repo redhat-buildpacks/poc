@@ -8,10 +8,12 @@ WORKDIR /go/src/buildah-app
 COPY ./code/ .
 
 # Install the needed packages
-RUN apk add gpgme gpgme-dev
+RUN apk add --no-cache \
+    gpgme \
+    gpgme-dev
 
 # Build the buildah app using compilation flags
-RUN GOOS=linux GOARCH=amd64 go build -tags "btrfs_noversion libdm_no_deferred_remove" -o /buildah-app *.go
+RUN GOOS=linux GOARCH=amd64 go build -o /buildah-app *.go
 
 #####################################
 # Setup the env to run the buildah app

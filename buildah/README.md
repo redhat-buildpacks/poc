@@ -59,20 +59,19 @@ drwx------.  2 root root  4096 Nov 17 16:50 bf4b432845dc71930dfcb9905d9a3de25c76
 
 ### Container
 
-Alternatively, build a container image and follow these instructions
+Alternatively, build a container image using the following instructions
 
-- To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
+- First, download the vendor libs to avoid that docker download them for every build
 ```bash
 cd code
 go mod vendor
 cd ..
 ```
-
-- Build next the container image of the `kaniko-app`.
+- Build a container image
 ```bash
 docker build -t buildah-app -f Dockerfile_build .
 ```
-Launch the `buildah-app` container
+- Launch the `buildah-app` container
 ```bash
 docker run \
        -v $(pwd)/wks:/workspace \
