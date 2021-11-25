@@ -12,7 +12,6 @@ import (
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
 	"github.com/redhat-buildpacks/poc/buildah/util"
-	"io/ioutil"
 	"time"
 
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -139,7 +138,7 @@ func main() {
 	logrus.Info("Image built successfully :-)")
 
 	// Let's try to copy the layers
-
+	CopyImage(imageID)
 }
 
 func parseImageSource(ctx context.Context, name string) (types.ImageSource, error) {
@@ -177,8 +176,8 @@ func (opts *globalOptions) getPolicyContext() (*signature.PolicyContext, error) 
 	return signature.NewPolicyContext(policy)
 }
 
-func (opts *globalOptions) copyImage(imageID string) {
-	initGlobalOptions()
+func CopyImage(imageID string) {
+	opts := initGlobalOptions()
 
 	policyContext, err := opts.getPolicyContext()
 	if err != nil {
