@@ -78,7 +78,7 @@ func InitOptions() *BuildahParameters {
 		ForceRmIntermediateCtrs: true,
 	}
 
-	// Initialize storage for buildah
+	// Initialize the storage
 	b.StoreOptions = storage.StoreOptions{
 		GraphDriverName:     b.GraphDriverName,
 		GraphRoot:           b.StorageRootDir,

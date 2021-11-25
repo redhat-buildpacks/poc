@@ -5,11 +5,17 @@ import (
 	"fmt"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
+	"github.com/containers/image/v5/copy"
 	"github.com/containers/image/v5/image"
+	"github.com/containers/image/v5/manifest"
+	"github.com/containers/image/v5/signature"
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
+	"github.com/redhat-buildpacks/poc/buildah/util"
+	"io/ioutil"
+	"time"
 
-	//"github.com/containers/image/v5/transports/alltransports"
+	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/containers/image/v5/types"
 	"github.com/containers/storage"
 	"github.com/containers/storage/pkg/unshare"
@@ -23,6 +29,19 @@ const (
 	graphDriver = "vfs"
 	repoType    = "containers-storage"
 )
+
+type globalOptions struct {
+	debug              bool                    // Enable debug output
+	policyPath         string                  // Path to a signature verification policy file
+	insecurePolicy     bool                    // Use an "allow everything" signature verification policy
+	registriesDirPath  string                  // Path to a "registries.d" registry configuration directory
+	overrideArch       string                  // Architecture to use for choosing images, instead of the runtime one
+	overrideOS         string                  // OS to use for choosing images, instead of the runtime one
+	overrideVariant    string                  // Architecture variant to use for choosing images, instead of the runtime one
+	commandTimeout     time.Duration           // Timeout for the command execution
+	registriesConfPath string                  // Path to the "registries.conf" file
+	tmpDir             string                  // Path to use for big temporary files
+}
 
 func main() {
 	ctx := context.TODO()
@@ -99,6 +118,7 @@ func main() {
 	}
 	parse.JsonMarshal("OCI Config",config)
 
+	// Get the layers from the source and log the Layer SHA
 	layers := src.LayerInfos()
 	for _, info := range layers {
 		logrus.Infof("Layer sha: %s\n", info.Digest.String())
@@ -115,7 +135,11 @@ func main() {
 		}
 	}
 
+	logrus.Infof("Image repositry id: %s",imageID[0:11])
 	logrus.Info("Image built successfully :-)")
+
+	// Let's try to copy the layers
+
 }
 
 func parseImageSource(ctx context.Context, name string) (types.ImageSource, error) {
@@ -134,4 +158,80 @@ func newSystemContext() *types.SystemContext {
 func containerStorageName(b *build.BuildahParameters, imageID string) string {
 	storage := fmt.Sprintf("[%s@%s+%s]", graphDriver, b.StorageRootDir, b.StorageRunRootDir)
 	return fmt.Sprintf("%s:%s%s", repoType, storage, imageID)
+}
+
+// getPolicyContext returns a *signature.PolicyContext based on opts.
+func (opts *globalOptions) getPolicyContext() (*signature.PolicyContext, error) {
+	var policy *signature.Policy // This could be cached across calls in opts.
+	var err error
+	if opts.insecurePolicy {
+		policy = &signature.Policy{Default: []signature.PolicyRequirement{signature.NewPRInsecureAcceptAnything()}}
+	} else if opts.policyPath == "" {
+		policy, err = signature.DefaultPolicy(nil)
+	} else {
+		policy, err = signature.NewPolicyFromFile(opts.policyPath)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return signature.NewPolicyContext(policy)
+}
+
+func (opts *globalOptions) copyImage(imageID string) {
+	initGlobalOptions()
+
+	policyContext, err := opts.getPolicyContext()
+	if err != nil {
+		logrus.Fatalf("Error loading trust policy: %v", err)
+	}
+	defer policyContext.Destroy()
+
+	srcURL := "oci://" + util.GetPWD() + "/" + imageID[0:11] + ":latest"
+	srcRef, err := alltransports.ParseImageName(srcURL)
+	if err != nil {
+		logrus.Fatalf("Invalid source name %s: %v", srcURL, err)
+	}
+
+	destURL := "oci://" + util.GetPWD() + "/" + imageID[0:11] + ":latest"
+	destRef, err := alltransports.ParseImageName(destURL)
+	if err != nil {
+		logrus.Fatalf("Invalid destination name %s: %v", destURL, err)
+	}
+
+	// copy image
+	_, err = copy.Image(context.TODO(), policyContext, destRef, srcRef, &copy.Options{
+		RemoveSignatures:      false,
+		SignBy:                "",
+		ReportWriter:          nil,
+		SourceCtx:             nil,
+		DestinationCtx:        nil,
+		ForceManifestMIMEType: parseManifestFormat("oci"),
+		ImageListSelection:    copy.CopySystemImage,
+		OciDecryptConfig:      nil,
+		OciEncryptLayers:      nil,
+		OciEncryptConfig:      nil,
+	})
+	if err != nil {
+		logrus.Fatalf("Image not copied :-(")
+	}
+}
+
+func initGlobalOptions() (*globalOptions) {
+	return &globalOptions{}
+}
+
+// parseManifestFormat parses format parameter for copy and sync command.
+// It returns string value to use as manifest MIME type
+func parseManifestFormat(manifestFormat string) (string) {
+	switch manifestFormat {
+	case "oci":
+		return imgspecv1.MediaTypeImageManifest
+	case "v2s1":
+		return manifest.DockerV2Schema1SignedMediaType
+	case "v2s2":
+		return manifest.DockerV2Schema2MediaType
+	default:
+		logrus.Errorf("unknown format %q. Choose one of the supported formats: 'oci', 'v2s1', or 'v2s2'", manifestFormat)
+		return ""
+	}
 }
