@@ -32,7 +32,7 @@ cp $HOME/poc/buildah/wks/Dockerfile $HOME/wks
 To parse the [Dockerfile](buildah/Dockerfile) pushed under the `WORKSPACE_DIR`, simply execute the
 `bud` go application. It will process it and will generate an image
 ```bash
-[vagrant@centos7 buildah]$ sudo WORKSPACE_DIR="/home/vagrant/wks" $HOME/poc/buildah/out/bud
+[vagrant@centos7 buildah]$ sudo WORKSPACE_DIR="/home/vagrant/wks" $HOME/poc/buildah/code/out/bud
 WARN[0000] Failpwd
 PACE DIR: /home/vagrant/wks             
 INFO[0000] GRAPH_DRIVER: vfs                            
@@ -67,15 +67,20 @@ cd code
 go mod vendor
 cd ..
 ```
-- Build a container image
+- Build the image containing `golang` and the needed `containers` libs
+```bash
+docker build -t go-containers -f Dockerfile_go_containers .
+```  
+- And now compile and build the `buildah-app` container image
 ```bash
 docker build -t buildah-app -f Dockerfile_build .
 ```
 - Launch the `buildah-app` container
 ```bash
-docker run \
-       -v $(pwd)/wks:/workspace \
-       -it buildah-app
+ docker run \
+    -e WORKSPACE_DIR=/wks \
+    -v $(pwd)/wks:/wks \
+    -it buildah-app
 ```
 
 ### Kubernetes

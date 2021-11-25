@@ -56,7 +56,7 @@ func main() {
 	logrus.Infof("Buildah tempdir: %s", b.TempDir)
 
 	dockerFileName := filepath.Join(b.WorkspaceDir, "Dockerfile")
-	logrus.Infof("Dockerfile: %s", dockerFileName)
+	logrus.Infof("Dockerfile path: %s", dockerFileName)
 
 	// storeOptions, err := storage.DefaultStoreOptions(false,0)
 
@@ -77,7 +77,7 @@ func main() {
 	*/
 	imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, dockerFileName)
 	if err != nil {
-		logrus.Errorf("Build image failed: %s", err.Error())
+		logrus.Errorf("Build image failed: %s", err)
 	}
 
 	logrus.Infof("Image id: %s", imageID)

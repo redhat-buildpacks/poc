@@ -53,6 +53,7 @@ func InitOptions() *BuildahParameters {
 	var transientMounts []string
 	b.TempDir = filepath.Join(b.WorkspaceDir,"buildah-layers") // ioutil.TempDir(b.WorkspaceDir, "buildah-poc-")
 	contextDir := filepath.Join(b.TempDir, "context")
+	logrus.Infof("Buildah contextDir: %s",contextDir)
 
 	dateStamp := fmt.Sprintf("%d", time.Now().UnixNano())
 	buildahImage := fmt.Sprintf("buildpack-buildah:%s-%d", dateStamp, 1)

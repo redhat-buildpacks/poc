@@ -1,0 +1,7 @@
+FROM golang:1.16-alpine
+
+# Install the needed containers -image packages
+RUN apk add --no-cache \
+    gpgme \
+    gpgme-dev \
+    libassuan

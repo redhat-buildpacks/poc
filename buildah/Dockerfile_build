@@ -1,21 +1,14 @@
 ###################
 ## Build the go app
 ###################
-FROM golang:1.16-alpine as builder
+FROM go-containers as builder
 ENV CGO_ENABLED 0
 
 WORKDIR /go/src/buildah-app
 COPY ./code/ .
 
-# Install the needed packages
-RUN apk add --no-cache \
-    gpgme \
-    gpgme-dev
-
-RUN go get -u github.com/proglottis/gpgme
-
 # Build the buildah app using compilation flags
-RUN GOOS=linux GOARCH=amd64 go build -o /buildah-app *.go
+RUN GOOS=linux GOARCH=amd64 go build -tags 'containers_image_openpgp' -o /buildah-app main.go
 
 #####################################
 # Setup the env to run the buildah app
@@ -23,7 +16,5 @@ RUN GOOS=linux GOARCH=amd64 go build -o /buildah-app *.go
 FROM registry.access.redhat.com/ubi8-minimal
 
 COPY --from=builder /buildah-app /buildah-app
-
-WORKDIR /workspace
 
 ENTRYPOINT ["/buildah-app"]
