@@ -6,17 +6,17 @@ ENV CGO_ENABLED 0
 
 RUN go get -u github.com/go-delve/delve/cmd/dlv@v1.7.3
 
-###################
-## Build the go app
-###################
-FROM golang:1.16-alpine as builder
-ENV CGO_ENABLED 0
-
-WORKDIR /go/src/kaniko-app
-COPY ./code/ .
-
-# Build the kaniko app using compilation flags
-RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app *.go
+# ###################
+# ## Build the go app
+# ###################
+# FROM golang:1.16-alpine as builder
+# ENV CGO_ENABLED 0
+#
+# WORKDIR /go/src/kaniko-app
+# COPY ./code/ .
+#
+# # Build the kaniko app using compilation flags
+# RUN GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o /kaniko-app *.go
 
 ################################
 ## Install the CA Red Hat certificates
@@ -36,7 +36,7 @@ FROM scratch
 
 COPY --from=certs /ca-certificates.crt /kaniko/ssl/certs/
 COPY --from=debugger /go/bin/dlv /usr/local/bin/
-COPY --from=builder /kaniko-app /kaniko-app
+# COPY --from=builder /kaniko-app /kaniko-app
 COPY --from=busybox:1.32.0 /bin/mkdir /busybox/mkdir
 # Declare /busybox as a volume to get it automatically in the path to ignore
 VOLUME /busybox
@@ -47,6 +47,8 @@ ENV SSL_CERT_DIR=/kaniko/ssl/certs
 
 WORKDIR /workspace
 RUN ["/busybox/mkdir", "-p", "/kaniko"]
+
+COPY code/out/kaniko-app /kaniko-app
 
 EXPOSE 2345
 

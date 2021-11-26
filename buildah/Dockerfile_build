@@ -6,17 +6,17 @@ ENV CGO_ENABLED 0
 
 RUN go get -u github.com/go-delve/delve/cmd/dlv@v1.7.3
 
-###################
-## Build the go app
-###################
-FROM go-containers as builder
-ENV CGO_ENABLED 0
-
-WORKDIR /go/src/buildah-app
-COPY ./code/ .
-
-# Build the buildah app using compilation flags
-RUN GOOS=linux GOARCH=amd64 go build -tags 'containers_image_openpgp' -gcflags "all=-N -l" -o /buildah-app main.go
+# ###################
+# ## Build the go app
+# ###################
+# FROM go-containers as builder
+# ENV CGO_ENABLED 0
+#
+# WORKDIR /go/src/buildah-app
+# COPY ./code/ .
+#
+# # Build the buildah app using compilation flags
+# RUN GOOS=linux GOARCH=amd64 go build -tags 'containers_image_openpgp' -gcflags "all=-N -l" -o /buildah-app main.go
 
 #####################################
 # Setup the env to run the buildah app
@@ -24,8 +24,11 @@ RUN GOOS=linux GOARCH=amd64 go build -tags 'containers_image_openpgp' -gcflags "
 FROM registry.access.redhat.com/ubi8-minimal
 
 COPY --from=debugger /go/bin/dlv /usr/local/bin/
-COPY --from=builder /buildah-app /buildah-app
-COPY --from=builder /etc/containers/policy.json /etc/containers/policy.json
+# COPY --from=builder /buildah-app /buildah-app
+# COPY --from=builder /etc/containers/policy.json /etc/containers/policy.json
+
+COPY code/out/buildah-app /buildah-app
+COPY config/policy.json /etc/containers/policy.json
 
 EXPOSE 2345
 

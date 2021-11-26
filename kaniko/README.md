@@ -48,7 +48,7 @@ cd ..
 
 Build next the container image of the `kaniko-app`.
 ```bash
-docker build -t kaniko-app -f Dockerfile_build .
+./hack/build.sh
 ```
 Launch the `kaniko-app` container
 ```bash
@@ -96,10 +96,7 @@ docker run \
 DEBU[0349] File found: /usr/bin/node                    
 DEBU[0349] File found: /workspace/hello.txt 
 ```
-and check the information logged
-```bash
-
-```
+and check the information logged.
 
 **NOTE**: You can also use the search_files bash [script](./scripts/search_files.sh) which will scan the content of the `tgz` files
 and search about the following keywords passed to grep - "wget\|curl\|hello.txt". TODO: Pass the keywords as bash script arg
