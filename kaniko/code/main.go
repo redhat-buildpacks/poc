@@ -7,9 +7,10 @@ import (
 	util "github.com/redhat-buildpacks/poc/kaniko/util"
 	logrus "github.com/sirupsen/logrus"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
+	"syscall"
 )
 
 const (
@@ -81,23 +82,19 @@ func init() {
 
 func main() {
 	if _, ok := os.LookupEnv("DEBUG"); ok && (len(os.Args) <= 1 || os.Args[1] != "from-debugger") {
-		cmd := exec.Command("/usr/local/bin/dlv",
+		args := []string {
 			"--listen=:2345",
 			"--headless=true",
 			"--api-version=2",
 			"--accept-multiclient",
 			"exec",
-			"/kaniko-app", "from-debugger")
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Env = os.Environ()
-		err := cmd.Run()
+			"/kaniko-app", "from-debugger",
+		}
+		err := syscall.Exec("/usr/local/bin/dlv", append([]string{"/usr/local/bin/dlv"}, args...), os.Environ())
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
-		os.Exit(0)
 	}
 	logrus.Info("Starting the Kaniko application to process a Dockerfile ...")
 
@@ -116,6 +113,10 @@ func main() {
 	// Build the Dockerfile
 	logrus.Infof("Building the %s", b.DockerFileName)
 	err := b.BuildDockerFile()
+	if err != nil {
+		panic(err)
+	}
+	err = reapChildProcesses()
 	if err != nil {
 		panic(err)
 	}
@@ -147,4 +148,40 @@ func main() {
 	if (len(filesToSearch) > 0) {
 		util.FindFiles(filesToSearch)
 	}
+}
+
+func reapChildProcesses() error {
+	procDir, err := os.Open("/proc")
+	if err != nil {
+		return err
+	}
+
+	procDirs, err := procDir.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+
+	tid := os.Getpid()
+
+	var wg sync.WaitGroup
+	for _, dirName := range procDirs {
+		pid, err := strconv.Atoi(dirName)
+		if err == nil && pid != 1 && pid != tid {
+			p, err := os.FindProcess(pid)
+			if err != nil {
+				continue
+			}
+			err = p.Signal(syscall.SIGTERM)
+			if err != nil {
+				continue
+			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				p.Wait()
+			}()
+		}
+	}
+	wg.Wait()
+	return nil
 }
