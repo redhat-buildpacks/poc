@@ -1,8 +1,12 @@
 Table of Contents
 =================
 
-* [Buildah App](#buildah-app)
-* [Kubernetes](#kubernetes)
+  * [Buildah App](#buildah-app)
+  * [How to build and run](#how-to-build-and-run)
+     * [Vagrant](#vagrant)
+     * [Container](#container)
+     * [Remote debugging](#remote-debugging)
+     * [Kubernetes](#kubernetes)
 
 ## Buildah App
 
@@ -78,6 +82,22 @@ docker build -t buildah-app -f Dockerfile_build .
 - Launch the `buildah-app` container
 ```bash
 docker run \
+  -e GRAPH_DRIVER=vfs \
+  -e LOGGING_LEVEL=debug \
+  -e LOGGING_FORMAT=color \
+  -e WORKSPACE_DIR=/wks \
+  -v $(pwd)/vol:/var/lib/containers \
+  -v $(pwd)/wks:/wks \
+  -it buildah-app
+```
+
+### Remote debugging
+
+To use the dlv remote debugger, simply pass as `ENV` var `DEBUG=true` and the port `2345` to access it using your favorite IDE (Visual studio, IntelliJ, ...)
+```bash
+docker run \
+  -e DEBUG=true \
+  -p 2345:2345 \
   -e GRAPH_DRIVER=vfs \
   -e LOGGING_LEVEL=debug \
   -e LOGGING_FORMAT=color \
