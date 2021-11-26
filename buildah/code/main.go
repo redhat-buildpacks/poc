@@ -11,8 +11,10 @@ import (
 	"github.com/containers/image/v5/signature"
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/redhat-buildpacks/poc/buildah/build"
+	"github.com/redhat-buildpacks/poc/buildah/logging"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
 	"github.com/redhat-buildpacks/poc/buildah/util"
+	"strconv"
 	"time"
 
 	"github.com/containers/image/v5/types"
@@ -25,8 +27,22 @@ import (
 )
 
 const (
+	LOGGING_LEVEL_ENV_NAME     = "LOGGING_LEVEL"
+	LOGGING_FORMAT_ENV_NAME    = "LOGGING_FORMAT"
+	LOGGING_TIMESTAMP_ENV_NAME = "LOGGING_TIMESTAMP"
+
+	DefaultLevel        = "info"
+	DefaultLogTimestamp = false
+	DefaultLogFormat    = "text"
+
 	graphDriver = "vfs"
 	repoType    = "containers-storage"
+)
+
+var (
+	logLevel      string   // Log level (trace, debug, info, warn, error, fatal, panic)
+	logFormat     string   // Log format (text, color, json)
+	logTimestamp  bool     // Timestamp in log output
 )
 
 type globalOptions struct {
@@ -42,6 +58,34 @@ type globalOptions struct {
 	tmpDir             string                  // Path to use for big temporary files
 }
 
+func init() {
+	logLevel = util.GetValFromEnVar(LOGGING_LEVEL_ENV_NAME)
+	if logLevel == "" {
+		logLevel = DefaultLevel
+	}
+
+	logFormat = util.GetValFromEnVar(LOGGING_FORMAT_ENV_NAME)
+	if logFormat == "" {
+		logFormat = DefaultLogFormat
+	}
+
+	loggingTimeStampStr := util.GetValFromEnVar(LOGGING_TIMESTAMP_ENV_NAME)
+	if loggingTimeStampStr == "" {
+		logTimestamp = DefaultLogTimestamp
+	} else {
+		v, err := strconv.ParseBool(loggingTimeStampStr)
+		if err != nil {
+			logrus.Fatalf("logTimestamp bool assignment failed %s", err)
+		} else {
+			logTimestamp = v
+		}
+	}
+	if err := logging.Configure(logLevel, logFormat, logTimestamp); err != nil {
+		panic(err)
+	}
+}
+
+// TODO: To be documented
 func main() {
 	ctx := context.TODO()
 
