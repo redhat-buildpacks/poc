@@ -7,3 +7,4 @@ out
 /kaniko/code/vendor/
 /kaniko/cache/
 /buildah/code/vendor/
+/buildah/vol/
