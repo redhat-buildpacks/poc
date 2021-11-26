@@ -82,15 +82,15 @@ To verify that the `kaniko` application is working fine, execute the following c
 dockerfile="ubi8-nodejs"        
 filesToSearch="node,hello.txt"
 docker run \
-       -e EXTRACT_LAYERS=true \
-       -e IGNORE_PATHS="/proc" \
-       -e FILES_TO_SEARCH=${filesToSearch} \
-       -e LOGGING_LEVEL=info \
-       -e LOGGING_FORMAT=color \
-       -e DOCKER_FILE_NAME=${dockerfile} \
-       -v $(pwd)/workspace:/workspace \
-       -v $(pwd)/cache:/cache \
-       -it kaniko-app:latest
+  -e EXTRACT_LAYERS=true \
+  -e IGNORE_PATHS="/proc" \
+  -e FILES_TO_SEARCH=${filesToSearch} \
+  -e LOGGING_LEVEL=info \
+  -e LOGGING_FORMAT=color \
+  -e DOCKER_FILE_NAME=${dockerfile} \
+  -v $(pwd)/workspace:/workspace \
+  -v $(pwd)/cache:/cache \
+  -it kaniko-app:latest
 -->
 ...
 DEBU[0349] File found: /usr/bin/node                    
@@ -127,11 +127,11 @@ drwxr-xr-x  0 0      0           0 Nov 18 14:22 usr/bin/
 To use the dlv remote debugger, simply pass as `ENV` var `DEBUG=true` and the port `4000` to access it using your favorite IDE (Visual studio, IntelliJ, ...)
 ```bash
 docker run \
-       -e DEBUG=true \
-       -p 2345:2345 \
-       -v $(pwd)/workspace:/workspace \
-       -v $(pwd)/cache:/cache \
-       -it kaniko-app
+  -e DEBUG=true \
+  -p 2345:2345 \
+  -v $(pwd)/workspace:/workspace \
+  -v $(pwd)/cache:/cache \
+  -it kaniko-app
 ```
 
 ## CNB Build args
