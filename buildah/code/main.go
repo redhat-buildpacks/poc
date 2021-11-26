@@ -10,6 +10,7 @@ import (
 	"github.com/containers/image/v5/manifest"
 	"github.com/containers/image/v5/signature"
 	"github.com/containers/image/v5/transports/alltransports"
+	"github.com/containers/storage/pkg/unshare"
 	"github.com/redhat-buildpacks/poc/buildah/build"
 	"github.com/redhat-buildpacks/poc/buildah/logging"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
@@ -21,7 +22,6 @@ import (
 
 	"github.com/containers/image/v5/types"
 	"github.com/containers/storage"
-	"github.com/containers/storage/pkg/unshare"
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -82,8 +82,9 @@ func init() {
 			logTimestamp = v
 		}
 	}
-	if err := logging.Configure(logLevel, logFormat, logTimestamp); err != nil {
-		panic(err)
+	err := logging.Configure(logLevel, logFormat, logTimestamp)
+	if err != nil {
+		logrus.Fatalf("Error creating logging !", err)
 	}
 }
 
@@ -110,6 +111,8 @@ func main() {
 	if buildah.InitReexec() {
 		return
 	}
+
+	// TODO: Check how we could continue to use the debugger as the following code exec a sub-command and by consequence it exits
 	unshare.MaybeReexecUsingUserNamespace(false)
 
 	b := build.InitOptions()
@@ -127,8 +130,7 @@ func main() {
 	// initializes a new Store object, and the underlying storage that it controls.
 	store, err := storage.GetStore(b.StoreOptions)
 	if err != nil {
-		logrus.Errorf("error creating buildah storage !", err)
-		panic(err)
+		logrus.Fatal("error creating buildah storage !", err)
 	}
 
 	/* Parse the content of the Dockerfile to execute the different commands: FROM, RUN, ...
