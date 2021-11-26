@@ -14,6 +14,7 @@ import (
 	"github.com/redhat-buildpacks/poc/buildah/logging"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
 	"github.com/redhat-buildpacks/poc/buildah/util"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -87,6 +88,26 @@ func init() {
 
 // TODO: To be documented
 func main() {
+	if _, ok := os.LookupEnv("DEBUG"); ok && (len(os.Args) <= 1 || os.Args[1] != "from-debugger") {
+		cmd := exec.Command("/usr/local/bin/dlv",
+			"--listen=:2345",
+			"--headless=true",
+			"--api-version=2",
+			"--accept-multiclient",
+			"exec",
+			"/kaniko-app", "from-debugger")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Env = os.Environ()
+		err := cmd.Run()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
 	ctx := context.TODO()
 
 	if buildah.InitReexec() {
