@@ -13,4 +13,4 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 )
 
-replace github.com/containers/storage v1.37.0 => /Users/cmoullia/code/containers/storage
+// replace github.com/containers/storage v1.37.0 => /Users/cmoullia/code/containers/storage
