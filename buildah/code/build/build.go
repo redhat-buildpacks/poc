@@ -77,6 +77,7 @@ func InitOptions() *BuildahParameters {
 		NoCache:                 true,
 		RemoveIntermediateCtrs:  true,
 		ForceRmIntermediateCtrs: true,
+		Isolation:               buildah.IsolationChroot,
 	}
 
 	// Initialize the storage
