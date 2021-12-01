@@ -82,11 +82,11 @@ docker build -t go-containers -f Dockerfile_go_containers .
 - Launch the `buildah-app` container
 ```bash
 docker run \
+  --privileged \
   -e GRAPH_DRIVER=vfs \
   -e LOGGING_LEVEL=debug \
   -e LOGGING_FORMAT=color \
   -e WORKSPACE_DIR=/wks \
-  -v $(pwd)/vol:/var/lib/containers \
   -v $(pwd)/wks:/wks \
   -it buildah-app
 ```
