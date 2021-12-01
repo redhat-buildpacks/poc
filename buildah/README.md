@@ -75,7 +75,7 @@ cd ..
 ```bash
 docker build -t go-containers -f Dockerfile_go_containers .
 ```  
-- And now compile and build the `buildah-app` container image
+- And now build the `buildah-app` container image
 ```bash
 ./hack/build.sh
 ```

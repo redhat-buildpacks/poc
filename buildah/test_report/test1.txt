@@ -1,0 +1,347 @@
+## Test 1
+
+Executed using : 199317c 2021-12-01 Charles Moulliard (HEAD -> main, origin/main) Merge pull request #14 from nalind/in-a-container
+
+## Scenario
+
+./hack/build.sh
+docker run \
+ --privileged \
+ -e GRAPH_DRIVER=vfs \
+ -e LOGGING_LEVEL=debug \
+ -e LOGGING_FORMAT=color \
+ -e WORKSPACE_DIR=/wks \
+ -v $(pwd)/wks:/wks \
+ -it buildah-app
+
+## Result
+
+INFO[0000] WORKSPACE DIR: /wks
+INFO[0000] GRAPH_DRIVER: vfs
+INFO[0000] STORAGE ROOT PATH: /var/lib/containers/storage
+INFO[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage
+INFO[0000] Buildah contextDir: /wks/buildah-layers/context
+INFO[0000] Buildah tempdir: /wks/buildah-layers
+INFO[0000] Dockerfile path: /wks/Dockerfile
+DEBU[0000] [graphdriver] trying provided driver "vfs"
+DEBU[0000] base for stage 0: "registry.access.redhat.com/ubi8"
+DEBU[0000] FROM "registry.access.redhat.com/ubi8"
+DEBU[0000] Pulling image registry.access.redhat.com/ubi8 (policy: missing)
+DEBU[0000] Looking up image "registry.access.redhat.com/ubi8" in local containers storage
+DEBU[0000] Trying "registry.access.redhat.com/ubi8" ...
+DEBU[0000] Trying "registry.access.redhat.com/ubi8:latest" ...
+DEBU[0000] Trying "registry.access.redhat.com/ubi8:latest" ...
+DEBU[0000] Loading registries configuration "/etc/containers/registries.conf"
+DEBU[0000] Loading registries configuration "/etc/containers/registries.conf.d/000-shortnames.conf"
+DEBU[0000] Attempting to pull candidate registry.access.redhat.com/ubi8:latest for registry.access.redhat.com/ubi8
+DEBU[0000] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]registry.access.redhat.com/ubi8:latest"
+DEBU[0000] Copying source image //registry.access.redhat.com/ubi8:latest to destination image [vfs@/var/lib/containers/storage+/var/run/containers/storage]registry.access.redhat.com/ubi8:latest
+DEBU[0000] Trying to access "registry.access.redhat.com/ubi8:latest"
+DEBU[0000] No credentials for registry.access.redhat.com found
+DEBU[0000] Using registries.d directory /etc/containers/registries.d for sigstore configuration
+DEBU[0000]  No signature storage configuration found for registry.access.redhat.com/ubi8:latest, using built-in default file:///var/lib/containers/sigstore
+DEBU[0000] Looking for TLS certificates and private keys in /etc/docker/certs.d/registry.access.redhat.com
+DEBU[0000] GET https://registry.access.redhat.com/v2/
+DEBU[0000] Ping https://registry.access.redhat.com/v2/ status 200
+DEBU[0000] GET https://registry.access.redhat.com/v2/ubi8/manifests/latest
+DEBU[0001] Content-Type from manifest GET is "application/vnd.docker.distribution.manifest.list.v2+json"
+DEBU[0001] Using blob info cache at /var/lib/containers/cache/blob-info-cache-v1.boltdb
+DEBU[0001] Source is a manifest list; copying (only) instance sha256:8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede for current system
+DEBU[0001] GET https://registry.access.redhat.com/v2/ubi8/manifests/sha256:8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede
+DEBU[0002] Content-Type from manifest GET is "application/vnd.docker.distribution.manifest.v2+json"
+DEBU[0002] IsRunningImageAllowed for image docker:registry.access.redhat.com/ubi8:latest
+DEBU[0002]  Using default policy section
+DEBU[0002]  Requirement 0: allowed
+DEBU[0002] Overall: allowed
+DEBU[0002] Downloading /v2/ubi8/blobs/sha256:cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd
+DEBU[0002] GET https://registry.access.redhat.com/v2/ubi8/blobs/sha256:cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd
+DEBU[0002] Reading /var/lib/containers/sigstore/ubi8@sha256=8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede/signature-1
+DEBU[0002] Manifest has MIME type application/vnd.docker.distribution.manifest.v2+json, ordered candidate list [application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.v1+prettyjws, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v1+json]
+DEBU[0002] ... will first try using the original manifest unmodified
+DEBU[0002] Failed to retrieve partial blob: blob type not supported for partial retrieval
+DEBU[0002] Downloading /v2/ubi8/blobs/sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f
+DEBU[0002] Failed to retrieve partial blob: blob type not supported for partial retrieval
+DEBU[0002] Downloading /v2/ubi8/blobs/sha256:63f9f4c31162a6a5dacd999a0dc65007e15b2ca6b2d9360a1234c27de12e7f38
+DEBU[0002] GET https://registry.access.redhat.com/v2/ubi8/blobs/sha256:63f9f4c31162a6a5dacd999a0dc65007e15b2ca6b2d9360a1234c27de12e7f38
+DEBU[0002] GET https://registry.access.redhat.com/v2/ubi8/blobs/sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f
+DEBU[0002] Detected compression format gzip
+DEBU[0002] Using original blob without modification
+DEBU[0003] Detected compression format gzip
+DEBU[0003] Using original blob without modification
+DEBU[0051] Start untar layer
+DEBU[0055] Untar time: 3.724407188s
+DEBU[0057] Start untar layer
+DEBU[0057] Untar time: 0.062359742s
+DEBU[0057] No compression detected
+DEBU[0057] Using original blob without modification
+DEBU[0057] setting image creation date to 2021-11-03 13:57:53.878769 +0000 UTC
+DEBU[0057] created new image ID "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd"
+DEBU[0057] saved image metadata "{\"signatures-sizes\":{\"sha256:8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede\":[]}}"
+DEBU[0057] set names of image "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd" to [registry.access.redhat.com/ubi8:latest]
+DEBU[0057] Pulled candidate registry.access.redhat.com/ubi8:latest successfully
+DEBU[0057] Looking up image "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd" in local containers storage
+DEBU[0057] Trying "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd" ...
+DEBU[0057] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]@cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd"
+DEBU[0057] Found image "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd" as "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd" in local containers storage
+DEBU[0057] Found image "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd" as "cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd" in local containers storage ([vfs@/var/lib/containers/storage+/var/run/containers/storage]@cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd)
+DEBU[0058] exporting opaque data as blob "sha256:cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd"
+DEBU[0058] [graphdriver] trying provided driver "vfs"
+DEBU[0058] Container ID: 429450a4e2e080d3b83fea7d949fb2cc254100a762ddd02bd89384b739e82108
+DEBU[0058] Parsed Step: {Env:[PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin container=oci] Command:label Args:[runtime nodejs] Flags:[] Attrs:map[] Message:LABEL runtime "nodejs" Original:LABEL runtime="nodejs"}
+DEBU[0058] COMMIT
+DEBU[0058] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]docker.io/library/5fd9d25c6b6c50e3d1ce292abb0a364bd8c6cfe6ba60efa6fb8ebb17b7becbe5-tmp:latest"
+DEBU[0058] committing image with reference "containers-storage:[vfs@/var/lib/containers/storage+/var/run/containers/storage]docker.io/library/5fd9d25c6b6c50e3d1ce292abb0a364bd8c6cfe6ba60efa6fb8ebb17b7becbe5-tmp:latest" is allowed by policy
+DEBU[0058] layer list: ["0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc" "0c51fae87c95e09f4dfccee417713913004c97821d72473d07faeba9c4132761" "6e02225437d495c35b98fbeac05b8c6300d098e7ac1531a34d5974bec8079694"]
+DEBU[0058] using "/tmp/buildah345768740" to hold temporary data
+DEBU[0058] OCIv1 config = {"created":"2021-12-01T16:19:13.576297229Z","architecture":"amd64","os":"linux","config":{"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"8.5"}},"rootfs":{"type":"layers","diff_ids":["sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"]},"history":[{"created":"2021-11-03T13:57:39.79709821Z","comment":"Imported from -"},{"created":"2021-11-03T13:57:53.878769Z"},{"created":"2021-12-01T16:19:13.577147412Z","created_by":"/bin/sh -c #(nop) LABEL runtime=\"nodejs\"","comment":"FROM registry.access.redhat.com/ubi8:latest","empty_layer":true}]}
+DEBU[0058] OCIv1 manifest = {"schemaVersion":2,"config":{"mediaType":"application/vnd.oci.image.config.v1+json","digest":"sha256:e27399fdf7e4f8248df6c0c6aed573ddc72a4c7d7ca753569d28c9c50c789158","size":2233},"layers":[{"mediaType":"application/vnd.oci.image.layer.v1.tar","digest":"sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","size":234711040},{"mediaType":"application/vnd.oci.image.layer.v1.tar","digest":"sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc","size":20480}],"annotations":{"org.opencontainers.image.base.digest":"sha256:8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede","org.opencontainers.image.base.name":"registry.access.redhat.com/ubi8:latest"}}
+DEBU[0058] Docker v2s2 config = {"created":"2021-12-01T16:19:13.576297229Z","container":"429450a4e2e080d3b83fea7d949fb2cc254100a762ddd02bd89384b739e82108","container_config":{"Hostname":"b20a3e8238f9","Domainname":"","User":"","AttachStdin":false,"AttachStdout":false,"AttachStderr":false,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"ArgsEscaped":true,"Image":"6c0c06bb29436721ce6844efc80334a2dd87c939a4fdaf5de4f539bf0e910a3a","Volumes":{},"WorkingDir":"","Entrypoint":[],"OnBuild":[],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"8.5"}},"config":{"Hostname":"b20a3e8238f9","Domainname":"","User":"","AttachStdin":false,"AttachStdout":false,"AttachStderr":false,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"ArgsEscaped":true,"Image":"6c0c06bb29436721ce6844efc80334a2dd87c939a4fdaf5de4f539bf0e910a3a","Volumes":{},"WorkingDir":"","Entrypoint":[],"OnBuild":[],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"8.5"}},"architecture":"amd64","os":"linux","parent":"sha256:cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd","rootfs":{"type":"layers","diff_ids":["sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"]},"history":[{"created":"2021-11-03T13:57:39.79709821Z","comment":"Imported from -"},{"created":"2021-11-03T13:57:53.878769Z"},{"created":"2021-12-01T16:19:13.577147412Z","created_by":"/bin/sh -c #(nop) LABEL runtime=\"nodejs\"","comment":"FROM registry.access.redhat.com/ubi8:latest","empty_layer":true}]}
+DEBU[0058] Docker v2s2 manifest = {"schemaVersion":2,"mediaType":"application/vnd.docker.distribution.manifest.v2+json","config":{"mediaType":"application/vnd.docker.container.image.v1+json","size":4694,"digest":"sha256:11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22"},"layers":[{"mediaType":"application/vnd.docker.image.rootfs.diff.tar","size":234711040,"digest":"sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc"},{"mediaType":"application/vnd.docker.image.rootfs.diff.tar","size":20480,"digest":"sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"}]}
+DEBU[0058] Using blob info cache at /var/lib/containers/cache/blob-info-cache-v1.boltdb
+DEBU[0058] IsRunningImageAllowed for image containers-storage:
+DEBU[0058]  Using transport "containers-storage" policy section
+DEBU[0058]  Requirement 0: allowed
+DEBU[0058] Overall: allowed
+DEBU[0058] start reading config
+DEBU[0058] finished reading config
+DEBU[0058] Manifest has MIME type application/vnd.docker.distribution.manifest.v2+json, ordered candidate list [application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.v1+prettyjws, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v1+json]
+DEBU[0058] ... will first try using the original manifest unmodified
+DEBU[0058] Skipping blob sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc (already present):
+DEBU[0058] Skipping blob sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc (already present):
+DEBU[0058] No compression detected
+DEBU[0058] Using original blob without modification
+DEBU[0058] setting image creation date to 2021-12-01 16:19:13.576297229 +0000 UTC
+DEBU[0058] created new image ID "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22"
+DEBU[0058] saved image metadata "{\"signatures-sizes\":{\"sha256:4bd1c47ca8e0bb1606a2b8053519c8d4f4866843e471f0546b600499c23dd60d\":[]}}"
+DEBU[0058] set names of image "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22" to [docker.io/library/5fd9d25c6b6c50e3d1ce292abb0a364bd8c6cfe6ba60efa6fb8ebb17b7becbe5-tmp:latest]
+DEBU[0058] reassigned names [] to image "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22"
+DEBU[0058] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]@11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22"
+DEBU[0058] Pulling image 11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22 (policy: never)
+DEBU[0058] Looking up image "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22" in local containers storage
+DEBU[0058] Trying "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22" ...
+DEBU[0058] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]@11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22"
+DEBU[0058] Found image "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22" as "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22" in local containers storage
+DEBU[0058] Found image "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22" as "11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22" in local containers storage ([vfs@/var/lib/containers/storage+/var/run/containers/storage]@11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22)
+DEBU[0060] exporting opaque data as blob "sha256:11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22"
+DEBU[0060] [graphdriver] trying provided driver "vfs"
+DEBU[0060] Container ID: f9dca8b06b536bd1499df1304fbbd3ea4a8f9ae1821bc39c6f139369a4f208a1
+DEBU[0060] Parsed Step: {Env:[PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin container=oci] Command:label Args:[version 1.14] Flags:[] Attrs:map[] Message:LABEL version "1.14" Original:LABEL version="1.14"}
+DEBU[0060] COMMIT
+DEBU[0060] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]docker.io/library/6660d4645d56da9cc161f1594e0c082b606b06d03361bd943c84dd1935110115-tmp:latest"
+DEBU[0060] committing image with reference "containers-storage:[vfs@/var/lib/containers/storage+/var/run/containers/storage]docker.io/library/6660d4645d56da9cc161f1594e0c082b606b06d03361bd943c84dd1935110115-tmp:latest" is allowed by policy
+DEBU[0060] layer list: ["0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc" "0c51fae87c95e09f4dfccee417713913004c97821d72473d07faeba9c4132761" "e80fadea6c8f1bbdcac733709431c65bbb3d094c8953765c8cf6470fec440098"]
+DEBU[0060] using "/tmp/buildah616019239" to hold temporary data
+DEBU[0060] OCIv1 config = {"created":"2021-12-01T16:19:15.272086018Z","architecture":"amd64","os":"linux","config":{"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"1.14"}},"rootfs":{"type":"layers","diff_ids":["sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"]},"history":[{"created":"2021-11-03T13:57:39.79709821Z","comment":"Imported from -"},{"created":"2021-11-03T13:57:53.878769Z"},{"created":"2021-12-01T16:19:13.577147412Z","created_by":"/bin/sh -c #(nop) LABEL runtime=\"nodejs\"","comment":"FROM registry.access.redhat.com/ubi8:latest","empty_layer":true},{"created":"2021-12-01T16:19:15.272619396Z","created_by":"/bin/sh -c #(nop) LABEL version=\"1.14\"","empty_layer":true}]}
+DEBU[0060] OCIv1 manifest = {"schemaVersion":2,"config":{"mediaType":"application/vnd.oci.image.config.v1+json","digest":"sha256:19ead1120342cda05054808b957b9283aae85cd96c77d008931551ec0440703a","size":2354},"layers":[{"mediaType":"application/vnd.oci.image.layer.v1.tar","digest":"sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","size":234711040},{"mediaType":"application/vnd.oci.image.layer.v1.tar","digest":"sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc","size":20480}],"annotations":{"org.opencontainers.image.base.digest":"sha256:4bd1c47ca8e0bb1606a2b8053519c8d4f4866843e471f0546b600499c23dd60d"}}
+DEBU[0060] Docker v2s2 config = {"created":"2021-12-01T16:19:15.272086018Z","container":"f9dca8b06b536bd1499df1304fbbd3ea4a8f9ae1821bc39c6f139369a4f208a1","container_config":{"Hostname":"b20a3e8238f9","Domainname":"","User":"","AttachStdin":false,"AttachStdout":false,"AttachStderr":false,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"ArgsEscaped":true,"Image":"6c0c06bb29436721ce6844efc80334a2dd87c939a4fdaf5de4f539bf0e910a3a","Volumes":{},"WorkingDir":"","Entrypoint":[],"OnBuild":[],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"1.14"}},"config":{"Hostname":"b20a3e8238f9","Domainname":"","User":"","AttachStdin":false,"AttachStdout":false,"AttachStderr":false,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"ArgsEscaped":true,"Image":"6c0c06bb29436721ce6844efc80334a2dd87c939a4fdaf5de4f539bf0e910a3a","Volumes":{},"WorkingDir":"","Entrypoint":[],"OnBuild":[],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"1.14"}},"architecture":"amd64","os":"linux","parent":"sha256:11fc04627144a864a896caea0354fce7b9cd3ecddd17f11b8ca8955c8ac66b22","rootfs":{"type":"layers","diff_ids":["sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"]},"history":[{"created":"2021-11-03T13:57:39.79709821Z","comment":"Imported from -"},{"created":"2021-11-03T13:57:53.878769Z"},{"created":"2021-12-01T16:19:13.577147412Z","created_by":"/bin/sh -c #(nop) LABEL runtime=\"nodejs\"","comment":"FROM registry.access.redhat.com/ubi8:latest","empty_layer":true},{"created":"2021-12-01T16:19:15.272619396Z","created_by":"/bin/sh -c #(nop) LABEL version=\"1.14\"","empty_layer":true}]}
+DEBU[0060] Docker v2s2 manifest = {"schemaVersion":2,"mediaType":"application/vnd.docker.distribution.manifest.v2+json","config":{"mediaType":"application/vnd.docker.container.image.v1+json","size":4816,"digest":"sha256:8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e"},"layers":[{"mediaType":"application/vnd.docker.image.rootfs.diff.tar","size":234711040,"digest":"sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc"},{"mediaType":"application/vnd.docker.image.rootfs.diff.tar","size":20480,"digest":"sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"}]}
+DEBU[0060] Using blob info cache at /var/lib/containers/cache/blob-info-cache-v1.boltdb
+DEBU[0060] IsRunningImageAllowed for image containers-storage:
+DEBU[0060]  Using transport "containers-storage" policy section
+DEBU[0060]  Requirement 0: allowed
+DEBU[0060] Overall: allowed
+DEBU[0060] start reading config
+DEBU[0060] finished reading config
+DEBU[0060] Manifest has MIME type application/vnd.docker.distribution.manifest.v2+json, ordered candidate list [application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.v1+prettyjws, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v1+json]
+DEBU[0060] ... will first try using the original manifest unmodified
+DEBU[0060] Skipping blob sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc (already present):
+DEBU[0060] Skipping blob sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc (already present):
+DEBU[0060] No compression detected
+DEBU[0060] Using original blob without modification
+DEBU[0060] setting image creation date to 2021-12-01 16:19:15.272086018 +0000 UTC
+DEBU[0060] created new image ID "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e"
+DEBU[0060] saved image metadata "{\"signatures-sizes\":{\"sha256:628ff259927a3fbb8b57dfe2b98b1c7535104ad356b9fc922df95b361c774bd9\":[]}}"
+DEBU[0060] set names of image "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e" to [docker.io/library/6660d4645d56da9cc161f1594e0c082b606b06d03361bd943c84dd1935110115-tmp:latest]
+DEBU[0060] reassigned names [] to image "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e"
+DEBU[0060] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]@8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e"
+DEBU[0060] Pulling image 8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e (policy: never)
+DEBU[0060] Looking up image "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e" in local containers storage
+DEBU[0060] Trying "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e" ...
+DEBU[0060] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]@8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e"
+DEBU[0060] Found image "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e" as "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e" in local containers storage
+DEBU[0060] Found image "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e" as "8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e" in local containers storage ([vfs@/var/lib/containers/storage+/var/run/containers/storage]@8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e)
+DEBU[0061] exporting opaque data as blob "sha256:8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e"
+DEBU[0061] [graphdriver] trying provided driver "vfs"
+DEBU[0061] Container ID: 1df734bd298aa213fff211f52cd9a5562396f796e39f7c877283098adfdc4348
+DEBU[0061] Parsed Step: {Env:[PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin container=oci] Command:run Args:[dnf install -y --setopt=tsflags=nodocs nodejs &&       rpm -V nodejs &&        dnf -y clean all] Flags:[] Attrs:map[] Message:RUN dnf install -y --setopt=tsflags=nodocs nodejs &&     rpm -V nodejs &&        dnf -y clean all Original:RUN dnf install -y --setopt=tsflags=nodocs nodejs &&  rpm -V nodejs &&        dnf -y clean all}
+DEBU[0061] RUN imagebuilder.Run{Shell:true, Args:[]string{"dnf install -y --setopt=tsflags=nodocs nodejs && \trpm -V nodejs && \tdnf -y clean all"}, Mounts:[]string(nil)}, docker.Config{Hostname:"b20a3e8238f9", Domainname:"", User:"", Memory:0, MemorySwap:0, MemoryReservation:0, KernelMemory:0, CPUShares:0, CPUSet:"", PortSpecs:[]string(nil), ExposedPorts:map[docker.Port]struct {}{}, PublishService:"", StopSignal:"", StopTimeout:0, Env:[]string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "container=oci"}, Cmd:[]string{"/bin/bash"}, Shell:[]string{}, Healthcheck:(*docker.HealthConfig)(nil), DNS:[]string(nil), Image:"", Volumes:map[string]struct {}{}, VolumeDriver:"", WorkingDir:"", MacAddress:"", Entrypoint:[]string{}, SecurityOpts:[]string(nil), OnBuild:[]string{}, Mounts:[]docker.Mount(nil), Labels:map[string]string{"architecture":"x86_64", "build-date":"2021-11-03T13:57:13.897992", "com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com", "com.redhat.component":"ubi8-container", "com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI", "description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.", "distribution-scope":"public", "io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.", "io.k8s.display-name":"Red Hat Universal Base Image 8", "io.openshift.expose-services":"", "io.openshift.tags":"base rhel8", "maintainer":"Red Hat, Inc.", "name":"ubi8", "release":"200", "runtime":"nodejs", "summary":"Provides the latest release of Red Hat Universal Base Image 8.", "url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200", "vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56", "vcs-type":"git", "vendor":"Red Hat, Inc.", "version":"1.14"}, AttachStdin:false, AttachStdout:false, AttachStderr:false, ArgsEscaped:false, Tty:false, OpenStdin:false, StdinOnce:false, NetworkDisabled:false, VolumesFrom:""}
+DEBU[0061] using "/tmp/buildah943532123" to hold bundle data
+DEBU[0061] Resources: &define.CommonBuildOptions{AddHost:[]string(nil), CgroupParent:"", CPUPeriod:0x0, CPUQuota:0, CPUShares:0x0, CPUSetCPUs:"", CPUSetMems:"", HTTPProxy:false, Memory:0, DNSSearch:[]string(nil), DNSServers:[]string(nil), DNSOptions:[]string(nil), MemorySwap:0, LabelOpts:[]string(nil), OmitTimestamp:false, SeccompProfilePath:"", ApparmorProfile:"", ShmSize:"", Ulimit:[]string(nil), Volumes:[]string(nil), Secrets:[]string(nil), SSHSources:[]string(nil)}
+DEBU[0061] [graphdriver] trying provided driver "vfs"
+DEBU[0061] /etc/system-fips does not exist on host, not mounting FIPS mode subscription
+DEBU[0061] config = {"ociVersion":"1.0.2-dev","process":{"user":{"uid":0,"gid":0},"args":["/bin/sh","-c","dnf install -y --setopt=tsflags=nodocs nodejs \u0026\u0026 \trpm -V nodejs \u0026\u0026 \tdnf -y clean all"],"env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci","HOSTNAME=b20a3e8238f9","HOME=/root"],"cwd":"/","capabilities":{"bounding":["CAP_AUDIT_WRITE","CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_FOWNER","CAP_FSETID","CAP_KILL","CAP_MKNOD","CAP_NET_BIND_SERVICE","CAP_NET_RAW","CAP_SETFCAP","CAP_SETGID","CAP_SETPCAP","CAP_SETUID","CAP_SYS_CHROOT"],"effective":["CAP_AUDIT_WRITE","CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_FOWNER","CAP_FSETID","CAP_KILL","CAP_MKNOD","CAP_NET_BIND_SERVICE","CAP_NET_RAW","CAP_SETFCAP","CAP_SETGID","CAP_SETPCAP","CAP_SETUID","CAP_SYS_CHROOT"],"inheritable":["CAP_AUDIT_WRITE","CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_FOWNER","CAP_FSETID","CAP_KILL","CAP_MKNOD","CAP_NET_BIND_SERVICE","CAP_NET_RAW","CAP_SETFCAP","CAP_SETGID","CAP_SETPCAP","CAP_SETUID","CAP_SYS_CHROOT"],"permitted":["CAP_AUDIT_WRITE","CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_FOWNER","CAP_FSETID","CAP_KILL","CAP_MKNOD","CAP_NET_BIND_SERVICE","CAP_NET_RAW","CAP_SETFCAP","CAP_SETGID","CAP_SETPCAP","CAP_SETUID","CAP_SYS_CHROOT"],"ambient":["CAP_AUDIT_WRITE","CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_FOWNER","CAP_FSETID","CAP_KILL","CAP_MKNOD","CAP_NET_BIND_SERVICE","CAP_NET_RAW","CAP_SETFCAP","CAP_SETGID","CAP_SETPCAP","CAP_SETUID","CAP_SYS_CHROOT"]},"rlimits":[{"type":"RLIMIT_NOFILE","hard":1024,"soft":1024},{"type":"RLIMIT_NPROC","hard":4194304,"soft":4194304}]},"root":{"path":"/var/lib/containers/storage/vfs/dir/5809930d5cd31e9be6a6e604bdd9423a6706c41fe8fb7d8765ff693fe4525c1c"},"hostname":"b20a3e8238f9","mounts":[{"destination":"/sys","type":"sysfs","source":"sysfs","options":["nosuid","noexec","nodev","ro"]},{"destination":"/proc","type":"proc","source":"proc","options":["nosuid","noexec","nodev"]},{"destination":"/dev","type":"tmpfs","source":"tmpfs","options":["nosuid","strictatime","mode=755","size=65536k"]},{"destination":"/etc/hosts","type":"bind","source":"/tmp/buildah943532123/hosts","options":["rbind","nobuildahbind"]},{"destination":"/etc/resolv.conf","type":"bind","source":"/tmp/buildah943532123/resolv.conf","options":["rbind","nobuildahbind"]},{"destination":"/dev/pts","type":"devpts","source":"devpts","options":["nosuid","noexec","newinstance","ptmxmode=0666","mode=0620","gid=5"]},{"destination":"/dev/shm","type":"tmpfs","source":"shm","options":["nosuid","noexec","nodev","mode=1777"]},{"destination":"/dev/mqueue","type":"mqueue","source":"mqueue","options":["nosuid","noexec","nodev"]},{"destination":"/run/.containerenv","type":"bind","source":"/tmp/buildah943532123/run/.containerenv","options":["rbind","nobuildahbind"]},{"destination":"/sys/fs/cgroup","type":"cgroup","source":"cgroup","options":["nobuildahbind","nosuid","noexec","nodev","relatime","ro"]}],"linux":{"resources":{"devices":[{"allow":false,"access":"rwm"}]},"namespaces":[{"type":"pid"},{"type":"ipc"},{"type":"uts"},{"type":"mount"}],"maskedPaths":["/proc/acpi","/proc/kcore","/proc/keys","/proc/latency_stats","/proc/timer_list","/proc/timer_stats","/proc/sched_debug","/proc/scsi","/sys/firmware","/sys/fs/selinux","/sys/dev"],"readonlyPaths":["/proc/asound","/proc/bus","/proc/fs","/proc/irq","/proc/sys","/proc/sysrq-trigger"]}}
+DEBU[0061] Running &exec.Cmd{Path:"/proc/self/exe", Args:[]string{"buildah-chroot-runtime"}, Env:[]string{"LOGLEVEL=5"}, Dir:"/", Stdin:(*os.File)(0xc00058c3a8), Stdout:(*bytes.Buffer)(0xc0001975f0), Stderr:(*bytes.Buffer)(0xc0001975f0), ExtraFiles:[]*os.File(nil), SysProcAttr:(*syscall.SysProcAttr)(nil), Process:(*os.Process)(nil), ProcessState:(*os.ProcessState)(nil), ctx:context.Context(nil), lookPathErr:error(nil), finished:false, childFiles:[]*os.File(nil), closeAfterStart:[]io.Closer(nil), closeAfterWait:[]io.Closer(nil), goroutine:[]func() error(nil), errch:(chan error)(nil), waitDone:(chan struct {})(nil)} in &unshare.Cmd{Cmd:(*exec.Cmd)(0xc000b70420), UnshareFlags:0, UseNewuidmap:false, UidMappings:[]specs.LinuxIDMapping(nil), UseNewgidmap:false, GidMappings:[]specs.LinuxIDMapping(nil), GidMappingsEnableSetgroups:false, Setsid:false, Setpgrp:false, Ctty:(*os.File)(nil), OOMScoreAdj:(*int)(nil), Hook:(func(int) error)(nil)}
+DEBU[0085] COMMIT buildpack-buildah:1638375495183671507-1
+DEBU[0085] Looking up image "buildpack-buildah:1638375495183671507-1" in local containers storage
+DEBU[0085] Trying "buildpack-buildah:1638375495183671507-1" ...
+DEBU[0085] Trying "localhost/buildpack-buildah:1638375495183671507-1" ...
+DEBU[0085] Trying "registry.fedoraproject.org/buildpack-buildah:1638375495183671507-1" ...
+DEBU[0085] Trying "registry.access.redhat.com/buildpack-buildah:1638375495183671507-1" ...
+DEBU[0085] Trying "docker.io/library/buildpack-buildah:1638375495183671507-1" ...
+DEBU[0085] Trying "quay.io/buildpack-buildah:1638375495183671507-1" ...
+DEBU[0085] Trying "docker.io/library/buildpack-buildah:1638375495183671507-1" ...
+DEBU[0085] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]localhost/buildpack-buildah:1638375495183671507-1"
+DEBU[0085] COMMIT "containers-storage:[vfs@/var/lib/containers/storage+/var/run/containers/storage]localhost/buildpack-buildah:1638375495183671507-1"
+DEBU[0085] committing image with reference "containers-storage:[vfs@/var/lib/containers/storage+/var/run/containers/storage]localhost/buildpack-buildah:1638375495183671507-1" is allowed by policy
+DEBU[0085] layer list: ["0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc" "0c51fae87c95e09f4dfccee417713913004c97821d72473d07faeba9c4132761" "5809930d5cd31e9be6a6e604bdd9423a6706c41fe8fb7d8765ff693fe4525c1c"]
+DEBU[0085] using "/tmp/buildah741467494" to hold temporary data
+DEBU[0086] layer "5809930d5cd31e9be6a6e604bdd9423a6706c41fe8fb7d8765ff693fe4525c1c" size is 93337088 bytes, uncompressed digest sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f, possibly-compressed digest sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f
+DEBU[0086] OCIv1 config = {"created":"2021-12-01T16:19:40.317081245Z","architecture":"amd64","os":"linux","config":{"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"1.14"}},"rootfs":{"type":"layers","diff_ids":["sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc","sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"]},"history":[{"created":"2021-11-03T13:57:39.79709821Z","comment":"Imported from -"},{"created":"2021-11-03T13:57:53.878769Z"},{"created":"2021-12-01T16:19:13.577147412Z","created_by":"/bin/sh -c #(nop) LABEL runtime=\"nodejs\"","comment":"FROM registry.access.redhat.com/ubi8:latest","empty_layer":true},{"created":"2021-12-01T16:19:15.272619396Z","created_by":"/bin/sh -c #(nop) LABEL version=\"1.14\"","empty_layer":true},{"created":"2021-12-01T16:19:41.520064345Z","created_by":"/bin/sh -c dnf install -y --setopt=tsflags=nodocs nodejs \u0026\u0026 \trpm -V nodejs \u0026\u0026 \tdnf -y clean all"}]}
+DEBU[0086] OCIv1 manifest = {"schemaVersion":2,"config":{"mediaType":"application/vnd.oci.image.config.v1+json","digest":"sha256:f150816a52e1b59e0a138416028999b2916b45302908c74dc583e0f92681e95f","size":2606},"layers":[{"mediaType":"application/vnd.oci.image.layer.v1.tar","digest":"sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","size":234711040},{"mediaType":"application/vnd.oci.image.layer.v1.tar","digest":"sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc","size":20480},{"mediaType":"application/vnd.oci.image.layer.v1.tar","digest":"sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f","size":93337088}],"annotations":{"org.opencontainers.image.base.digest":"sha256:628ff259927a3fbb8b57dfe2b98b1c7535104ad356b9fc922df95b361c774bd9"}}
+DEBU[0086] Docker v2s2 config = {"created":"2021-12-01T16:19:40.317081245Z","container":"1df734bd298aa213fff211f52cd9a5562396f796e39f7c877283098adfdc4348","container_config":{"Hostname":"b20a3e8238f9","Domainname":"","User":"","AttachStdin":false,"AttachStdout":false,"AttachStderr":false,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"ArgsEscaped":true,"Image":"6c0c06bb29436721ce6844efc80334a2dd87c939a4fdaf5de4f539bf0e910a3a","Volumes":{},"WorkingDir":"","Entrypoint":[],"OnBuild":[],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"1.14"}},"config":{"Hostname":"b20a3e8238f9","Domainname":"","User":"","AttachStdin":false,"AttachStdout":false,"AttachStderr":false,"Tty":false,"OpenStdin":false,"StdinOnce":false,"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","container=oci"],"Cmd":["/bin/bash"],"ArgsEscaped":true,"Image":"6c0c06bb29436721ce6844efc80334a2dd87c939a4fdaf5de4f539bf0e910a3a","Volumes":{},"WorkingDir":"","Entrypoint":[],"OnBuild":[],"Labels":{"architecture":"x86_64","build-date":"2021-11-03T13:57:13.897992","com.redhat.build-host":"cpt-1006.osbs.prod.upshift.rdu2.redhat.com","com.redhat.component":"ubi8-container","com.redhat.license_terms":"https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI","description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","distribution-scope":"public","io.buildah.version":"1.23.1","io.k8s.description":"The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.","io.k8s.display-name":"Red Hat Universal Base Image 8","io.openshift.expose-services":"","io.openshift.tags":"base rhel8","maintainer":"Red Hat, Inc.","name":"ubi8","release":"200","runtime":"nodejs","summary":"Provides the latest release of Red Hat Universal Base Image 8.","url":"https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200","vcs-ref":"3aadd00326f3dd6cfe65ee31017ab98915fddb56","vcs-type":"git","vendor":"Red Hat, Inc.","version":"1.14"}},"architecture":"amd64","os":"linux","parent":"sha256:8ed39c75e0c15656a7aac9dc66e2c7830d5e30d6e9728f04e870ec2d3bb1f25e","rootfs":{"type":"layers","diff_ids":["sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc","sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc","sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"]},"history":[{"created":"2021-11-03T13:57:39.79709821Z","comment":"Imported from -"},{"created":"2021-11-03T13:57:53.878769Z"},{"created":"2021-12-01T16:19:13.577147412Z","created_by":"/bin/sh -c #(nop) LABEL runtime=\"nodejs\"","comment":"FROM registry.access.redhat.com/ubi8:latest","empty_layer":true},{"created":"2021-12-01T16:19:15.272619396Z","created_by":"/bin/sh -c #(nop) LABEL version=\"1.14\"","empty_layer":true},{"created":"2021-12-01T16:19:41.520064345Z","created_by":"/bin/sh -c dnf install -y --setopt=tsflags=nodocs nodejs \u0026\u0026 \trpm -V nodejs \u0026\u0026 \tdnf -y clean all"}]}
+DEBU[0086] Docker v2s2 manifest = {"schemaVersion":2,"mediaType":"application/vnd.docker.distribution.manifest.v2+json","config":{"mediaType":"application/vnd.docker.container.image.v1+json","size":5068,"digest":"sha256:85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521"},"layers":[{"mediaType":"application/vnd.docker.image.rootfs.diff.tar","size":234711040,"digest":"sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc"},{"mediaType":"application/vnd.docker.image.rootfs.diff.tar","size":20480,"digest":"sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"},{"mediaType":"application/vnd.docker.image.rootfs.diff.tar","size":93337088,"digest":"sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"}]}
+DEBU[0086] Using blob info cache at /var/lib/containers/cache/blob-info-cache-v1.boltdb
+DEBU[0086] IsRunningImageAllowed for image containers-storage:
+DEBU[0086]  Using transport "containers-storage" policy section
+DEBU[0086]  Requirement 0: allowed
+DEBU[0086] Overall: allowed
+DEBU[0086] start reading config
+DEBU[0086] finished reading config
+DEBU[0086] Manifest has MIME type application/vnd.docker.distribution.manifest.v2+json, ordered candidate list [application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.v1+prettyjws, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v1+json]
+DEBU[0086] ... will first try using the original manifest unmodified
+DEBU[0086] Skipping blob sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc (already present):
+DEBU[0086] Skipping blob sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc (already present):
+DEBU[0086] reading layer "sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"
+DEBU[0086] No compression detected
+DEBU[0086] Using original blob without modification
+DEBU[0088] Start untar layer
+DEBU[0089] Untar time: 1.011027011s
+DEBU[0089] finished reading layer "sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"
+DEBU[0089] No compression detected
+DEBU[0089] Using original blob without modification
+DEBU[0089] setting image creation date to 2021-12-01 16:19:40.317081245 +0000 UTC
+DEBU[0089] created new image ID "85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521"
+DEBU[0089] saved image metadata "{\"signatures-sizes\":{\"sha256:d2977cb5192d5045e2036855e20d2a2bc6da959a278366d91b5be0909ab03308\":[]}}"
+DEBU[0089] set names of image "85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521" to [localhost/buildpack-buildah:1638375495183671507-1]
+DEBU[0089] Looking up image "buildpack-buildah:1638375495183671507-1" in local containers storage
+DEBU[0089] Trying "buildpack-buildah:1638375495183671507-1" ...
+DEBU[0089] Trying "localhost/buildpack-buildah:1638375495183671507-1" ...
+DEBU[0089] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]@85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521"
+DEBU[0089] Found image "buildpack-buildah:1638375495183671507-1" as "localhost/buildpack-buildah:1638375495183671507-1" in local containers storage
+DEBU[0089] Found image "buildpack-buildah:1638375495183671507-1" as "localhost/buildpack-buildah:1638375495183671507-1" in local containers storage ([vfs@/var/lib/containers/storage+/var/run/containers/storage]@85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521)
+DEBU[0089] parsed reference into "[vfs@/var/lib/containers/storage+/var/run/containers/storage]localhost/buildpack-buildah:1638375495183671507-1"
+DEBU[0090] printing final image id "85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521"
+INFO[0090] Image id: 85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521
+INFO[0090] Image digest: localhost/buildpack-buildah:1638375495183671507-1@sha256:d2977cb5192d5045e2036855e20d2a2bc6da959a278366d91b5be0909ab03308
+INFO[0090] Image manifest: {
+    "schemaVersion": 2,
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "config": {
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "size": 5068,
+        "digest": "sha256:85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521"
+    },
+    "layers": [
+        {
+            "mediaType": "application/vnd.docker.image.rootfs.diff.tar",
+            "size": 234711040,
+            "digest": "sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc"
+        },
+        {
+            "mediaType": "application/vnd.docker.image.rootfs.diff.tar",
+            "size": 20480,
+            "digest": "sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"
+        },
+        {
+            "mediaType": "application/vnd.docker.image.rootfs.diff.tar",
+            "size": 93337088,
+            "digest": "sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"
+        }
+    ]
+}
+DEBU[0090] exporting opaque data as blob "sha256:85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521"
+INFO[0090] OCI Config: {
+    "created": "2021-12-01T16:19:40.317081245Z",
+    "architecture": "amd64",
+    "os": "linux",
+    "config": {
+        "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "container=oci"
+        ],
+        "Cmd": [
+            "/bin/bash"
+        ],
+        "Labels": {
+            "architecture": "x86_64",
+            "build-date": "2021-11-03T13:57:13.897992",
+            "com.redhat.build-host": "cpt-1006.osbs.prod.upshift.rdu2.redhat.com",
+            "com.redhat.component": "ubi8-container",
+            "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+            "description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "distribution-scope": "public",
+            "io.buildah.version": "1.23.1",
+            "io.k8s.description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "io.k8s.display-name": "Red Hat Universal Base Image 8",
+            "io.openshift.expose-services": "",
+            "io.openshift.tags": "base rhel8",
+            "maintainer": "Red Hat, Inc.",
+            "name": "ubi8",
+            "release": "200",
+            "runtime": "nodejs",
+            "summary": "Provides the latest release of Red Hat Universal Base Image 8.",
+            "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200",
+            "vcs-ref": "3aadd00326f3dd6cfe65ee31017ab98915fddb56",
+            "vcs-type": "git",
+            "vendor": "Red Hat, Inc.",
+            "version": "1.14"
+        }
+    },
+    "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+            "sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc",
+            "sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc",
+            "sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"
+        ]
+    },
+    "history": [
+        {
+            "created": "2021-11-03T13:57:39.79709821Z",
+            "comment": "Imported from -"
+        },
+        {
+            "created": "2021-11-03T13:57:53.878769Z"
+        },
+        {
+            "created": "2021-12-01T16:19:13.577147412Z",
+            "created_by": "/bin/sh -c #(nop) LABEL runtime=\"nodejs\"",
+            "comment": "FROM registry.access.redhat.com/ubi8:latest",
+            "empty_layer": true
+        },
+        {
+            "created": "2021-12-01T16:19:15.272619396Z",
+            "created_by": "/bin/sh -c #(nop) LABEL version=\"1.14\"",
+            "empty_layer": true
+        },
+        {
+            "created": "2021-12-01T16:19:41.520064345Z",
+            "created_by": "/bin/sh -c dnf install -y --setopt=tsflags=nodocs nodejs \u0026\u0026 \trpm -V nodejs \u0026\u0026 \tdnf -y clean all"
+        }
+    ]
+}
+INFO[0090] Layer sha: sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc
+INFO[0090] Layer sha: sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc
+INFO[0090] Layer sha: sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f
+INFO[0090] Image metadata: {"signatures-sizes":{"sha256:d2977cb5192d5045e2036855e20d2a2bc6da959a278366d91b5be0909ab03308":[]}}
+INFO[0090] Top layer: f747669093973254d1b3d1103397cc3b71e2c34da696b2d92b6081f6e431dd69
+INFO[0090] Image repositry id: 85cac84a9ac
+INFO[0090] Image built successfully :-)
+DEBU[0090] Using blob info cache at /var/lib/containers/cache/blob-info-cache-v1.boltdb
+DEBU[0090] IsRunningImageAllowed for image containers-storage:[vfs@/var/lib/containers/storage]@85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521
+DEBU[0090]  Using default policy section
+DEBU[0090]  Requirement 0: allowed
+DEBU[0090] Overall: allowed
+DEBU[0090] Manifest has MIME type application/vnd.docker.distribution.manifest.v2+json, ordered candidate list [application/vnd.oci.image.manifest.v1+json]
+DEBU[0090] exporting filesystem layer "0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc" without compression for blob "sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc"
+DEBU[0094] No compression detected
+DEBU[0094] Compressing blob on the fly
+DEBU[0096] exporting filesystem layer "0c51fae87c95e09f4dfccee417713913004c97821d72473d07faeba9c4132761" without compression for blob "sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"
+DEBU[0096] No compression detected
+DEBU[0096] Compressing blob on the fly
+DEBU[0096] exporting filesystem layer "f747669093973254d1b3d1103397cc3b71e2c34da696b2d92b6081f6e431dd69" without compression for blob "sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f"
+DEBU[0097] No compression detected
+DEBU[0097] Compressing blob on the fly
+DEBU[0098] exporting opaque data as blob "sha256:85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521"
+DEBU[0098] No compression detected
+DEBU[0098] Using original blob without modification
