@@ -8,3 +8,4 @@ out
 /kaniko/cache/
 /buildah/code/vendor/
 /buildah/vol/
+/buildah/cache/

@@ -208,7 +208,7 @@ func main() {
 		}
 	}
 
-	logrus.Infof("Image repositry id: %s",imageID[0:11])
+	logrus.Infof("Image repository id: %s",imageID[0:11])
 	logrus.Info("Image built successfully :-)")
 
 	// Let's try to copy the layers
@@ -241,7 +241,7 @@ func CopyImage(srcRef types.ImageReference, imageID string) {
 	}
 	defer policyContext.Destroy()
 
-	destURL := "oci://" + util.GetPWD() + "/" + imageID[0:11] + ":latest"
+	destURL := "oci:///cache/" + imageID[0:11] + ":latest"
 	destRef, err := alltransports.ParseImageName(destURL)
 	if err != nil {
 		logrus.Fatalf("Invalid destination name %s: %v", destURL, err)
@@ -262,6 +262,8 @@ func CopyImage(srcRef types.ImageReference, imageID string) {
 	})
 	if err != nil {
 		logrus.Fatalf("Image not copied :-(",err)
+	} else {
+		logrus.Infof("Image copied to %s",destURL)
 	}
 }
 
