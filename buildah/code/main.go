@@ -6,9 +6,9 @@ import (
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
 	"github.com/containers/image/v5/copy"
-	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/manifest"
 	"github.com/containers/image/v5/signature"
+	istorage "github.com/containers/image/v5/storage"
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/redhat-buildpacks/poc/buildah/build"
@@ -116,7 +116,11 @@ func main() {
 	ctx := context.TODO()
 
 	// TODO: Check how we could continue to use the debugger as the following code exec a sub-command and by consequence it exits
-	unshare.MaybeReexecUsingUserNamespace(false)
+	hasCapSysAdmin, err := unshare.HasCapSysAdmin()
+	if err != nil {
+		logrus.Fatalf("error checking for CAP_SYS_ADMIN: %v", err)
+	}
+	unshare.MaybeReexecUsingUserNamespace(!hasCapSysAdmin)
 
 	b := build.InitOptions()
 
@@ -159,17 +163,16 @@ func main() {
 	       NOTE: An imageSource is a service, possibly remote (= slow), to download components of a single image or a named image set (manifest list).
 	       This is primarily useful for copying images around; for examining their properties, Image (below)
 	*/
-	ref, err := parseImageSource(ctx, containerStorageName(b, imageID))
+	ref, err := istorage.Transport.NewStoreReference(store, nil, imageID)
 	if err != nil {
-		logrus.Fatalf("Error parsing the image source: %s", containerStorageName, err)
+		logrus.Fatalf("Error parsing the image source: %s", imageID, err)
 	}
 
 	// Create a FromSource object to read the image content
-	src, err := image.FromSource(ctx, nil, ref)
+	src, err := ref.NewImage(ctx, nil)
 	if err != nil {
 		logrus.Fatalf("Error getting the image", err)
 	}
-	defer ref.Close()
 	defer src.Close()
 
 	// Get the Image Manifest and log it as JSON indented string
@@ -209,25 +212,7 @@ func main() {
 	logrus.Info("Image built successfully :-)")
 
 	// Let's try to copy the layers
-	// CopyImage(imageID)
-}
-
-func parseImageSource(ctx context.Context, name string) (types.ImageSource, error) {
-	ref, err := alltransports.ParseImageName(name)
-	if err != nil {
-		return nil, err
-	}
-	return ref.NewImageSource(ctx, newSystemContext())
-}
-
-// newSystemContext returns a *types.SystemContext
-func newSystemContext() *types.SystemContext {
-	return &types.SystemContext{}
-}
-
-func containerStorageName(b *build.BuildahParameters, imageID string) string {
-	storage := fmt.Sprintf("[%s@%s+%s]", graphDriver, b.StorageRootDir, b.StorageRunRootDir)
-	return fmt.Sprintf("%s:%s%s", repoType, storage, imageID)
+	CopyImage(ref, imageID)
 }
 
 // getPolicyContext returns a *signature.PolicyContext based on opts.
@@ -247,7 +232,7 @@ func (opts *globalOptions) getPolicyContext() (*signature.PolicyContext, error) 
 	return signature.NewPolicyContext(policy)
 }
 
-func CopyImage(imageID string) {
+func CopyImage(srcRef types.ImageReference, imageID string) {
 	opts := initGlobalOptions()
 
 	policyContext, err := opts.getPolicyContext()
@@ -255,12 +240,6 @@ func CopyImage(imageID string) {
 		logrus.Fatalf("Error loading trust policy: %v", err)
 	}
 	defer policyContext.Destroy()
-
-	srcURL := "oci://" + util.GetPWD() + "/" + imageID[0:11] + ":latest"
-	srcRef, err := alltransports.ParseImageName(srcURL)
-	if err != nil {
-		logrus.Fatalf("Invalid source name %s: %v", srcURL, err)
-	}
 
 	destURL := "oci://" + util.GetPWD() + "/" + imageID[0:11] + ":latest"
 	destRef, err := alltransports.ParseImageName(destURL)
