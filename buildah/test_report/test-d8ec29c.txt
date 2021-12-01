@@ -1,0 +1,143 @@
+## Test 1
+
+d8ec29c 2021-12-01 Charles Moulliard (HEAD -> main) Moint a cache volume to check if files have been copied
+
+
+## Scenario
+
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e LOGGING_LEVEL=info \
+  -e LOGGING_FORMAT=color \
+  -e WORKSPACE_DIR=/wks \
+  -v $(pwd)/cache:/cache \
+  -v $(pwd)/wks:/wks \
+  -it buildah-app
+
+## RESULT
+
+INFO[0000] WORKSPACE DIR: /wks
+INFO[0000] GRAPH_DRIVER: vfs
+INFO[0000] STORAGE ROOT PATH: /var/lib/containers/storage
+INFO[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage
+INFO[0000] Buildah contextDir: /wks/buildah-layers/context
+INFO[0000] Buildah tempdir: /wks/buildah-layers
+INFO[0000] Dockerfile path: /wks/Dockerfile
+INFO[0092] Image id: 487c0162855ed1f3ed59e766b4c69da38c0274e95d8834a46a2fc17700a8e192
+INFO[0092] Image digest: localhost/buildpack-buildah:1638376990845237872-1@sha256:077c1f99aee36a284f41a2c6f2facd77be32e73e2c7a713b042113e741fea253
+INFO[0092] Image manifest: {
+    "schemaVersion": 2,
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "config": {
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "size": 5068,
+        "digest": "sha256:487c0162855ed1f3ed59e766b4c69da38c0274e95d8834a46a2fc17700a8e192"
+    },
+    "layers": [
+        {
+            "mediaType": "application/vnd.docker.image.rootfs.diff.tar",
+            "size": 234711040,
+            "digest": "sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc"
+        },
+        {
+            "mediaType": "application/vnd.docker.image.rootfs.diff.tar",
+            "size": 20480,
+            "digest": "sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc"
+        },
+        {
+            "mediaType": "application/vnd.docker.image.rootfs.diff.tar",
+            "size": 93337088,
+            "digest": "sha256:c6c8c91d7ad0be6cfc3c6787ead58084eb744c4c0f0fdf9d9c168119b849365e"
+        }
+    ]
+}
+INFO[0092] OCI Config: {
+    "created": "2021-12-01T16:44:38.517137267Z",
+    "architecture": "amd64",
+    "os": "linux",
+    "config": {
+        "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "container=oci"
+        ],
+        "Cmd": [
+            "/bin/bash"
+        ],
+        "Labels": {
+            "architecture": "x86_64",
+            "build-date": "2021-11-03T13:57:13.897992",
+            "com.redhat.build-host": "cpt-1006.osbs.prod.upshift.rdu2.redhat.com",
+            "com.redhat.component": "ubi8-container",
+            "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+            "description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "distribution-scope": "public",
+            "io.buildah.version": "1.23.1",
+            "io.k8s.description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "io.k8s.display-name": "Red Hat Universal Base Image 8",
+            "io.openshift.expose-services": "",
+            "io.openshift.tags": "base rhel8",
+            "maintainer": "Red Hat, Inc.",
+            "name": "ubi8",
+            "release": "200",
+            "runtime": "nodejs",
+            "summary": "Provides the latest release of Red Hat Universal Base Image 8.",
+            "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200",
+            "vcs-ref": "3aadd00326f3dd6cfe65ee31017ab98915fddb56",
+            "vcs-type": "git",
+            "vendor": "Red Hat, Inc.",
+            "version": "1.14"
+        }
+    },
+    "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+            "sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc",
+            "sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc",
+            "sha256:c6c8c91d7ad0be6cfc3c6787ead58084eb744c4c0f0fdf9d9c168119b849365e"
+        ]
+    },
+    "history": [
+        {
+            "created": "2021-11-03T13:57:39.79709821Z",
+            "comment": "Imported from -"
+        },
+        {
+            "created": "2021-11-03T13:57:53.878769Z"
+        },
+        {
+            "created": "2021-12-01T16:44:10.497758118Z",
+            "created_by": "/bin/sh -c #(nop) LABEL runtime=\"nodejs\"",
+            "comment": "FROM registry.access.redhat.com/ubi8:latest",
+            "empty_layer": true
+        },
+        {
+            "created": "2021-12-01T16:44:12.103036264Z",
+            "created_by": "/bin/sh -c #(nop) LABEL version=\"1.14\"",
+            "empty_layer": true
+        },
+        {
+            "created": "2021-12-01T16:44:39.737641893Z",
+            "created_by": "/bin/sh -c dnf install -y --setopt=tsflags=nodocs nodejs \u0026\u0026 \trpm -V nodejs \u0026\u0026 \tdnf -y clean all"
+        }
+    ]
+}
+INFO[0092] Layer sha: sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc
+INFO[0092] Layer sha: sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc
+INFO[0092] Layer sha: sha256:c6c8c91d7ad0be6cfc3c6787ead58084eb744c4c0f0fdf9d9c168119b849365e
+INFO[0092] Image metadata: {"signatures-sizes":{"sha256:077c1f99aee36a284f41a2c6f2facd77be32e73e2c7a713b042113e741fea253":[]}}
+INFO[0092] Top layer: 2982cbf9884c0c7a56baf6c62390965f81338c293373d86d28eeb55f72d20ebc
+INFO[0092] Image repository id: 487c0162855
+INFO[0092] Image built successfully :-)
+INFO[0117] Image copied to oci:///cache/fd28b6ecb28:latest
+
+ls -la ./cache/fd28b6ecb28/blobs/sha256
+total 264720
+drwxr-xr-x  7 cmoullia  staff       224 Dec  1 18:03 .
+drwxr-xr-x  3 cmoullia  staff        96 Dec  1 18:03 ..
+-rw-r--r--  1 cmoullia  staff      1876 Dec  1 18:03 22f677655049d4c2e6cd9e49ca9ed20f34ac175ef0c82f5c5eabc79031c1c29a
+-rw-r--r--  1 cmoullia  staff       664 Dec  1 18:03 4d614c43e697d0e2ed0383f06b3badd08e6edccf1643c2820a424e7c52c918e2
+-rw-r--r--  1 cmoullia  staff  85633977 Dec  1 18:03 ac56bdc7f9934acede05653e9e01e73e961c31818b522c0732ad35350bb3a82b
+-rw-r--r--  1 cmoullia  staff      2606 Dec  1 18:03 b1c9b294ef0424dccd2d082fb5e9002ae506b7d3f4132215d4f3f4296dbcfd45
+-rw-r--r--  1 cmoullia  staff  33416720 Dec  1 18:03 f9a38a40c9dfafa1795d9655acefbbfcba44546a38382ab17abc892357fb0e95
+
