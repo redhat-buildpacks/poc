@@ -60,7 +60,7 @@ type globalOptions struct {
 	tmpDir             string                  // Path to use for big temporary files
 }
 
-func init() {
+func initLog() {
 	logLevel = util.GetValFromEnVar(LOGGING_LEVEL_ENV_NAME)
 	if logLevel == "" {
 		logLevel = DefaultLevel
@@ -90,6 +90,13 @@ func init() {
 
 // TODO: To be documented
 func main() {
+	if buildah.InitReexec() {
+		return
+	}
+
+	// Configure the Logger with ENV vars or default values
+	initLog()
+
 	if _, ok := os.LookupEnv("DEBUG"); ok && (len(os.Args) <= 1 || os.Args[1] != "from-debugger") {
 		args := []string {
 			"--listen=:2345",
@@ -107,10 +114,6 @@ func main() {
 	}
 
 	ctx := context.TODO()
-
-	if buildah.InitReexec() {
-		return
-	}
 
 	// TODO: Check how we could continue to use the debugger as the following code exec a sub-command and by consequence it exits
 	unshare.MaybeReexecUsingUserNamespace(false)
