@@ -1,0 +1,5 @@
+FROM registry.access.redhat.com/ubi8
+
+RUN echo "Good" > good.txt
+
+RUN echo "Bye" > bye.txt

@@ -5,6 +5,7 @@ Table of Contents
   * [How to build and run](#how-to-build-and-run)
     * [Vagrant](#vagrant)
     * [Container](#container)
+    * [Process a different Dockerfile](#process-a-different-dockerfile)
     * [How to verify what it happened](#how-to-verify-what-it-happened)
     * [Remote debugging](#remote-debugging)
     * [Kubernetes](#kubernetes)
@@ -93,6 +94,21 @@ docker run \
   -v $(pwd)/wks:/wks \
   -v $(pwd)/cache:/cache \
   -it buildah-app > ./test_report/test-sha-f2b7739.txt
+```
+
+### Process a different Dockerfile
+
+To parse a different Dockerfile, then pass as ENV var the following key `DOCKERFILE_NAME`
+
+```bash
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e WORKSPACE_DIR=/wks \
+  -e DOCKERFILE_NAME="Dockerfile-1" \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app
 ```
 
 ### How to verify what it happened

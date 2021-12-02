@@ -127,7 +127,12 @@ func main() {
 	os.Setenv("BUILDAH_TEMP_DIR", b.TempDir)
 	logrus.Infof("Buildah tempdir: %s", b.TempDir)
 
-	dockerFileName := filepath.Join(b.WorkspaceDir, "Dockerfile")
+	dockerfileNameToParse := os.Getenv("DOCKERFILE_NAME")
+	if (dockerfileNameToParse == "") {
+		dockerfileNameToParse = "Dockerfile"
+	}
+
+	dockerFileName := filepath.Join(b.WorkspaceDir, dockerfileNameToParse)
 	logrus.Infof("Dockerfile path: %s", dockerFileName)
 
 	// storeOptions, err := storage.DefaultStoreOptions(false,0)
