@@ -82,6 +82,18 @@ docker run \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
+**NOTE**: As the content logged could be verbse if you use `debug` as logging_level, you can then send the stdout to a report file
+```bash
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e LOGGING_LEVEL=info \
+  -e LOGGING_FORMAT=color \
+  -e WORKSPACE_DIR=/wks \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app > ./test_report/test-sha-f2b7739.txt
+```
 
 ### How to verify what it happened
 

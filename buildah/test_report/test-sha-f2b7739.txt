@@ -1,0 +1,111 @@
+## Test 3
+
+f2b7739 2021-12-02 Charles Moulliard (HEAD -> main) Squash the new build image
+
+## Scenario
+
+docker run \
+>   --privileged \
+>   -e GRAPH_DRIVER=vfs \
+>   -e LOGGING_LEVEL=info \
+>   -e LOGGING_FORMAT=color \
+>   -e WORKSPACE_DIR=/wks \
+>   -v $(pwd)/wks:/wks \
+>   -v $(pwd)/cache:/cache \
+>   -it buildah-app > ./test_report/test-sha-f2b7739.txt
+
+## Result
+
+[36mINFO[0m[0000] WORKSPACE DIR: /wks
+[36mINFO[0m[0000] GRAPH_DRIVER: vfs                            
+[36mINFO[0m[0000] STORAGE ROOT PATH: /var/lib/containers/storage 
+[36mINFO[0m[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage 
+[36mINFO[0m[0000] Buildah contextDir: /wks/buildah-layers/context 
+[36mINFO[0m[0000] Buildah tempdir: /wks/buildah-layers         
+[36mINFO[0m[0000] Dockerfile path: /wks/Dockerfile             
+[36mINFO[0m[0113] Image id: 325464711e78c5f66a2e38e15e573d3b86f44ddd4397239ffd4fc5998e414a29 
+[36mINFO[0m[0113] Image digest: localhost/buildpack-buildah:1638442751852036047-1@sha256:f01bfd089ef3d5dc4172b38fda92b3bf0249908e74d3b58d170458139f0fea0b 
+[36mINFO[0m[0113] Image manifest: {
+    "schemaVersion": 2,
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "config": {
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "size": 4425,
+        "digest": "sha256:325464711e78c5f66a2e38e15e573d3b86f44ddd4397239ffd4fc5998e414a29"
+    },
+    "layers": [
+        {
+            "mediaType": "application/vnd.docker.image.rootfs.diff.tar",
+            "size": 302084096,
+            "digest": "sha256:041c515b31d9d94579677cffe33e07ecf5ea05b3a073379197cb31f287f9e930"
+        }
+    ]
+} 
+[36mINFO[0m[0113] OCI Config: {
+    "created": "2021-12-02T11:00:54.789336559Z",
+    "architecture": "amd64",
+    "os": "linux",
+    "config": {
+        "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "container=oci"
+        ],
+        "Cmd": [
+            "/bin/bash"
+        ],
+        "Labels": {
+            "architecture": "x86_64",
+            "build-date": "2021-11-03T13:57:13.897992",
+            "com.redhat.build-host": "cpt-1006.osbs.prod.upshift.rdu2.redhat.com",
+            "com.redhat.component": "ubi8-container",
+            "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+            "description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "distribution-scope": "public",
+            "io.buildah.version": "1.23.1",
+            "io.k8s.description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "io.k8s.display-name": "Red Hat Universal Base Image 8",
+            "io.openshift.expose-services": "",
+            "io.openshift.tags": "base rhel8",
+            "maintainer": "Red Hat, Inc.",
+            "name": "ubi8",
+            "release": "200",
+            "runtime": "nodejs",
+            "summary": "Provides the latest release of Red Hat Universal Base Image 8.",
+            "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.5-200",
+            "vcs-ref": "3aadd00326f3dd6cfe65ee31017ab98915fddb56",
+            "vcs-type": "git",
+            "vendor": "Red Hat, Inc.",
+            "version": "1.14"
+        }
+    },
+    "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+            "sha256:041c515b31d9d94579677cffe33e07ecf5ea05b3a073379197cb31f287f9e930"
+        ]
+    },
+    "history": [
+        {
+            "created": "2021-12-02T11:00:58.385019124Z",
+            "created_by": "/bin/sh -c dnf install -y --setopt=tsflags=nodocs nodejs \u0026\u0026 \trpm -V nodejs \u0026\u0026 \tdnf -y clean all"
+        }
+    ]
+} 
+[36mINFO[0m[0113] Layer sha: sha256:041c515b31d9d94579677cffe33e07ecf5ea05b3a073379197cb31f287f9e930 
+[36mINFO[0m[0113] Image metadata: {"signatures-sizes":{"sha256:f01bfd089ef3d5dc4172b38fda92b3bf0249908e74d3b58d170458139f0fea0b":[]}} 
+[36mINFO[0m[0113] Top layer: 041c515b31d9d94579677cffe33e07ecf5ea05b3a073379197cb31f287f9e930 
+[36mINFO[0m[0113] Image repository id: 325464711e7             
+[36mINFO[0m[0113] Image built successfully :-)                 
+[36mINFO[0m[0121] Image copied to oci:///cache/325464711e7:latest 
+
+## Cache content
+
+cache
+    325464711e7
+        blobs
+            sha256
+                9f49c645111edf22998e11ab6b4e5f9d4c6e8e48b812887f342875a7be2c95f0 -> squashed layer file: 34e01b7ef6663736bd2fd1073e811f6e6695cf4ab993f4ea3b2504da6e91a7a4
+                34e01b7ef6663736bd2fd1073e811f6e6695cf4ab993f4ea3b2504da6e91a7a4
+                fc168fbb7f58257c410e151fef0c952273acd3d95269e6649205724de3899e90
+        index.json -> digest file: 9f49c645111edf22998e11ab6b4e5f9d4c6e8e48b812887f342875a7be2c95f0
+        oci-layout
