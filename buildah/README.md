@@ -128,6 +128,19 @@ drwxr-xr-x  3 cmoullia  staff        96 Dec  1 18:03 ..
 -rw-r--r--  1 cmoullia  staff      2606 Dec  1 18:03 b1c9b294ef0424dccd2d082fb5e9002ae506b7d3f4132215d4f3f4296dbcfd45
 -rw-r--r--  1 cmoullia  staff  33416720 Dec  1 18:03 f9a38a40c9dfafa1795d9655acefbbfcba44546a38382ab17abc892357fb0e95
 ```
+The files extracted from the docker image are structured as such
+```
+image_id_sha
+  blobs
+    sha256
+      4d614c43e697d0e2ed0383f06b3badd08e6edccf1643c2820a424e7c52c918e2 // oci.image.config file containing the oci.image.layer.v1.tar+gzip digests and the oci.image.config.v1+json digest
+      22f677655049d4c2e6cd9e49ca9ed20f34ac175ef0c82f5c5eabc79031c1c29a // layer tar-gz file
+      ac56bdc7f9934acede05653e9e01e73e961c31818b522c0732ad35350bb3a82b // layer tar-gz file
+      b1c9b294ef0424dccd2d082fb5e9002ae506b7d3f4132215d4f3f4296dbcfd45 // oci.image.config.v1+json file of the new image created
+      f9a38a40c9dfafa1795d9655acefbbfcba44546a38382ab17abc892357fb0e95 // layer tar-gz file     
+  index.json // oci.image.manifest file containing the sha of oci.image.config file --> 4d614c43e697d0e2ed0383f06b3badd08e6edccf1643c2820a424e7c52c918e2
+  oci-layout
+```
 
 ### Remote debugging
 
