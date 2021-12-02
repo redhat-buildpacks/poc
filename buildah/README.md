@@ -3,10 +3,11 @@ Table of Contents
 
   * [Buildah App](#buildah-app)
   * [How to build and run](#how-to-build-and-run)
-     * [Vagrant](#vagrant)
-     * [Container](#container)
-     * [Remote debugging](#remote-debugging)
-     * [Kubernetes](#kubernetes)
+    * [Vagrant](#vagrant)
+    * [Container](#container)
+    * [How to verify what the app did](#how-to-verify-what-the-app-did)
+    * [Remote debugging](#remote-debugging)
+    * [Kubernetes](#kubernetes)
 
 ## Buildah App
 
@@ -91,6 +92,8 @@ docker run \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
+
+### How to verify what the app did
 
 Review the log and check if an image has been built and layers copied under the folder `/cache`
 using as key the id f the image 
