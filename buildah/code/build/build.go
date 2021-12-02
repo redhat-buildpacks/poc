@@ -78,6 +78,7 @@ func InitOptions() *BuildahParameters {
 		RemoveIntermediateCtrs:  true,
 		ForceRmIntermediateCtrs: true,
 		Isolation:               buildah.IsolationChroot,
+		Squash: 				 true, // TODO: Pass as parameter the bool value
 	}
 
 	// Initialize the storage

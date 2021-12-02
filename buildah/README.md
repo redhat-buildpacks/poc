@@ -65,27 +65,17 @@ drwx------.  2 root root  4096 Nov 17 16:50 bf4b432845dc71930dfcb9905d9a3de25c76
 ### Container
 
 Alternatively, build a container image using the following instructions
-
-- First, download the vendor libs to avoid that docker download them for every build
-```bash
-cd code
-go mod vendor
-cd ..
-```
-- Build the image containing `golang` and the needed `containers` libs
-```bash
-docker build -t go-containers -f Dockerfile_go_containers .
-```  
-- And now build the `buildah-app` container image
+ 
+- First build the `buildah-app` container image using this bash script
 ```bash
 ./hack/build.sh
 ```
-- Launch the `buildah-app` container
+- Launch next the `buildah-app` container using the `--privileged` parameter
 ```bash
 docker run \
   --privileged \
   -e GRAPH_DRIVER=vfs \
-  -e LOGGING_LEVEL=debug \
+  -e LOGGING_LEVEL=info \
   -e LOGGING_FORMAT=color \
   -e WORKSPACE_DIR=/wks \
   -v $(pwd)/wks:/wks \
