@@ -5,7 +5,7 @@ Table of Contents
   * [How to build and run](#how-to-build-and-run)
     * [Vagrant](#vagrant)
     * [Container](#container)
-    * [How to verify what the app did](#how-to-verify-what-the-app-did)
+    * [How to verify what it happened](#how-to-verify-what-it-happened)
     * [Remote debugging](#remote-debugging)
     * [Kubernetes](#kubernetes)
 
@@ -93,7 +93,7 @@ docker run \
   -it buildah-app
 ```
 
-### How to verify what the app did
+### How to verify what it happened
 
 Review the log and check if an image has been built and layers copied under the folder `/cache`
 using as key the id f the image 
