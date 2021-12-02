@@ -88,7 +88,40 @@ docker run \
   -e LOGGING_FORMAT=color \
   -e WORKSPACE_DIR=/wks \
   -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
   -it buildah-app
+```
+
+Review the log and check if an image has been built and layers copied under the folder `/cache`
+using as key the id f the image 
+```bash
+INFO[0090] Image id: 85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521
+INFO[0090] Image digest: localhost/buildpack-buildah:1638375495183671507-1@sha256:d2977cb5192d5045e2036855e20d2a2bc6da959a278366d91b5be0909ab03308
+INFO[0090] Image manifest: {
+...
+INFO[0090] OCI Config: {
+    "created": "2021-12-01T16:19:40.317081245Z",
+    "architecture": "amd64",
+    "os": "linux",
+...    
+INFO[0090] Layer sha: sha256:0d3f22d60daf4a2421b2239fb0e1c6ec02d3787274db8b098fb648941ea2d5dc
+INFO[0090] Layer sha: sha256:0488bd866f642b2b1b5490f5c50d628815e4e8fa1f7cae57d52c67c1e9d3e2cc
+INFO[0090] Layer sha: sha256:484159bb1f91a3a34382d43c2de5f8f95a8848947130179a0b2d44addfe3a03f
+...
+INFO[0090] Top layer: f747669093973254d1b3d1103397cc3b71e2c34da696b2d92b6081f6e431dd69
+INFO[0090] Image repositry id: 85cac84a9ac
+INFO[0090] Image built successfully :-)
+
+IMAGE_ID="85cac84a9ac"
+ls -la ./cache/$IMAGE_ID/blobs/sha256
+total 264720
+drwxr-xr-x  7 cmoullia  staff       224 Dec  1 18:03 .
+drwxr-xr-x  3 cmoullia  staff        96 Dec  1 18:03 ..
+-rw-r--r--  1 cmoullia  staff      1876 Dec  1 18:03 22f677655049d4c2e6cd9e49ca9ed20f34ac175ef0c82f5c5eabc79031c1c29a
+-rw-r--r--  1 cmoullia  staff       664 Dec  1 18:03 4d614c43e697d0e2ed0383f06b3badd08e6edccf1643c2820a424e7c52c918e2
+-rw-r--r--  1 cmoullia  staff  85633977 Dec  1 18:03 ac56bdc7f9934acede05653e9e01e73e961c31818b522c0732ad35350bb3a82b
+-rw-r--r--  1 cmoullia  staff      2606 Dec  1 18:03 b1c9b294ef0424dccd2d082fb5e9002ae506b7d3f4132215d4f3f4296dbcfd45
+-rw-r--r--  1 cmoullia  staff  33416720 Dec  1 18:03 f9a38a40c9dfafa1795d9655acefbbfcba44546a38382ab17abc892357fb0e95
 ```
 
 ### Remote debugging
