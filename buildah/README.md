@@ -96,7 +96,8 @@ docker run \
 ### How to verify what it happened
 
 Review the log and check if an image has been built and layers copied under the folder `/cache`
-using as key the id of the image. Examples of such reports are available within the [test_report](./test_report) folder (see: `test-d8ec29c.txt`):
+using as key the id of the image. Examples of such reports are available within the [test_report](./test_report) folder.
+See by example this [report](https://github.com/redhat-buildpacks/poc/blob/main/buildah/test_report/test-d8ec29c.txt):
 
 ```bash
 INFO[0090] Image id: 85cac84a9ac17b782117490e4789525badc8de9a3bf71f7abd721b623a8b3521
