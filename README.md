@@ -68,15 +68,15 @@ STORAGE="[vfs@/var/lib/containers/storage+/run/containers/storage]"
 sudo skopeo copy -q containers-storage:$STORAGE$IMAGE_ID oci:$(pwd)/$IMAGE_ID:$TAG
 
 cat $IMAGE_ID/index.json
-MANIFEST_SHA=$(cat $IMAGE_ID/index.json | jq .manifests[0].digest | cut -d: -f2 | sed 's/.$//')
+MANIFEST_SHA=$(cat $IMAGE_ID/index.json | jq '.manifests[0].digest' | cut -d: -f2 | sed 's/.$//')
 echo "MANIFEST SHA: $MANIFEST_SHA"
 cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | python -m json.tool
 
-DIGEST_SHA=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq .config.digest | cut -d: -f2 | sed 's/.$//')
+DIGEST_SHA=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq '.config.digest' | cut -d: -f2 | sed 's/.$//')
 echo "DIGEST SHA: $DIGEST_SHA"
 cat $IMAGE_ID/blobs/sha256/$DIGEST_SHA | python -m json.tool
 
-LAST_LAYER_ID=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq .layers[-1].digest | cut -d: -f2 | sed 's/.$//')
+LAST_LAYER_ID=$(cat $IMAGE_ID/blobs/sha256/$MANIFEST_SHA | jq '.layers[-1].digest' | cut -d: -f2 | sed 's/.$//')
 echo "LAST LAYER SHA: $LAST_LAYER_ID"
 echo "## Display the content of the layer containing the package added ..."
 tar -tvf $IMAGE_ID/blobs/sha256/$LAST_LAYER_ID
