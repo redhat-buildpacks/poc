@@ -6,6 +6,7 @@ import (
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
 	"github.com/containers/image/v5/copy"
+	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/manifest"
 	"github.com/containers/image/v5/signature"
 	istorage "github.com/containers/image/v5/storage"
@@ -197,19 +198,22 @@ func main() {
 	parse.JsonMarshal("OCI Config",config)
 
 	// Get the layers from the source and log the Layer SHA
-	layers := src.LayerInfos()
-	for _, info := range layers {
-		logrus.Infof("Layer sha: %s\n", info.Digest.String())
+	blobs := src.LayerInfos()
+	for _, blobInfo := range blobs {
+		logrus.Infof("Layer blobInfo sha: %s\n", blobInfo.Digest.String())
+		logrus.Infof("Layer blobInfo urls: %s\n", blobInfo.URLs)
 	}
+
 
 	images, err := store.Images()
 	if err != nil {
 		logrus.Fatalf("Error reading store of images", err)
 	}
 	for _, img := range images {
-		if img.ID == imageID {
-			logrus.Infof("Image metadata: %s", img.Metadata)
-			logrus.Infof("Top layer: %s", img.TopLayer)
+		logrus.Infof("Image metadata: %s", img.Metadata)
+		logrus.Infof("Top layer: %s", img.TopLayer)
+		for _, dig := range img.Digests {
+			logrus.Infof("Digest sha: %s", dig.String())
 		}
 	}
 
@@ -265,11 +269,51 @@ func CopyImage(srcRef types.ImageReference, imageID string) {
 		OciEncryptLayers:      nil,
 		OciEncryptConfig:      nil,
 	})
+
+
 	if err != nil {
 		logrus.Fatalf("Image not copied :-(",err)
 	} else {
 		logrus.Infof("Image copied to %s",destURL)
 	}
+
+	src, err := destRef.NewImageSource(context.TODO(),nil)
+	if err != nil {
+		logrus.Fatalf("Image source cannot be created",err)
+	}
+
+	defer func() {
+		if err := src.Close(); err != nil {
+			logrus.Fatalf("Could not close image", err)
+		}
+	}()
+
+	// TODO: Should only logged for debugging purpose
+	rawManifest, _, err := src.GetManifest(context.TODO(), nil)
+	if err != nil {
+		logrus.Fatalf("Cannot get the manifest of the image",err)
+	} else {
+		parse.JsonIndent("New image manifest",rawManifest)
+	}
+
+	img, err := image.FromUnparsedImage(context.TODO(), nil, image.UnparsedInstance(src, nil))
+	if err != nil {
+		logrus.Fatalf("Error parsing manifest for image",err)
+	}
+	// Get the layers from the source and log the Layer SHA
+	blobs := img.LayerInfos()
+	for _, blobInfo := range blobs {
+		logrus.Infof("Layer blobInfo: %s\n", blobInfo.Digest.String())
+	}
+
+	// Get the last layer from the Layers as it corresponds to our new image
+	lastLayer := blobs[len(blobs)-1]
+	sha := lastLayer.Digest.Hex()
+	logrus.Infof("Last layer: %s",sha)
+	pathTarGZipLayer := "/cache/" + imageID[0:11] + "/blobs/sha256/" + sha
+	logrus.Infof("Path to the TarGzipLayer file: %s",pathTarGZipLayer)
+
+	// TODO: Add code to extract the last layer compressed file
 }
 
 func initGlobalOptions() (*globalOptions) {
