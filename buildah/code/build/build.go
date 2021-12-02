@@ -73,12 +73,12 @@ func InitOptions() *BuildahParameters {
 		OutputFormat:            buildah.Dockerv2ImageManifest,
 		Out:                     output,
 		Err:                     output,
-		Layers:                  true,
+		Layers:                  false, // TODO: Check with containers team what the value should be and this option do
 		NoCache:                 true,
 		RemoveIntermediateCtrs:  true,
 		ForceRmIntermediateCtrs: true,
 		Isolation:               buildah.IsolationChroot,
-		Squash: 				 true, // TODO: Pass as parameter the bool value
+		Squash: 				 false,
 	}
 
 	// Initialize the storage
