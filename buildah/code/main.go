@@ -17,6 +17,7 @@ import (
 	"github.com/redhat-buildpacks/poc/buildah/parse"
 	"github.com/redhat-buildpacks/poc/buildah/util"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -33,6 +34,8 @@ const (
 	LOGGING_LEVEL_ENV_NAME     = "LOGGING_LEVEL"
 	LOGGING_FORMAT_ENV_NAME    = "LOGGING_FORMAT"
 	LOGGING_TIMESTAMP_ENV_NAME = "LOGGING_TIMESTAMP"
+	EXTRACT_LAYERS_ENV_NAME    = "EXTRACT_LAYERS"
+	FILES_TO_SEARCH_ENV_NAME   = "FILES_TO_SEARCH"
 
 	DefaultLevel        = "info"
 	DefaultLogTimestamp = false
@@ -46,6 +49,8 @@ var (
 	logLevel      string   // Log level (trace, debug, info, warn, error, fatal, panic)
 	logFormat     string   // Log format (text, color, json)
 	logTimestamp  bool     // Timestamp in log output
+	extractLayers bool     // Extract layers from tgz files. Default is false
+	filesToSearch []string // List of files to search to check if they exist under the updated FS
 )
 
 type globalOptions struct {
@@ -89,6 +94,27 @@ func initLog() {
 	}
 }
 
+func initGlobalVar() {
+	extractLayersStr := util.GetValFromEnVar(EXTRACT_LAYERS_ENV_NAME)
+	if extractLayersStr == "" {
+		logrus.Info("The layered tzg files will NOT be extracted to the home dir ...")
+		extractLayers = false
+	} else {
+		v, err := strconv.ParseBool(extractLayersStr)
+		if err != nil {
+			logrus.Fatalf("extractLayers bool assignment failed %s", err)
+		} else {
+			extractLayers = v
+			logrus.Info("The layered tar-GZip files will be extracted to the home dir ...")
+		}
+	}
+
+	filesToSearchStr := util.GetValFromEnVar(FILES_TO_SEARCH_ENV_NAME)
+	if filesToSearchStr != "" {
+		filesToSearch = strings.Split(filesToSearchStr, ",")
+	}
+}
+
 // TODO: To be documented
 func main() {
 	if buildah.InitReexec() {
@@ -97,6 +123,9 @@ func main() {
 
 	// Configure the Logger with ENV vars or default values
 	initLog()
+
+	// Init the variables of the application using the ENV var
+	initGlobalVar()
 
 	if _, ok := os.LookupEnv("DEBUG"); ok && (len(os.Args) <= 1 || os.Args[1] != "from-debugger") {
 		args := []string {
@@ -124,6 +153,7 @@ func main() {
 	unshare.MaybeReexecUsingUserNamespace(!hasCapSysAdmin)
 
 	b := build.InitOptions()
+	b.ExtractLayers = extractLayers
 
 	os.Setenv("BUILDAH_TEMP_DIR", b.TempDir)
 	logrus.Infof("Buildah tempdir: %s", b.TempDir)
@@ -191,7 +221,16 @@ func main() {
 	}
 
 	// Get the path of the new layer file created under OCI:///
-	GetPathLayerTarGZIpfile(ociImageReference, imageID)
+	pathOCINewLayer := GetPathLayerTarGZIpfile(ociImageReference, imageID)
+
+	if(b.ExtractLayers) {
+		b.ExtractTGZFile(pathOCINewLayer)
+	}
+
+	// Check if files exist
+	if (len(filesToSearch) > 0) {
+		util.FindFiles(filesToSearch)
+	}
 }
 
 // getPolicyContext returns a *signature.PolicyContext based on opts.
@@ -282,7 +321,7 @@ func CopyImage(srcRef types.ImageReference, imageID string) (types.ImageReferenc
 	return destRef, nil
 }
 
-func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) {
+func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) string {
 	src, err := destRef.NewImageSource(context.TODO(),nil)
 	if err != nil {
 		logrus.Fatalf("Image source cannot be created",err)
@@ -313,6 +352,8 @@ func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) {
 	logrus.Infof("Last layer: %s",sha)
 	pathTarGZipLayer := "/cache/" + imageID[0:11] + "/blobs/sha256/" + sha
 	logrus.Infof("Path to the TarGzipLayer file: %s",pathTarGZipLayer)
+
+	return pathTarGZipLayer
 }
 
 func initGlobalOptions() (*globalOptions) {

@@ -6,6 +6,8 @@ Table of Contents
     * [Vagrant](#vagrant)
     * [Container](#container)
     * [Process a different Dockerfile](#process-a-different-dockerfile)
+    * [Extract the new layer created](#extract-the-new-layer-created)
+    * [Verify if files exist](#verify-if-files-exist)
     * [How to verify what it happened](#how-to-verify-what-it-happened)
     * [Remote debugging](#remote-debugging)
     * [Kubernetes](#kubernetes)
@@ -106,6 +108,39 @@ docker run \
   -e GRAPH_DRIVER=vfs \
   -e WORKSPACE_DIR=/wks \
   -e DOCKERFILE_NAME="Dockerfile-1" \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app
+```
+
+### Extract the new layer created
+
+To parse a different Dockerfile, then pass as ENV var the following key `DOCKERFILE_NAME`
+
+```bash
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e WORKSPACE_DIR=/wks \
+  -e DOCKERFILE_NAME="Dockerfile-1" \
+  -e EXTRACT_LAYERS=true \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app
+```
+
+### Verify if files exist
+
+To check/control if files added from the layers exist under the root filesystem, please use the following `ENV` var `FILES_TO_SEARCH`
+
+```bash
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e WORKSPACE_DIR=/wks \
+  -e DOCKERFILE_NAME="Dockerfile-1" \
+  -e EXTRACT_LAYERS=true \
+  -e FILES_TO_SEARCH="good.txt" \
   -v $(pwd)/wks:/wks \
   -v $(pwd)/cache:/cache \
   -it buildah-app
