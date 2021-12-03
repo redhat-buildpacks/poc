@@ -183,11 +183,15 @@ func main() {
 	logrus.Infof("Image repository id: %s",imageID[0:11])
 	logrus.Info("Image built successfully :-)")
 
-	// Let's try to copy the layers
-	CopyImage(ref, imageID)
+	// Let's try to copy the layers from the local storage to the local Cache volume as
+	// OCI folder
+	ociImageReference, err := CopyImage(ref, imageID)
+	if (err != nil) {
+		logrus.Fatalf("Image not copied from local storage to OCI path.",err)
+	}
 
 	// Get the path of the new layer file created under OCI:///
-	GetPathLayerTarGZIpfile(ref, imageID)
+	GetPathLayerTarGZIpfile(ociImageReference, imageID)
 }
 
 // getPolicyContext returns a *signature.PolicyContext based on opts.
@@ -240,19 +244,19 @@ func ShowOCIContent(ref types.ImageReference) {
 	parse.JsonMarshal("OCI Config",config)
 }
 
-func CopyImage(srcRef types.ImageReference, imageID string) {
+func CopyImage(srcRef types.ImageReference, imageID string) (types.ImageReference, error) {
 	opts := initGlobalOptions()
 
 	policyContext, err := opts.getPolicyContext()
 	if err != nil {
-		logrus.Fatalf("Error loading trust policy: %v", err)
+		return nil, err
 	}
 	defer policyContext.Destroy()
 
 	destURL := "oci:///cache/" + imageID[0:11] + ":latest"
 	destRef, err := alltransports.ParseImageName(destURL)
 	if err != nil {
-		logrus.Fatalf("Invalid destination name %s: %v", destURL, err)
+		return nil, err
 	}
 
 	// copy image
@@ -271,10 +275,11 @@ func CopyImage(srcRef types.ImageReference, imageID string) {
 
 
 	if err != nil {
-		logrus.Fatalf("Image not copied :-(",err)
+		return nil, err
 	} else {
 		logrus.Infof("Image copied to %s",destURL)
 	}
+	return destRef, nil
 }
 
 func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) {
