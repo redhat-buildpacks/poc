@@ -259,7 +259,7 @@ You can change some ENV vars within the `./k8s/manifest.yml` file as by example:
       - name: EXTRACT_LAYERS
         value: "true"
       - name:  FILES_TO_SEARCH
-        value: "good.txt"
+        value: "good.txt,bye.txt"
 ```
 
 To delete the pod, do
