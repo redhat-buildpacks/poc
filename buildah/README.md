@@ -216,20 +216,33 @@ docker run \
 
 ### Kubernetes
 
-To test the POC on a kubernetes cluster, build a container image from your local machine (containing the poc bud executable).
+To run the `buildah-app` as a kubernetes pod, some additional steps are required and described hereafter.
 
+Create a k8s cluster having access to your local workspace and cache folders. This step can be achieved easily using kind
+and the following [bash script](scripts/kind-reg.sh) where the following config can be defined to access your local folders
+```yaml
+  extraMounts:
+    - hostPath: $(pwd)/wks        # PLEASE CHANGE ME
+      containerPath: /workspace
+    - hostPath: $(pwd)/cache      # PLEASE CHANGE ME
+      containerPath: /cache
+```
+Next, create the cluster using the command `./k8s/kind-reg.sh`
+
+When the cluster is up and running like the registry, we can push the image:
 ```bash
-cd buildah
-REPO=quay.io/snowdrop/buildah-poc
-docker build -t $REPO -f Dockerfile_bud .
-docker push $REPO
+REGISTRY="127.0.0.1:5000"
+docker tag buildah-app $REGISTRY/buildah-app
+docker push $REGISTRY/buildah-app
 ```
 
-Next, deploy the poc on kubernetes to verify if buildah can build the image
+and then deploy the buildah pod
 ```bash
-kubectl apply -f k8s/manifest.yml
+kubectl apply -f k8s/manifest.yml 
 ```
-To clean up the project on kubernetes
+**NOTE**: Check the content of the pod initContainers logs using [k9s](https://k9scli.io/) or another tool :-)
+
+To delete the pod, do
 ```bash
 kubectl delete -f k8s/manifest.yml
 ```

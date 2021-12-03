@@ -32,19 +32,7 @@ imagePullSecrets:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: buildah-poc-cache
-  namespace: buildpack
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 500m
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: buildah-layers
+  name: cache
   namespace: buildpack
 spec:
   accessModes:
@@ -60,108 +48,59 @@ metadata:
   namespace: buildpack
 spec:
   volumes:
-    - name: cache-dir
-      persistentVolumeClaim:
-        claimName: buildah-poc-cache
-    - name: layers
-      persistentVolumeClaim:
-        claimName: buildah-layers
+    - name: cache
+      hostPath:
+        path: /cache
+    - name: workspace
+      hostPath:
+        path: /workspace
   initContainers:
-    - name: check-before
-      image: registry.access.redhat.com/ubi8:8.4-211
-      env:
-        - name: LAYERS_DIR
-          value: "/layers"
-      command: [ "/bin/sh","-c" ]
-      args:
-        - |
-          echo "## Check if Node exists within the /layers volume"
-          echo "## $LAYERS_DIR/usr/bin/node -v"
-          $LAYERS_DIR/usr/bin/node -v || true
-      volumeMounts:
-        - name: layers
-          mountPath: /layers
     - name: buildah-bud
-      image: registry.local:5000/snowdrop/buildah-poc
+      image: localhost:5000/buildah-app
       env:
-        - name: LAYERS_DIR
-          value: "/layers"
-        - name: WORKSPACE_DIR
-          value: "/workspace"
-        - name: GRAPH_DRIVER
-          value: "vfs"
-        - name: STORAGE_DIR
-          value: "/var/lib/containers/storage"
+      - name: LOGGING_FORMAT
+        value: "color"
+      - name: LOGGING_LEVEL
+        value: "debug"
+      - name: WORKSPACE_DIR
+        value: "/workspace"
+      - name: DOCKERFILE_NAME
+        value: Dockerfile
+      - name: EXTRACT_LAYERS
+        value: "true"
       workingDir: /workspace
-      command: [ "/bin/sh","-c" ]
-      args:
-        - |
-          set -e
-
-          echo "## Execute the go application able to "
-          echo "## - Read a dockerfile"
-          echo "## - Create locally an image"
-          echo "## - Extract the layers created to the volume mounted /layers"
-          echo "## Remark: Only one layer is extracted for the moment"
-          echo "## A layer corresponds to a command executed such as RUN"
-          cp /Dockerfile $WORKSPACE_DIR/
-          cp /undocker.py $WORKSPACE_DIR/
-          /bud
-
-          echo "## Check if the image has been created locally"
-          buildah --storage-driver $GRAPH_DRIVER images
-
-          REPO="localhost/buildpack-buildah"
-          echo "## Extract the layer to $LAYERS_DIR ##"
-          echo "## Get the tag of the image created ##"
-          buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}'
-          TAG=$(buildah --storage-driver $GRAPH_DRIVER images | awk -v r="$REPO" '$0 ~ r {print $2;}')
-
-          echo "## Docker save ..."
-          alias docker=podman
-          STORAGE_DRIVER=$GRAPH_DRIVER
-          echo "## Storage driver to be used for podman: $STORAGE_DRIVER"
-
-          echo "## Get the last layer ID for the image $REPO:$TAG ##"
-          LAST_LAYER_ID=$(docker --storage-driver $STORAGE_DRIVER save $REPO:$TAG | ./undocker.py --layers | tail -n1)
-          echo "Layer ID: $LAST_LAYER_ID"
-
-          echo "## Extract the content of the layer: $LAST_LAYER_ID ##"
-          docker --storage-driver $STORAGE_DRIVER save $REPO:$TAG | ./undocker.py -ivd -o $LAYERS_DIR -l $LAST_LAYER_ID
+      command: [ "/buildah-app" ]
       volumeMounts:
-        - name: cache-dir
-          mountPath: /workspace
-        - name: layers
-          mountPath: /layers
+      - name: cache
+        mountPath: /cache
+      - name: workspace
+        mountPath: /workspace
       imagePullPolicy: Always
       securityContext:
         privileged: true
-    - name: check-after
-      image: registry.access.redhat.com/ubi8:8.4-211 # busybox:1.28
-      env:
-        - name: LAYERS_DIR
-          value: "/layers"
-      command: [ "/bin/sh","-c" ]
-      args:
-        - |
-          echo "## Check if Node exists and version"
-          echo "## Append $LAYERS_DIR/usr/bin to the path"
-          export PATH="$LAYERS_DIR/usr/bin:$PATH"
-          echo $PATH
-          type -a node
-          node -v
-      volumeMounts:
-        - name: layers
-          mountPath: /layers
-      securityContext:
-        privileged: true
+    # - name: check-after
+    #   image: registry.access.redhat.com/ubi8:8.4-211 # busybox:1.28
+    #   env:
+    #     - name: LAYERS_DIR
+    #       value: "/layers"
+    #   command: [ "/bin/sh","-c" ]
+    #   args:
+    #     - |
+    #       echo "## Check if Node exists and version"
+    #       echo "## Append $LAYERS_DIR/usr/bin to the path"
+    #       export PATH="$LAYERS_DIR/usr/bin:$PATH"
+    #       echo $PATH
+    #       type -a node
+    #       node -v
+    #   volumeMounts:
+    #     - name: layers
+    #       mountPath: /layers
+    #   securityContext:
+    #     privileged: true
   containers:
     - name: completion
       image: busybox:1.28
       command: [ "/bin/sh","-c","--" ]
       args: [ "while true; do sleep 30; done;" ]
-      volumeMounts:
-      - name: layers
-        mountPath: /layers
   serviceAccountName: buildpack
 
