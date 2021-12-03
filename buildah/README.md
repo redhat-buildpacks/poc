@@ -245,7 +245,7 @@ kubectl apply -f k8s/manifest.yml
 You can change some ENV vars within the `./k8s/manifest.yml` file as by example:
 ```yaml
   initContainers:
-    - name: buildah-bud
+    - name: bud
       image: localhost:5000/buildah-app
       env:
       - name: LOGGING_FORMAT
@@ -261,7 +261,40 @@ You can change some ENV vars within the `./k8s/manifest.yml` file as by example:
       - name:  FILES_TO_SEARCH
         value: "good.txt,bye.txt"
 ```
-
+Grab the log using the following command:
+```bash
+kubectl -n buildpack logs buildah-poc -c bud -f
+DEBU[0000] EXTRACT_LAYERS=true                          
+INFO[0000] The layered tar-GZip files will be extracted to the home dir ... 
+DEBU[0000] FILES_TO_SEARCH=good.txt                     
+INFO[0000] WORKSPACE DIR: /workspace                    
+INFO[0000] GRAPH_DRIVER: vfs                            
+INFO[0000] STORAGE ROOT PATH: /var/lib/containers/storage 
+INFO[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage 
+INFO[0000] Buildah contextDir: /workspace/buildah-layers/context 
+INFO[0000] Buildah tempdir: /workspace/buildah-layers   
+INFO[0000] Dockerfile path: /workspace/Dockerfile-1     
+DEBU[0000] [graphdriver] trying provided driver "vfs"   
+DEBU[0000] base for stage 0: "registry.access.redhat.com/ubi8" 
+DEBU[0000] FROM "registry.access.redhat.com/ubi8"       
+DEBU[0000] Pulling image registry.access.redhat.com/ubi8 (policy: missing) 
+DEBU[0000] Looking up image "registry.access.redhat.com/ubi8" in local containers storage 
+DEBU[0000] Trying "registry.access.redhat.com/ubi8" ... 
+...
+INFO[0081] Path to the TarGzipLayer file: /cache/a5ed42f31c8/blobs/sha256/1e93239f5c738e9379fa97ed61a5d06518f8fbc66468d3a2031f576502470786 
+INFO[0081] Tgz file to be extracted /cache/a5ed42f31c8/blobs/sha256/1e93239f5c738e9379fa97ed61a5d06518f8fbc66468d3a2031f576502470786 
+INFO[0081] Opening the gzip file: /cache/a5ed42f31c8/blobs/sha256/1e93239f5c738e9379fa97ed61a5d06518f8fbc66468d3a2031f576502470786 
+INFO[0081] Creating a gzip reader for: /cache/a5ed42f31c8/blobs/sha256/1e93239f5c738e9379fa97ed61a5d06518f8fbc66468d3a2031f576502470786 
+DEBU[0081] File to be extracted: /bye.txt               
+DEBU[0081] File extracted to /bye.txt                   
+DEBU[0081] File to be extracted: /good.txt              
+DEBU[0081] File extracted to /good.txt                  
+DEBU[0081] File to be extracted: /run                   
+DEBU[0081] File to be extracted: /run/.containerenv     
+DEBU[0081] File extracted to /run/.containerenv         
+INFO[0082] File found: /good.txt                        
+INFO[0082] File found: /var/lib/containers/storage/vfs/dir/3ccf3a2b8f677b5e6d7daf0556c0f29bae2111bb2fe93d426a3b14e565cc8e6d/good.txt 
+```
 To delete the pod, do
 ```bash
 kubectl delete -f k8s/manifest.yml

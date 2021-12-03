@@ -55,7 +55,7 @@ spec:
       hostPath:
         path: /workspace
   initContainers:
-    - name: buildah-bud
+    - name: bud
       image: localhost:5000/buildah-app
       env:
       - name: LOGGING_FORMAT
