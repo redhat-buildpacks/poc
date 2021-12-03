@@ -29,7 +29,7 @@ var (
 	logLevel      string   // Log level (trace, debug, info, warn, error, fatal, panic)
 	logFormat     string   // Log format (text, color, json)
 	logTimestamp  bool     // Timestamp in log output
-	extractLayers bool     // Extract layers from tgz files. Defaul is false
+	extractLayers bool     // Extract layers from tgz files. Default is false
 	filesToSearch []string // List of files to search to check if they exist under the updated FS
 )
 
