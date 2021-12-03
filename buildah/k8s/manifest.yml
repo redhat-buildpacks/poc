@@ -65,9 +65,11 @@ spec:
       - name: WORKSPACE_DIR
         value: "/workspace"
       - name: DOCKERFILE_NAME
-        value: Dockerfile
+        value: Dockerfile-1
       - name: EXTRACT_LAYERS
         value: "true"
+      - name:  FILES_TO_SEARCH
+        value: "good.txt"
       workingDir: /workspace
       command: [ "/buildah-app" ]
       volumeMounts:
