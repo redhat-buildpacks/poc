@@ -242,6 +242,26 @@ kubectl apply -f k8s/manifest.yml
 ```
 **NOTE**: Check the content of the pod initContainers logs using [k9s](https://k9scli.io/) or another tool :-)
 
+You can change some ENV vars within the `./k8s/manifest.yml` file as by example:
+```yaml
+  initContainers:
+    - name: buildah-bud
+      image: localhost:5000/buildah-app
+      env:
+      - name: LOGGING_FORMAT
+        value: "color"
+      - name: LOGGING_LEVEL
+        value: "debug"
+      - name: WORKSPACE_DIR
+        value: "/workspace"
+      - name: DOCKERFILE_NAME
+        value: Dockerfile-1
+      - name: EXTRACT_LAYERS
+        value: "true"
+      - name:  FILES_TO_SEARCH
+        value: "good.txt"
+```
+
 To delete the pod, do
 ```bash
 kubectl delete -f k8s/manifest.yml
