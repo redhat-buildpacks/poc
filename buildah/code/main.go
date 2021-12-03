@@ -174,54 +174,20 @@ func main() {
 		logrus.Fatalf("Error parsing the image source: %s", imageID, err)
 	}
 
-	// Create a FromSource object to read the image content
-	src, err := ref.NewImage(ctx, nil)
-	if err != nil {
-		logrus.Fatalf("Error getting the image", err)
-	}
-	defer src.Close()
+	// Show the content of the Image MANIFEST stored under the local storage
+	ShowRawManifestContent(ref)
 
-	// Get the Image Manifest and log it as JSON indented string
-	// See spec: https://docs.docker.com/registry/spec/manifest-v2-2/#image-manifest
-	rawManifest, _, err := src.Manifest(ctx)
-	if err != nil {
-		logrus.Fatalf("Error while getting the raw manifest", err)
-	}
-	parse.JsonIndent("Image manifest",rawManifest)
-
-	// Get the OCIConfig configuration as per OCI v1 image-spec.
-	// Log it as JSON indented string
-	config, err := src.OCIConfig(ctx)
-	if err != nil {
-		logrus.Fatalf("Error parsing OCI Config", err)
-	}
-	parse.JsonMarshal("OCI Config",config)
-
-	// Get the layers from the source and log the Layer SHA
-	blobs := src.LayerInfos()
-	for _, blobInfo := range blobs {
-		logrus.Infof("Layer blobInfo sha: %s\n", blobInfo.Digest.String())
-		logrus.Infof("Layer blobInfo urls: %s\n", blobInfo.URLs)
-	}
-
-
-	images, err := store.Images()
-	if err != nil {
-		logrus.Fatalf("Error reading store of images", err)
-	}
-	for _, img := range images {
-		logrus.Infof("Image metadata: %s", img.Metadata)
-		logrus.Infof("Top layer: %s", img.TopLayer)
-		for _, dig := range img.Digests {
-			logrus.Infof("Digest sha: %s", dig.String())
-		}
-	}
+	// Show the OCI content of the Image
+	//ShowOCIContent(ref)
 
 	logrus.Infof("Image repository id: %s",imageID[0:11])
 	logrus.Info("Image built successfully :-)")
 
 	// Let's try to copy the layers
 	CopyImage(ref, imageID)
+
+	// Get the path of the new layer file created under OCI:///
+	GetPathLayerTarGZIpfile(ref, imageID)
 }
 
 // getPolicyContext returns a *signature.PolicyContext based on opts.
@@ -239,6 +205,39 @@ func (opts *globalOptions) getPolicyContext() (*signature.PolicyContext, error) 
 		return nil, err
 	}
 	return signature.NewPolicyContext(policy)
+}
+
+func ShowRawManifestContent(ref types.ImageReference) {
+	// Create a FromSource object to read the image content
+	src, err := ref.NewImage(context.TODO(), nil)
+	if err != nil {
+		logrus.Fatalf("Error getting the image", err)
+	}
+	defer src.Close()
+
+	// Get the Image Manifest and log it as JSON indented string
+	// See spec: https://docs.docker.com/registry/spec/manifest-v2-2/#image-manifest
+	rawManifest, _, err := src.Manifest(context.TODO())
+	if err != nil {
+		logrus.Fatalf("Error while getting the raw manifest", err)
+	}
+	parse.JsonIndent("Image manifest",rawManifest)
+}
+
+func ShowOCIContent(ref types.ImageReference) {
+	// Create a FromSource object to read the image content
+	src, err := ref.NewImage(context.TODO(), nil)
+	if err != nil {
+		logrus.Fatalf("Error getting the image", err)
+	}
+	defer src.Close()
+	// Get the OCIConfig configuration as per OCI v1 image-spec.
+	// Log it as JSON indented string
+	config, err := src.OCIConfig(context.TODO())
+	if err != nil {
+		logrus.Fatalf("Error parsing OCI Config", err)
+	}
+	parse.JsonMarshal("OCI Config",config)
 }
 
 func CopyImage(srcRef types.ImageReference, imageID string) {
@@ -276,7 +275,9 @@ func CopyImage(srcRef types.ImageReference, imageID string) {
 	} else {
 		logrus.Infof("Image copied to %s",destURL)
 	}
+}
 
+func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) {
 	src, err := destRef.NewImageSource(context.TODO(),nil)
 	if err != nil {
 		logrus.Fatalf("Image source cannot be created",err)
@@ -289,12 +290,7 @@ func CopyImage(srcRef types.ImageReference, imageID string) {
 	}()
 
 	// TODO: Should only logged for debugging purpose
-	rawManifest, _, err := src.GetManifest(context.TODO(), nil)
-	if err != nil {
-		logrus.Fatalf("Cannot get the manifest of the image",err)
-	} else {
-		parse.JsonIndent("New image manifest",rawManifest)
-	}
+	ShowRawManifestContent(destRef)
 
 	img, err := image.FromUnparsedImage(context.TODO(), nil, image.UnparsedInstance(src, nil))
 	if err != nil {
@@ -312,8 +308,6 @@ func CopyImage(srcRef types.ImageReference, imageID string) {
 	logrus.Infof("Last layer: %s",sha)
 	pathTarGZipLayer := "/cache/" + imageID[0:11] + "/blobs/sha256/" + sha
 	logrus.Infof("Path to the TarGzipLayer file: %s",pathTarGZipLayer)
-
-	// TODO: Add code to extract the last layer compressed file
 }
 
 func initGlobalOptions() (*globalOptions) {
