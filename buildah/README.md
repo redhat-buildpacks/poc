@@ -107,6 +107,7 @@ docker run \
   --privileged \
   -e GRAPH_DRIVER=vfs \
   -e WORKSPACE_DIR=/wks \
+  -e LOGGING_LEVEL=debug \
   -e DOCKERFILE_NAME="Dockerfile-1" \
   -v $(pwd)/wks:/wks \
   -v $(pwd)/cache:/cache \
@@ -124,6 +125,8 @@ docker run \
   -e WORKSPACE_DIR=/wks \
   -e DOCKERFILE_NAME="Dockerfile-1" \
   -e EXTRACT_LAYERS=true \
+  -e FILES_TO_SEARCH="good.txt" \
+  -e LOGGING_LEVEL=debug \
   -v $(pwd)/wks:/wks \
   -v $(pwd)/cache:/cache \
   -it buildah-app
