@@ -1,0 +1,101 @@
+## Test 4
+
+984b4eb - 2021-12-03 Charles Moulliard (HEAD -> main, origin/main) Support to extract files and search about them
+
+## Scenario
+
+./hack/build.sh
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e WORKSPACE_DIR=/wks \
+  -e DOCKERFILE_NAME="Dockerfile-1" \
+  -e EXTRACT_LAYERS=true \
+  -e FILES_TO_SEARCH="good.txt" \
+  -e LOGGING_LEVEL=info \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app >> ./test_report/test-sha-984b4eb.txt
+
+## Report
+
+time="2021-12-06T13:37:09Z" level=debug msg="EXTRACT_LAYERS=true"
+time="2021-12-06T13:37:09Z" level=info msg="The layered tar-GZip files will be extracted to the home dir ..."
+time="2021-12-06T13:37:09Z" level=debug msg="FILES_TO_SEARCH=good.txt"
+time="2021-12-06T13:37:09Z" level=info msg="WORKSPACE DIR: /wks"
+time="2021-12-06T13:37:09Z" level=info msg="GRAPH_DRIVER: vfs"
+time="2021-12-06T13:37:09Z" level=info msg="STORAGE ROOT PATH: /var/lib/containers/storage"
+time="2021-12-06T13:37:09Z" level=info msg="STORAGE RUN ROOT PATH: /var/run/containers/storage"
+time="2021-12-06T13:37:09Z" level=info msg="Buildah contextDir: /wks/buildah-layers/context"
+time="2021-12-06T13:37:09Z" level=info msg="Buildah tempdir: /wks/buildah-layers"
+time="2021-12-06T13:37:09Z" level=info msg="Dockerfile path: /wks/Dockerfile-1"
+time="2021-12-06T13:37:09Z" level=debug msg="[graphdriver] trying provided driver \"vfs\""
+time="2021-12-06T13:37:09Z" level=debug msg="base for stage 0: \"registry.access.redhat.com/ubi8\""
+time="2021-12-06T13:37:09Z" level=debug msg="FROM \"registry.access.redhat.com/ubi8\""
+time="2021-12-06T13:37:09Z" level=debug msg="Pulling image registry.access.redhat.com/ubi8 (policy: missing)"
+time="2021-12-06T13:37:09Z" level=debug msg="Looking up image \"registry.access.redhat.com/ubi8\" in local containers storage"
+time="2021-12-06T13:37:09Z" level=debug msg="Trying \"registry.access.redhat.com/ubi8\" ..."
+time="2021-12-06T13:37:09Z" level=debug msg="Trying \"registry.access.redhat.com/ubi8:latest\" ..."
+time="2021-12-06T13:37:09Z" level=debug msg="Trying \"registry.access.redhat.com/ubi8:latest\" ..."
+time="2021-12-06T13:37:09Z" level=debug msg="Loading registries configuration \"/etc/containers/registries.conf\""
+time="2021-12-06T13:37:09Z" level=debug msg="Loading registries configuration \"/etc/containers/registries.conf.d/000-shortnames.conf\""
+time="2021-12-06T13:37:09Z" level=debug msg="Attempting to pull candidate registry.access.redhat.com/ubi8:latest for registry.access.redhat.com/ubi8"
+time="2021-12-06T13:37:09Z" level=debug msg="parsed reference into \"[vfs@/var/lib/containers/storage+/var/run/containers/storage]registry.access.redhat.com/ubi8:latest\""
+time="2021-12-06T13:37:09Z" level=debug msg="Copying source image //registry.access.redhat.com/ubi8:latest to destination image [vfs@/var/lib/containers/storage+/var/run/containers/storage]registry.access.redhat.com/ubi8:latest"
+time="2021-12-06T13:37:09Z" level=debug msg="Trying to access \"registry.access.redhat.com/ubi8:latest\""
+time="2021-12-06T13:37:09Z" level=debug msg="No credentials for registry.access.redhat.com found"
+time="2021-12-06T13:37:09Z" level=debug msg="Using registries.d directory /etc/containers/registries.d for sigstore configuration"
+time="2021-12-06T13:37:09Z" level=debug msg=" No signature storage configuration found for registry.access.redhat.com/ubi8:latest, using built-in default file:///var/lib/containers/sigstore"
+time="2021-12-06T13:37:09Z" level=debug msg="Looking for TLS certificates and private keys in /etc/docker/certs.d/registry.access.redhat.com"
+time="2021-12-06T13:37:09Z" level=debug msg="GET https://registry.access.redhat.com/v2/"
+time="2021-12-06T13:37:09Z" level=debug msg="Ping https://registry.access.redhat.com/v2/ status 200"
+time="2021-12-06T13:37:09Z" level=debug msg="GET https://registry.access.redhat.com/v2/ubi8/manifests/latest"
+time="2021-12-06T13:37:10Z" level=debug msg="Content-Type from manifest GET is \"application/vnd.docker.distribution.manifest.list.v2+json\""
+time="2021-12-06T13:37:10Z" level=debug msg="Using blob info cache at /var/lib/containers/cache/blob-info-cache-v1.boltdb"
+time="2021-12-06T13:37:10Z" level=debug msg="Source is a manifest list; copying (only) instance sha256:8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede for current system"
+time="2021-12-06T13:37:10Z" level=debug msg="GET https://registry.access.redhat.com/v2/ubi8/manifests/sha256:8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede"
+time="2021-12-06T13:37:10Z" level=debug msg="Content-Type from manifest GET is \"application/vnd.docker.distribution.manifest.v2+json\""
+time="2021-12-06T13:37:10Z" level=debug msg="IsRunningImageAllowed for image docker:registry.access.redhat.com/ubi8:latest"
+time="2021-12-06T13:37:10Z" level=debug msg=" Using default policy section"
+time="2021-12-06T13:37:10Z" level=debug msg=" Requirement 0: allowed"
+time="2021-12-06T13:37:10Z" level=debug msg="Overall: allowed"
+time="2021-12-06T13:37:10Z" level=debug msg="Downloading /v2/ubi8/blobs/sha256:cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd"
+time="2021-12-06T13:37:10Z" level=debug msg="GET https://registry.access.redhat.com/v2/ubi8/blobs/sha256:cc0656847854310306093b3dc1a7d9e7fc06399da46853e0c921cd5ec1906bfd"
+time="2021-12-06T13:37:10Z" level=debug msg="Reading /var/lib/containers/sigstore/ubi8@sha256=8ee9d7bbcfc19d383f9044316a5c5fbcbe2df6be3c97f6c7a5422527b29bdede/signature-1"
+time="2021-12-06T13:37:10Z" level=debug msg="Manifest has MIME type application/vnd.docker.distribution.manifest.v2+json, ordered candidate list [application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.v1+prettyjws, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v1+json]"
+time="2021-12-06T13:37:10Z" level=debug msg="... will first try using the original manifest unmodified"
+time="2021-12-06T13:37:10Z" level=debug msg="Failed to retrieve partial blob: blob type not supported for partial retrieval"
+time="2021-12-06T13:37:10Z" level=debug msg="Downloading /v2/ubi8/blobs/sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f"
+time="2021-12-06T13:37:10Z" level=debug msg="GET https://registry.access.redhat.com/v2/ubi8/blobs/sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f"
+time="2021-12-06T13:37:10Z" level=debug msg="Failed to retrieve partial blob: blob type not supported for partial retrieval"
+time="2021-12-06T13:37:10Z" level=debug msg="Downloading /v2/ubi8/blobs/sha256:63f9f4c31162a6a5dacd999a0dc65007e15b2ca6b2d9360a1234c27de12e7f38"
+time="2021-12-06T13:37:10Z" level=debug msg="GET https://registry.access.redhat.com/v2/ubi8/blobs/sha256:63f9f4c31162a6a5dacd999a0dc65007e15b2ca6b2d9360a1234c27de12e7f38"
+time="2021-12-06T13:37:11Z" level=debug msg="Detected compression format gzip"
+time="2021-12-06T13:37:11Z" level=debug msg="Using original blob without modification"
+time="2021-12-06T13:37:11Z" level=debug msg="Detected compression format gzip"
+time="2021-12-06T13:37:11Z" level=debug msg="Using original blob without modification"
+^Ctime="2021-12-06T13:38:35Z" level=info msg="The layered tar-GZip files will be extracted to the home dir ..."
+time="2021-12-06T13:38:35Z" level=info msg="WORKSPACE DIR: /wks"
+time="2021-12-06T13:38:35Z" level=info msg="GRAPH_DRIVER: vfs"
+time="2021-12-06T13:38:35Z" level=info msg="STORAGE ROOT PATH: /var/lib/containers/storage"
+time="2021-12-06T13:38:35Z" level=info msg="STORAGE RUN ROOT PATH: /var/run/containers/storage"
+time="2021-12-06T13:38:35Z" level=info msg="Buildah contextDir: /wks/buildah-layers/context"
+time="2021-12-06T13:38:35Z" level=info msg="Buildah tempdir: /wks/buildah-layers"
+time="2021-12-06T13:38:35Z" level=info msg="Dockerfile path: /wks/Dockerfile-1"
+time="2021-12-06T13:40:01Z" level=info msg="Image id: a9fdbbc239a6bf30c39af46496e71e19858ebddf41df031642a6795e7e323401"
+time="2021-12-06T13:40:01Z" level=info msg="Image digest: localhost/buildpack-buildah:1638797915193258188-1@sha256:a31c84aa649f17ab10609df07919ce84607b8555e0ea3453a141b48e0e099ca9"
+time="2021-12-06T13:40:01Z" level=info msg="Image repository id: a9fdbbc239a"
+time="2021-12-06T13:40:01Z" level=info msg="Image built successfully :-)"
+time="2021-12-06T13:40:08Z" level=info msg="Image copied to oci:///cache/a9fdbbc239a:latest"
+time="2021-12-06T13:40:08Z" level=info msg="Image manifest: {\n    \"schemaVersion\": 2,\n    \"config\": {\n        \"mediaType\": \"application/vnd.oci.image.config.v1+json\",\n        \"digest\": \"sha256:553f8875c2bf8d98a19cb98349713e10228b33d1a56b64a5c0aff9c2dc15a69a\",\n        \"size\": 2383\n    },\n    \"layers\": [\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:ac56bdc7f9934acede05653e9e01e73e961c31818b522c0732ad35350bb3a82b\",\n            \"size\": 85633977\n        },\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:22f677655049d4c2e6cd9e49ca9ed20f34ac175ef0c82f5c5eabc79031c1c29a\",\n            \"size\": 1876\n        },\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:4c02578f819d85c0e8285dab246bbf568f701fb8ad6cb8c995f7d2098e499501\",\n            \"size\": 217\n        }\n    ]\n}\n"
+time="2021-12-06T13:40:08Z" level=info msg="Layer blobInfo: sha256:ac56bdc7f9934acede05653e9e01e73e961c31818b522c0732ad35350bb3a82b\n"
+time="2021-12-06T13:40:08Z" level=info msg="Layer blobInfo: sha256:22f677655049d4c2e6cd9e49ca9ed20f34ac175ef0c82f5c5eabc79031c1c29a\n"
+time="2021-12-06T13:40:08Z" level=info msg="Layer blobInfo: sha256:4c02578f819d85c0e8285dab246bbf568f701fb8ad6cb8c995f7d2098e499501\n"
+time="2021-12-06T13:40:08Z" level=info msg="Last layer: 4c02578f819d85c0e8285dab246bbf568f701fb8ad6cb8c995f7d2098e499501"
+time="2021-12-06T13:40:08Z" level=info msg="Path to the TarGzipLayer file: /cache/a9fdbbc239a/blobs/sha256/4c02578f819d85c0e8285dab246bbf568f701fb8ad6cb8c995f7d2098e499501"
+time="2021-12-06T13:40:08Z" level=info msg="Tgz file to be extracted /cache/a9fdbbc239a/blobs/sha256/4c02578f819d85c0e8285dab246bbf568f701fb8ad6cb8c995f7d2098e499501"
+time="2021-12-06T13:40:08Z" level=info msg="Opening the gzip file: /cache/a9fdbbc239a/blobs/sha256/4c02578f819d85c0e8285dab246bbf568f701fb8ad6cb8c995f7d2098e499501"
+time="2021-12-06T13:40:08Z" level=info msg="Creating a gzip reader for: /cache/a9fdbbc239a/blobs/sha256/4c02578f819d85c0e8285dab246bbf568f701fb8ad6cb8c995f7d2098e499501"
+time="2021-12-06T13:40:08Z" level=info msg="File found: /good.txt"
+time="2021-12-06T13:40:08Z" level=info msg="File found: /var/lib/containers/storage/vfs/dir/16b6a7b530e9527973f99d845bdb00e0317c777bbfebe10b5e9cbfe4a0fdd6bf/good.txt"
+time="2021-12-06T13:40:08Z" level=info msg="Time elapsed: 1m33.693522748s"

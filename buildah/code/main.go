@@ -176,6 +176,9 @@ func main() {
 		logrus.Fatal("error creating buildah storage !", err)
 	}
 
+	// Launch a timer to measure the time needed to parse/copy/extract
+	start := time.Now()
+
 	/* Parse the content of the Dockerfile to execute the different commands: FROM, RUN, ...
 	   Return the:
 	   - imageID: id of the new image created. String of 64 chars.
@@ -205,7 +208,7 @@ func main() {
 	}
 
 	// Show the content of the Image MANIFEST stored under the local storage
-	ShowRawManifestContent(ref)
+	// ShowRawManifestContent(ref)
 
 	// Show the OCI content of the Image
 	//ShowOCIContent(ref)
@@ -231,6 +234,9 @@ func main() {
 	if (len(filesToSearch) > 0) {
 		util.FindFiles(filesToSearch)
 	}
+
+	// Time elapsed is ...
+	logrus.Infof("Time elapsed: %s",time.Since(start))
 }
 
 // getPolicyContext returns a *signature.PolicyContext based on opts.
