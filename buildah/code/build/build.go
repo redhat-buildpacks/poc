@@ -55,8 +55,9 @@ func InitOptions() *BuildahParameters {
 	logrus.Infof("STORAGE RUN ROOT PATH: %s", b.StorageRunRootDir)
 
 	var transientMounts []string
-	b.TempDir = filepath.Join(b.WorkspaceDir, "buildah-layers") // ioutil.TempDir(b.WorkspaceDir, "buildah-poc-")
-	contextDir := filepath.Join(b.TempDir, "context")
+
+	// Buildah context should be the same as the dir where Dockerfiles, files to be copied are located
+	contextDir := b.WorkspaceDir
 	logrus.Infof("Buildah contextDir: %s", contextDir)
 
 	dateStamp := fmt.Sprintf("%d", time.Now().UnixNano())

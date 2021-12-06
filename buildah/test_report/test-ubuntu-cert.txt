@@ -1,88 +1,56 @@
-time="2021-12-06T16:08:24Z" level=debug msg="EXTRACT_LAYERS=true"
-time="2021-12-06T16:08:24Z" level=info msg="The layered tar-GZip files will be extracted to the home dir ..."
-time="2021-12-06T16:08:24Z" level=debug msg="FILES_TO_SEARCH=server.crt"
-time="2021-12-06T16:08:24Z" level=info msg="WORKSPACE DIR: /wks"
-time="2021-12-06T16:08:24Z" level=info msg="GRAPH_DRIVER: vfs"
-time="2021-12-06T16:08:24Z" level=info msg="STORAGE ROOT PATH: /var/lib/containers/storage"
-time="2021-12-06T16:08:24Z" level=info msg="STORAGE RUN ROOT PATH: /var/run/containers/storage"
-time="2021-12-06T16:08:24Z" level=info msg="Buildah contextDir: /wks/buildah-layers/context"
-time="2021-12-06T16:08:24Z" level=info msg="Buildah tempdir: /wks/buildah-layers"
-time="2021-12-06T16:08:24Z" level=info msg="Dockerfile path: /wks/ubuntu-cert"
-time="2021-12-06T16:08:24Z" level=debug msg="[graphdriver] trying provided driver \"vfs\""
-time="2021-12-06T16:08:24Z" level=debug msg="base for stage 0: \"ubuntu:bionic\""
-time="2021-12-06T16:08:24Z" level=debug msg="FROM \"ubuntu:bionic\""
-time="2021-12-06T16:08:24Z" level=debug msg="Pulling image ubuntu:bionic (policy: missing)"
-time="2021-12-06T16:08:24Z" level=debug msg="Looking up image \"ubuntu:bionic\" in local containers storage"
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Loading registries configuration \"/etc/containers/registries.conf\""
-time="2021-12-06T16:08:24Z" level=debug msg="Loading registries configuration \"/etc/containers/registries.conf.d/000-shortnames.conf\""
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"docker.io/library/ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"localhost/ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"registry.fedoraproject.org/ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"registry.access.redhat.com/ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"docker.io/library/ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"quay.io/ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Trying \"docker.io/library/ubuntu:bionic\" ..."
-time="2021-12-06T16:08:24Z" level=debug msg="Attempting to pull candidate docker.io/library/ubuntu:bionic for ubuntu:bionic"
-time="2021-12-06T16:08:24Z" level=debug msg="parsed reference into \"[vfs@/var/lib/containers/storage+/var/run/containers/storage]docker.io/library/ubuntu:bionic\""
-time="2021-12-06T16:08:24Z" level=debug msg="Resolved \"ubuntu\" as an alias (/etc/containers/registries.conf.d/000-shortnames.conf)"
-time="2021-12-06T16:08:24Z" level=debug msg="Copying source image //ubuntu:bionic to destination image [vfs@/var/lib/containers/storage+/var/run/containers/storage]docker.io/library/ubuntu:bionic"
-time="2021-12-06T16:08:24Z" level=debug msg="Trying to access \"docker.io/library/ubuntu:bionic\""
-time="2021-12-06T16:08:24Z" level=debug msg="No credentials for docker.io found"
-time="2021-12-06T16:08:24Z" level=debug msg="Using registries.d directory /etc/containers/registries.d for sigstore configuration"
-time="2021-12-06T16:08:24Z" level=debug msg=" No signature storage configuration found for docker.io/library/ubuntu:bionic, using built-in default file:///var/lib/containers/sigstore"
-time="2021-12-06T16:08:24Z" level=debug msg="Looking for TLS certificates and private keys in /etc/docker/certs.d/docker.io"
-time="2021-12-06T16:08:24Z" level=debug msg="GET https://registry-1.docker.io/v2/"
-time="2021-12-06T16:08:25Z" level=debug msg="Ping https://registry-1.docker.io/v2/ status 401"
-time="2021-12-06T16:08:25Z" level=debug msg="GET https://auth.docker.io/token?scope=repository%3Alibrary%2Fubuntu%3Apull&service=registry.docker.io"
-time="2021-12-06T16:08:25Z" level=debug msg="GET https://registry-1.docker.io/v2/library/ubuntu/manifests/bionic"
-time="2021-12-06T16:08:25Z" level=debug msg="Content-Type from manifest GET is \"application/vnd.docker.distribution.manifest.list.v2+json\""
-time="2021-12-06T16:08:25Z" level=debug msg="Using blob info cache at /var/lib/containers/cache/blob-info-cache-v1.boltdb"
-time="2021-12-06T16:08:25Z" level=debug msg="Source is a manifest list; copying (only) instance sha256:fc0d6af5ab38dab33aa53643c4c4b312c6cd1f044c1a2229b2743b252b9689fc for current system"
-time="2021-12-06T16:08:25Z" level=debug msg="GET https://registry-1.docker.io/v2/library/ubuntu/manifests/sha256:fc0d6af5ab38dab33aa53643c4c4b312c6cd1f044c1a2229b2743b252b9689fc"
-time="2021-12-06T16:08:26Z" level=debug msg="Content-Type from manifest GET is \"application/vnd.docker.distribution.manifest.v2+json\""
-time="2021-12-06T16:08:26Z" level=debug msg="IsRunningImageAllowed for image docker:docker.io/library/ubuntu:bionic"
-time="2021-12-06T16:08:26Z" level=debug msg=" Using default policy section"
-time="2021-12-06T16:08:26Z" level=debug msg=" Requirement 0: allowed"
-time="2021-12-06T16:08:26Z" level=debug msg="Overall: allowed"
-time="2021-12-06T16:08:26Z" level=debug msg="Downloading /v2/library/ubuntu/blobs/sha256:5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972"
-time="2021-12-06T16:08:26Z" level=debug msg="GET https://registry-1.docker.io/v2/library/ubuntu/blobs/sha256:5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972"
-time="2021-12-06T16:08:26Z" level=debug msg="Reading /var/lib/containers/sigstore/library/ubuntu@sha256=fc0d6af5ab38dab33aa53643c4c4b312c6cd1f044c1a2229b2743b252b9689fc/signature-1"
-time="2021-12-06T16:08:26Z" level=debug msg="Manifest has MIME type application/vnd.docker.distribution.manifest.v2+json, ordered candidate list [application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.v1+prettyjws, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v1+json]"
-time="2021-12-06T16:08:26Z" level=debug msg="... will first try using the original manifest unmodified"
-time="2021-12-06T16:08:26Z" level=debug msg="Failed to retrieve partial blob: blob type not supported for partial retrieval"
-time="2021-12-06T16:08:26Z" level=debug msg="Downloading /v2/library/ubuntu/blobs/sha256:284055322776031bac33723839acb0db2d063a525ba4fa1fd268a831c7553b26"
-time="2021-12-06T16:08:26Z" level=debug msg="GET https://registry-1.docker.io/v2/library/ubuntu/blobs/sha256:284055322776031bac33723839acb0db2d063a525ba4fa1fd268a831c7553b26"
-time="2021-12-06T16:08:27Z" level=debug msg="Detected compression format gzip"
-time="2021-12-06T16:08:27Z" level=debug msg="Using original blob without modification"
-time="2021-12-06T16:08:54Z" level=debug msg="Start untar layer"
-time="2021-12-06T16:08:55Z" level=debug msg="Untar time: 1.128929581s"
-time="2021-12-06T16:08:55Z" level=debug msg="No compression detected"
-time="2021-12-06T16:08:55Z" level=debug msg="Using original blob without modification"
-time="2021-12-06T16:08:55Z" level=debug msg="setting image creation date to 2021-10-01 02:23:24.179667784 +0000 UTC"
-time="2021-12-06T16:08:55Z" level=debug msg="created new image ID \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\""
-time="2021-12-06T16:08:55Z" level=debug msg="saved image metadata \"{\\\"signatures-sizes\\\":{\\\"sha256:fc0d6af5ab38dab33aa53643c4c4b312c6cd1f044c1a2229b2743b252b9689fc\\\":[]}}\""
-time="2021-12-06T16:08:55Z" level=debug msg="set names of image \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\" to [docker.io/library/ubuntu:bionic]"
-time="2021-12-06T16:08:55Z" level=debug msg="Pulled candidate docker.io/library/ubuntu:bionic successfully"
-time="2021-12-06T16:08:55Z" level=debug msg="Looking up image \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\" in local containers storage"
-time="2021-12-06T16:08:55Z" level=debug msg="Trying \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\" ..."
-time="2021-12-06T16:08:55Z" level=debug msg="parsed reference into \"[vfs@/var/lib/containers/storage+/var/run/containers/storage]@5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\""
-time="2021-12-06T16:08:55Z" level=debug msg="Found image \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\" as \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\" in local containers storage"
-time="2021-12-06T16:08:55Z" level=debug msg="Found image \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\" as \"5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\" in local containers storage ([vfs@/var/lib/containers/storage+/var/run/containers/storage]@5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972)"
-time="2021-12-06T16:08:56Z" level=debug msg="exporting opaque data as blob \"sha256:5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972\""
-time="2021-12-06T16:08:56Z" level=debug msg="[graphdriver] trying provided driver \"vfs\""
-time="2021-12-06T16:08:56Z" level=debug msg="Container ID: 1131898ec1587d6040d031b66356428d648943ce0c7f93d3638e50dde0a7ac50"
-time="2021-12-06T16:08:56Z" level=debug msg="Parsed Step: {Env:[PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin] Command:run Args:[apt-get update && apt-get install -y ca-certificates] Flags:[] Attrs:map[] Message:RUN apt-get update && apt-get install -y ca-certificates Original:RUN apt-get update && apt-get install -y ca-certificates}"
-time="2021-12-06T16:08:56Z" level=debug msg="RUN imagebuilder.Run{Shell:true, Args:[]string{\"apt-get update && apt-get install -y ca-certificates\"}, Mounts:[]string(nil)}, docker.Config{Hostname:\"7ea134268b4b\", Domainname:\"\", User:\"\", Memory:0, MemorySwap:0, MemoryReservation:0, KernelMemory:0, CPUShares:0, CPUSet:\"\", PortSpecs:[]string(nil), ExposedPorts:map[docker.Port]struct {}{}, PublishService:\"\", StopSignal:\"\", StopTimeout:0, Env:[]string{\"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"}, Cmd:[]string{\"bash\"}, Shell:[]string{}, Healthcheck:(*docker.HealthConfig)(nil), DNS:[]string(nil), Image:\"\", Volumes:map[string]struct {}{}, VolumeDriver:\"\", WorkingDir:\"\", MacAddress:\"\", Entrypoint:[]string{}, SecurityOpts:[]string(nil), OnBuild:[]string{}, Mounts:[]docker.Mount(nil), Labels:map[string]string{}, AttachStdin:false, AttachStdout:false, AttachStderr:false, ArgsEscaped:false, Tty:false, OpenStdin:false, StdinOnce:false, NetworkDisabled:false, VolumesFrom:\"\"}"
-time="2021-12-06T16:08:56Z" level=debug msg="using \"/tmp/buildah015158172\" to hold bundle data"
-time="2021-12-06T16:08:56Z" level=debug msg="Resources: &define.CommonBuildOptions{AddHost:[]string(nil), CgroupParent:\"\", CPUPeriod:0x0, CPUQuota:0, CPUShares:0x0, CPUSetCPUs:\"\", CPUSetMems:\"\", HTTPProxy:false, Memory:0, DNSSearch:[]string(nil), DNSServers:[]string(nil), DNSOptions:[]string(nil), MemorySwap:0, LabelOpts:[]string(nil), OmitTimestamp:false, SeccompProfilePath:\"\", ApparmorProfile:\"\", ShmSize:\"\", Ulimit:[]string(nil), Volumes:[]string(nil), Secrets:[]string(nil), SSHSources:[]string(nil)}"
-time="2021-12-06T16:08:56Z" level=debug msg="[graphdriver] trying provided driver \"vfs\""
-time="2021-12-06T16:08:56Z" level=debug msg="/etc/system-fips does not exist on host, not mounting FIPS mode subscription"
-time="2021-12-06T16:08:56Z" level=debug msg="config = {\"ociVersion\":\"1.0.2-dev\",\"process\":{\"user\":{\"uid\":0,\"gid\":0},\"args\":[\"/bin/sh\",\"-c\",\"apt-get update \\u0026\\u0026 apt-get install -y ca-certificates\"],\"env\":[\"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\"HOSTNAME=7ea134268b4b\",\"HOME=/root\"],\"cwd\":\"/\",\"capabilities\":{\"bounding\":[\"CAP_AUDIT_WRITE\",\"CAP_CHOWN\",\"CAP_DAC_OVERRIDE\",\"CAP_FOWNER\",\"CAP_FSETID\",\"CAP_KILL\",\"CAP_MKNOD\",\"CAP_NET_BIND_SERVICE\",\"CAP_NET_RAW\",\"CAP_SETFCAP\",\"CAP_SETGID\",\"CAP_SETPCAP\",\"CAP_SETUID\",\"CAP_SYS_CHROOT\"],\"effective\":[\"CAP_AUDIT_WRITE\",\"CAP_CHOWN\",\"CAP_DAC_OVERRIDE\",\"CAP_FOWNER\",\"CAP_FSETID\",\"CAP_KILL\",\"CAP_MKNOD\",\"CAP_NET_BIND_SERVICE\",\"CAP_NET_RAW\",\"CAP_SETFCAP\",\"CAP_SETGID\",\"CAP_SETPCAP\",\"CAP_SETUID\",\"CAP_SYS_CHROOT\"],\"inheritable\":[\"CAP_AUDIT_WRITE\",\"CAP_CHOWN\",\"CAP_DAC_OVERRIDE\",\"CAP_FOWNER\",\"CAP_FSETID\",\"CAP_KILL\",\"CAP_MKNOD\",\"CAP_NET_BIND_SERVICE\",\"CAP_NET_RAW\",\"CAP_SETFCAP\",\"CAP_SETGID\",\"CAP_SETPCAP\",\"CAP_SETUID\",\"CAP_SYS_CHROOT\"],\"permitted\":[\"CAP_AUDIT_WRITE\",\"CAP_CHOWN\",\"CAP_DAC_OVERRIDE\",\"CAP_FOWNER\",\"CAP_FSETID\",\"CAP_KILL\",\"CAP_MKNOD\",\"CAP_NET_BIND_SERVICE\",\"CAP_NET_RAW\",\"CAP_SETFCAP\",\"CAP_SETGID\",\"CAP_SETPCAP\",\"CAP_SETUID\",\"CAP_SYS_CHROOT\"],\"ambient\":[\"CAP_AUDIT_WRITE\",\"CAP_CHOWN\",\"CAP_DAC_OVERRIDE\",\"CAP_FOWNER\",\"CAP_FSETID\",\"CAP_KILL\",\"CAP_MKNOD\",\"CAP_NET_BIND_SERVICE\",\"CAP_NET_RAW\",\"CAP_SETFCAP\",\"CAP_SETGID\",\"CAP_SETPCAP\",\"CAP_SETUID\",\"CAP_SYS_CHROOT\"]},\"rlimits\":[{\"type\":\"RLIMIT_NOFILE\",\"hard\":1024,\"soft\":1024},{\"type\":\"RLIMIT_NPROC\",\"hard\":4194304,\"soft\":4194304}]},\"root\":{\"path\":\"/var/lib/containers/storage/vfs/dir/ca3ec6cacf8482cbe1321de5c6815317949393f6043a79d523a5ca9e74942fd8\"},\"hostname\":\"7ea134268b4b\",\"mounts\":[{\"destination\":\"/sys\",\"type\":\"sysfs\",\"source\":\"sysfs\",\"options\":[\"nosuid\",\"noexec\",\"nodev\",\"ro\"]},{\"destination\":\"/proc\",\"type\":\"proc\",\"source\":\"proc\",\"options\":[\"nosuid\",\"noexec\",\"nodev\"]},{\"destination\":\"/dev\",\"type\":\"tmpfs\",\"source\":\"tmpfs\",\"options\":[\"nosuid\",\"strictatime\",\"mode=755\",\"size=65536k\"]},{\"destination\":\"/etc/hosts\",\"type\":\"bind\",\"source\":\"/tmp/buildah015158172/hosts\",\"options\":[\"rbind\",\"nobuildahbind\"]},{\"destination\":\"/etc/resolv.conf\",\"type\":\"bind\",\"source\":\"/tmp/buildah015158172/resolv.conf\",\"options\":[\"rbind\",\"nobuildahbind\"]},{\"destination\":\"/dev/pts\",\"type\":\"devpts\",\"source\":\"devpts\",\"options\":[\"nosuid\",\"noexec\",\"newinstance\",\"ptmxmode=0666\",\"mode=0620\",\"gid=5\"]},{\"destination\":\"/dev/shm\",\"type\":\"tmpfs\",\"source\":\"shm\",\"options\":[\"nosuid\",\"noexec\",\"nodev\",\"mode=1777\"]},{\"destination\":\"/dev/mqueue\",\"type\":\"mqueue\",\"source\":\"mqueue\",\"options\":[\"nosuid\",\"noexec\",\"nodev\"]},{\"destination\":\"/run/.containerenv\",\"type\":\"bind\",\"source\":\"/tmp/buildah015158172/run/.containerenv\",\"options\":[\"rbind\",\"nobuildahbind\"]},{\"destination\":\"/sys/fs/cgroup\",\"type\":\"cgroup\",\"source\":\"cgroup\",\"options\":[\"nobuildahbind\",\"nosuid\",\"noexec\",\"nodev\",\"relatime\",\"ro\"]}],\"linux\":{\"resources\":{\"devices\":[{\"allow\":false,\"access\":\"rwm\"}]},\"namespaces\":[{\"type\":\"pid\"},{\"type\":\"ipc\"},{\"type\":\"uts\"},{\"type\":\"mount\"}],\"maskedPaths\":[\"/proc/acpi\",\"/proc/kcore\",\"/proc/keys\",\"/proc/latency_stats\",\"/proc/timer_list\",\"/proc/timer_stats\",\"/proc/sched_debug\",\"/proc/scsi\",\"/sys/firmware\",\"/sys/fs/selinux\",\"/sys/dev\"],\"readonlyPaths\":[\"/proc/asound\",\"/proc/bus\",\"/proc/fs\",\"/proc/irq\",\"/proc/sys\",\"/proc/sysrq-trigger\"]}}"
-time="2021-12-06T16:08:56Z" level=debug msg="Running &exec.Cmd{Path:\"/proc/self/exe\", Args:[]string{\"buildah-chroot-runtime\"}, Env:[]string{\"LOGLEVEL=5\"}, Dir:\"/\", Stdin:(*os.File)(0xc001e68520), Stdout:(*bytes.Buffer)(0xc00011d590), Stderr:(*bytes.Buffer)(0xc00011d590), ExtraFiles:[]*os.File(nil), SysProcAttr:(*syscall.SysProcAttr)(nil), Process:(*os.Process)(nil), ProcessState:(*os.ProcessState)(nil), ctx:context.Context(nil), lookPathErr:error(nil), finished:false, childFiles:[]*os.File(nil), closeAfterStart:[]io.Closer(nil), closeAfterWait:[]io.Closer(nil), goroutine:[]func() error(nil), errch:(chan error)(nil), waitDone:(chan struct {})(nil)} in &unshare.Cmd{Cmd:(*exec.Cmd)(0xc0005b7340), UnshareFlags:0, UseNewuidmap:false, UidMappings:[]specs.LinuxIDMapping(nil), UseNewgidmap:false, GidMappings:[]specs.LinuxIDMapping(nil), GidMappingsEnableSetgroups:false, Setsid:false, Setpgrp:false, Ctty:(*os.File)(nil), OOMScoreAdj:(*int)(nil), Hook:(func(int) error)(nil)}"
-time="2021-12-06T16:09:27Z" level=debug msg="Parsed Step: {Env:[PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin] Command:copy Args:[server.crt /usr/local/share/ca-certificates] Flags:[] Attrs:map[] Message:COPY server.crt /usr/local/share/ca-certificates Original:COPY server.crt /usr/local/share/ca-certificates}"
-time="2021-12-06T16:09:27Z" level=debug msg="COPY []string(nil), imagebuilder.Copy{FromFS:false, From:\"\", Src:[]string{\"server.crt\"}, Dest:\"/usr/local/share/ca-certificates\", Download:false, Chown:\"\", Chmod:\"\"}"
-time="2021-12-06T16:09:27Z" level=debug msg="[graphdriver] trying provided driver \"vfs\""
-time="2021-12-06T16:09:27Z" level=debug msg="error changing to intended-new-root directory \"/wks/buildah-layers/context\": chdir /wks/buildah-layers/context: no such file or directory"
-time="2021-12-06T16:09:27Z" level=debug msg="error building at step {Env:[PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin] Command:copy Args:[server.crt /usr/local/share/ca-certificates] Flags:[] Attrs:map[] Message:COPY server.crt /usr/local/share/ca-certificates Original:COPY server.crt /usr/local/share/ca-certificates}: checking on sources under \"/wks/buildah-layers/context\": error in copier subprocess: error changing to intended-new-root directory \"/wks/buildah-layers/context\": chdir /wks/buildah-layers/context: no such file or directory"
-time="2021-12-06T16:09:27Z" level=fatal msg="Build image failed: error building at STEP \"COPY server.crt /usr/local/share/ca-certificates\": checking on sources under \"/wks/buildah-layers/context\": error in copier subprocess: error changing to intended-new-root directory \"/wks/buildah-layers/context\": chdir /wks/buildah-layers/context: no such file or directory"
+## Test
+
+a449729 - 2021-12-06 Charles Moulliard (HEAD -> main, origin/main) Add missing report file
+
+## Dockerfile
+
+FROM ubuntu:bionic
+
+RUN apt-get update && apt-get install -y ca-certificates
+
+COPY server.crt /usr/local/share/ca-certificates
+
+RUN update-ca-certificates
+
+## Scenario
+
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e WORKSPACE_DIR=/wks \
+  -e DOCKERFILE_NAME="ubuntu-cert" \
+  -e EXTRACT_LAYERS=true \
+  -e FILES_TO_SEARCH="server.crt" \
+  -e LOGGING_LEVEL=info \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app > ./test_report/test-ubuntu-cert.txt
+
+
+## Report
+
+time="2021-12-06T16:32:05Z" level=info msg="The layered tar-GZip files will be extracted to the home dir ..."
+time="2021-12-06T16:32:05Z" level=info msg="WORKSPACE DIR: /wks"
+time="2021-12-06T16:32:05Z" level=info msg="GRAPH_DRIVER: vfs"
+time="2021-12-06T16:32:05Z" level=info msg="STORAGE ROOT PATH: /var/lib/containers/storage"
+time="2021-12-06T16:32:05Z" level=info msg="STORAGE RUN ROOT PATH: /var/run/containers/storage"
+time="2021-12-06T16:32:05Z" level=info msg="Buildah contextDir: /wks"
+time="2021-12-06T16:32:05Z" level=info msg="Buildah tempdir: "
+time="2021-12-06T16:32:05Z" level=info msg="Dockerfile path: /wks/ubuntu-cert"
+time="2021-12-06T16:33:07Z" level=info msg="Image id: cac1214ab4332cc2561f45fe68597d7e70a1f04580e72f7ae3dfaa0e6a7edb43"
+time="2021-12-06T16:33:07Z" level=info msg="Image digest: localhost/buildpack-buildah:1638808325105689050-1@sha256:4cbe373c62d791aec15369dba74059b4912ae698a52bd86cf1966ced7c745d4e"
+time="2021-12-06T16:33:07Z" level=info msg="Image repository id: cac1214ab43"
+time="2021-12-06T16:33:07Z" level=info msg="Image built successfully :-)"
+time="2021-12-06T16:33:10Z" level=info msg="Image copied to oci:///cache/cac1214ab43:latest"
+time="2021-12-06T16:33:10Z" level=info msg="Image manifest: {\n    \"schemaVersion\": 2,\n    \"config\": {\n        \"mediaType\": \"application/vnd.oci.image.config.v1+json\",\n        \"digest\": \"sha256:0606b81fc8e0d83980fe1994e65c719267b031c09880a67e87fad4546f0a5bed\",\n        \"size\": 1199\n    },\n    \"layers\": [\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:249318e32f30e79fe2dfe3504c0018b6651d1ea91e7fd76ff3cb7566656e1e68\",\n            \"size\": 27965659\n        },\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:fa3a47a00710aabcdcf36fcf86e66c55f136af52f47e7e88f7821c96a9bd2c5a\",\n            \"size\": 31119180\n        }\n    ]\n}\n"
+time="2021-12-06T16:33:10Z" level=info msg="Layer blobInfo: sha256:249318e32f30e79fe2dfe3504c0018b6651d1ea91e7fd76ff3cb7566656e1e68\n"
+time="2021-12-06T16:33:10Z" level=info msg="Layer blobInfo: sha256:fa3a47a00710aabcdcf36fcf86e66c55f136af52f47e7e88f7821c96a9bd2c5a\n"
+time="2021-12-06T16:33:10Z" level=info msg="Last layer: fa3a47a00710aabcdcf36fcf86e66c55f136af52f47e7e88f7821c96a9bd2c5a"
+time="2021-12-06T16:33:10Z" level=info msg="Path to the TarGzipLayer file: /cache/cac1214ab43/blobs/sha256/fa3a47a00710aabcdcf36fcf86e66c55f136af52f47e7e88f7821c96a9bd2c5a"
+time="2021-12-06T16:33:10Z" level=info msg="Tgz file to be extracted /cache/cac1214ab43/blobs/sha256/fa3a47a00710aabcdcf36fcf86e66c55f136af52f47e7e88f7821c96a9bd2c5a"
+time="2021-12-06T16:33:10Z" level=info msg="Opening the gzip file: /cache/cac1214ab43/blobs/sha256/fa3a47a00710aabcdcf36fcf86e66c55f136af52f47e7e88f7821c96a9bd2c5a"
+time="2021-12-06T16:33:10Z" level=info msg="Creating a gzip reader for: /cache/cac1214ab43/blobs/sha256/fa3a47a00710aabcdcf36fcf86e66c55f136af52f47e7e88f7821c96a9bd2c5a"
+time="2021-12-06T16:33:12Z" level=info msg="File found: /usr/local/share/ca-certificates/server.crt"
+time="2021-12-06T16:33:12Z" level=info msg="File found: /var/lib/containers/storage/vfs/dir/e7eec592ba5a1c803304a2e0e9bd07005c1ccbd25df236e69aa0740e33d3fee9/usr/local/share/ca-certificates/server.crt"
+time="2021-12-06T16:33:12Z" level=info msg="File found: /wks/server.crt"
+time="2021-12-06T16:33:12Z" level=info msg="Time elapsed: 1m7.403858448s"
