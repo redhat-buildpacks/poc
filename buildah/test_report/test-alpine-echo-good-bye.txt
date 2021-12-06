@@ -1,0 +1,39 @@
+## Test
+
+abbd022 - 2021-12-06 Charles Moulliard (HEAD -> main, origin/main) Update the Dockerfile to generate the selfsigned certificate
+
+## dockerfile
+
+FROM alpine
+RUN echo "Good" > good.txt
+RUN echo "Bye" > bye.txt
+
+## Scenario
+
+## Report
+time="2021-12-06T17:07:44Z" level=info msg="The layered tar-GZip files will be extracted to the home dir ..."
+time="2021-12-06T17:07:44Z" level=info msg="WORKSPACE DIR: /wks"
+time="2021-12-06T17:07:44Z" level=info msg="GRAPH_DRIVER: vfs"
+time="2021-12-06T17:07:44Z" level=info msg="STORAGE ROOT PATH: /var/lib/containers/storage"
+time="2021-12-06T17:07:44Z" level=info msg="STORAGE RUN ROOT PATH: /var/run/containers/storage"
+time="2021-12-06T17:07:44Z" level=info msg="Buildah contextDir: /wks"
+time="2021-12-06T17:07:44Z" level=info msg="Buildah tempdir: "
+time="2021-12-06T17:07:44Z" level=info msg="Dockerfile path: /wks/alpine-echo-good-bye"
+time="2021-12-06T17:07:51Z" level=info msg="Image id: 06b8f603e8e1d99b20aa31f5b2326045d2cc59c4530799664c41f44377f1854e"
+time="2021-12-06T17:07:51Z" level=info msg="Image digest: localhost/buildpack-buildah:1638810464449092891-1@sha256:e750113fec6e588aee42e1f571a94b0fa762e85f1569b2a4332a272c85487f3a"
+time="2021-12-06T17:07:51Z" level=info msg="Image repository id: 06b8f603e8e"
+time="2021-12-06T17:07:51Z" level=info msg="Image built successfully :-)"
+time="2021-12-06T17:07:51Z" level=info msg="Image copied to oci:///cache/06b8f603e8e:latest"
+time="2021-12-06T17:07:51Z" level=info msg="Image manifest: {\n    \"schemaVersion\": 2,\n    \"config\": {\n        \"mediaType\": \"application/vnd.oci.image.config.v1+json\",\n        \"digest\": \"sha256:950906ac45d3d80d255f14beda707baf11b0e5fb6f27a340f22587c8fc3fd3d9\",\n        \"size\": 968\n    },\n    \"layers\": [\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:3c4e9198e8c15669838fa75b9fde03039cc4a256d6868d214d966bd8f27b093d\",\n            \"size\": 2896369\n        },\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:b8d0c45dae2009497cba572cfa51cd1d86d2ceccf5abb70d9dc0f6f7bc3bdaff\",\n            \"size\": 252\n        }\n    ]\n}\n"
+time="2021-12-06T17:07:51Z" level=info msg="Layer blobInfo: sha256:3c4e9198e8c15669838fa75b9fde03039cc4a256d6868d214d966bd8f27b093d\n"
+time="2021-12-06T17:07:51Z" level=info msg="Layer blobInfo: sha256:b8d0c45dae2009497cba572cfa51cd1d86d2ceccf5abb70d9dc0f6f7bc3bdaff\n"
+time="2021-12-06T17:07:51Z" level=info msg="Last layer: b8d0c45dae2009497cba572cfa51cd1d86d2ceccf5abb70d9dc0f6f7bc3bdaff"
+time="2021-12-06T17:07:51Z" level=info msg="Path to the TarGzipLayer file: /cache/06b8f603e8e/blobs/sha256/b8d0c45dae2009497cba572cfa51cd1d86d2ceccf5abb70d9dc0f6f7bc3bdaff"
+time="2021-12-06T17:07:51Z" level=info msg="Tgz file to be extracted /cache/06b8f603e8e/blobs/sha256/b8d0c45dae2009497cba572cfa51cd1d86d2ceccf5abb70d9dc0f6f7bc3bdaff"
+time="2021-12-06T17:07:51Z" level=info msg="Opening the gzip file: /cache/06b8f603e8e/blobs/sha256/b8d0c45dae2009497cba572cfa51cd1d86d2ceccf5abb70d9dc0f6f7bc3bdaff"
+time="2021-12-06T17:07:51Z" level=info msg="Creating a gzip reader for: /cache/06b8f603e8e/blobs/sha256/b8d0c45dae2009497cba572cfa51cd1d86d2ceccf5abb70d9dc0f6f7bc3bdaff"
+time="2021-12-06T17:07:51Z" level=info msg="File found: /bye.txt"
+time="2021-12-06T17:07:51Z" level=info msg="File found: /good.txt"
+time="2021-12-06T17:07:51Z" level=info msg="File found: /var/lib/containers/storage/vfs/dir/4ddb6a668fc1f7301bd043566cb90291df596d3561e9eaa2d449bdd407cc41cc/bye.txt"
+time="2021-12-06T17:07:51Z" level=info msg="File found: /var/lib/containers/storage/vfs/dir/4ddb6a668fc1f7301bd043566cb90291df596d3561e9eaa2d449bdd407cc41cc/good.txt"
+time="2021-12-06T17:07:51Z" level=info msg="Time elapsed: 7.148459775s"
