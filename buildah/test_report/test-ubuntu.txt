@@ -1,0 +1,44 @@
+## Test
+
+fd107fa - 2021-12-06 Charles Moulliard (HEAD -> main, origin/main) Remove comment non needed. Rename the Dockerfole-1 to use the same convention as for the kaniko project
+
+## dockerfile
+
+From ubuntu:bionic
+
+RUN apt update -y && apt install wget -y
+
+## Scenario
+
+docker run \
+  --privileged \
+  -e GRAPH_DRIVER=vfs \
+  -e WORKSPACE_DIR=/wks \
+  -e DOCKERFILE_NAME="ubuntu-wget" \
+  -e EXTRACT_LAYERS=true \
+  -e FILES_TO_SEARCH="good.txt" \
+  -e LOGGING_LEVEL=info \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app > ./test_report/test-ubuntu.txt
+
+## Report
+
+time="2021-12-06T15:03:55Z" level=info msg="The layered tar-GZip files will be extracted to the home dir ..."
+time="2021-12-06T15:03:55Z" level=info msg="WORKSPACE DIR: /wks"
+time="2021-12-06T15:03:55Z" level=info msg="GRAPH_DRIVER: vfs"
+time="2021-12-06T15:03:55Z" level=info msg="STORAGE ROOT PATH: /var/lib/containers/storage"
+time="2021-12time="2021-12-06T15:05:02Z" level=info msg="Image id: 9d1035c3464770ae4f3399c2551a3bed0daa1e098bc3da28cc6071e5f66ce4d9"
+time="2021-12-06T15:05:02Z" level=info msg="Image digest: localhost/buildpack-buildah:1638803035500968369-1@sha256:4c426bc067e9a5a1052aae6953dac9b7814bef9d088e4c6bfc253fdaace9820e"
+time="2021-12-06T15:05:02Z" level=info msg="Image repository id: 9d1035c3464"
+time="2021-12-06T15:05:02Z" level=info msg="Image built successfully :-)"
+time="2021-12-06T15:05:08Z" level=info msg="Image copied to oci:///cache/9d1035c3464:latest"
+time="2021-12-06T15:05:08Z" level=info msg="Image manifest: {\n    \"schemaVersion\": 2,\n    \"config\": {\n        \"mediaType\": \"application/vnd.oci.image.config.v1+json\",\n        \"digest\": \"sha256:2d2536dbe4a9e8808665650a05fa3305075de7a8f4aab2b97962cfabd87405f5\",\n        \"size\": 861\n    },\n    \"layers\": [\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:249318e32f30e79fe2dfe3504c0018b6651d1ea91e7fd76ff3cb7566656e1e68\",\n            \"size\": 27965659\n        },\n        {\n            \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n            \"digest\": \"sha256:70ab5a92588a288993c8e3cbd32223baea6147b66693b49d19b30a98f1c84ea7\",\n            \"size\": 31189119\n        }\n    ]\n}\n"
+time="2021-12-06T15:05:08Z" level=info msg="Layer blobInfo: sha256:249318e32f30e79fe2dfe3504c0018b6651d1ea91e7fd76ff3cb7566656e1e68\n"
+time="2021-12-06T15:05:08Z" level=info msg="Layer blobInfo: sha256:70ab5a92588a288993c8e3cbd32223baea6147b66693b49d19b30a98f1c84ea7\n"
+time="2021-12-06T15:05:08Z" level=info msg="Last layer: 70ab5a92588a288993c8e3cbd32223baea6147b66693b49d19b30a98f1c84ea7"
+time="2021-12-06T15:05:08Z" level=info msg="Path to the TarGzipLayer file: /cache/9d1035c3464/blobs/sha256/70ab5a92588a288993c8e3cbd32223baea6147b66693b49d19b30a98f1c84ea7"
+time="2021-12-06T15:05:08Z" level=info msg="Tgz file to be extracted /cache/9d1035c3464/blobs/sha256/70ab5a92588a288993c8e3cbd32223baea6147b66693b49d19b30a98f1c84ea7"
+time="2021-12-06T15:05:08Z" level=info msg="Opening the gzip file: /cache/9d1035c3464/blobs/sha256/70ab5a92588a288993c8e3cbd32223baea6147b66693b49d19b30a98f1c84ea7"
+time="2021-12-06T15:05:08Z" level=info msg="Creating a gzip reader for: /cache/9d1035c3464/blobs/sha256/70ab5a92588a288993c8e3cbd32223baea6147b66693b49d19b30a98f1c84ea7"
+time="2021-12-06T15:05:10Z" level=info msg="Time elapsed: 1m15.484091109s"
