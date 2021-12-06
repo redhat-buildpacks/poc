@@ -1,0 +1,83 @@
+## Test 1
+
+40f6c14 - 2021-12-06 Charles Moulliard (HEAD -> main, origin/main) Add code to buildah to measure the time elapsed to perform the job
+
+## Scenario
+
+./hack/build.sh
+dockerfile="ubi8-good-bye"
+filesToSearch="good.txt"
+docker run \
+  -e EXTRACT_LAYERS=true \
+  -e IGNORE_PATHS="/proc" \
+  -e FILES_TO_SEARCH=${filesToSearch} \
+  -e LOGGING_LEVEL=info \
+  -e LOGGING_FORMAT=color \
+  -e DOCKER_FILE_NAME=${dockerfile} \
+  -v $(pwd)/workspace:/workspace \
+  -v $(pwd)/cache:/cache \
+  -it kaniko-app:latest >> ./test-report/test-sha.txt
+
+## Dockerfile
+
+FROM registry.access.redhat.com/ubi8
+
+RUN echo "Good" > good.txt
+
+RUN echo "Bye" > bye.txt
+
+## Report
+
+[36mINFO[0m[0000] The layered tzg files will be extracted to the home dir ... 
+[36mINFO[0m[0000] Starting the Kaniko application to process a Dockerfile ... 
+[36mINFO[0m[0000] Initialize the BuildPackConfig and set the defaults values ... 
+[36mINFO[0m[0000] Kaniko      dir: /kaniko                     
+[36mINFO[0m[0000] Workspace   dir: /workspace                  
+[36mINFO[0m[0000] Cache       dir: /cache                      
+[36mINFO[0m[0000] Dockerfile name: ubi8-good-bye               
+[36mINFO[0m[0000] Extract layer files ? true                   
+[36mINFO[0m[0000] Building the ubi8-good-bye                   
+[36mINFO[0m[0000] Retrieving image manifest registry.access.redhat.com/ubi8 
+[36mINFO[0m[0000] Retrieving image registry.access.redhat.com/ubi8 from registry registry.access.redhat.com 
+[36mINFO[0m[0000] Built cross stage deps: map[]                
+[36mINFO[0m[0000] Retrieving image manifest registry.access.redhat.com/ubi8 
+[36mINFO[0m[0000] Returning cached image manifest              
+[36mINFO[0m[0000] Executing 0 build triggers                   
+[36mINFO[0m[0000] Unpacking rootfs as cmd RUN echo "Good" > good.txt requires it. 
+[36mINFO[0m[0077] RUN echo "Good" > good.txt                   
+[36mINFO[0m[0077] Taking snapshot of full filesystem...        
+[36mINFO[0m[0080] cmd: /bin/sh                                 
+[36mINFO[0m[0080] args: [-c echo "Good" > good.txt]            
+[36mINFO[0m[0080] Running: [/bin/sh -c echo "Good" > good.txt] 
+[36mINFO[0m[0080] Taking snapshot of full filesystem...        
+[36mINFO[0m[0080] No files were changed, appending empty layer to config. No layer added to image. 
+[36mINFO[0m[0080] RUN echo "Bye" > bye.txt                     
+[36mINFO[0m[0080] cmd: /bin/sh                                 
+[36mINFO[0m[0080] args: [-c echo "Bye" > bye.txt]              
+[36mINFO[0m[0080] Running: [/bin/sh -c echo "Bye" > bye.txt]   
+[36mINFO[0m[0080] Taking snapshot of full filesystem...        
+[36mINFO[0m[0081] No files were changed, appending empty layer to config. No layer added to image. 
+[36mINFO[0m[0081] Reading dir content of: /kaniko              
+2796677698 false
+860883337 false
+bye.txt false
+config.json false
+good.txt false
+ssl true
+[36mINFO[0m[0081] Export the layers as tar gzip files under the /cache ... 
+[36mINFO[0m[0081] Generated 2 layers                           
+[36mINFO[0m[0081] Tar layer file: /kaniko/sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f.tgz 
+[36mINFO[0m[0167] Tar layer file: /kaniko/sha256:63f9f4c31162a6a5dacd999a0dc65007e15b2ca6b2d9360a1234c27de12e7f38.tgz 
+[36mINFO[0m[0167] Copy the files created from the Kaniko dir to the /cache dir ... 
+[36mINFO[0m[0168] Kaniko stage is: registry.access.redhat.com/ubi8, index: 0 
+[36mINFO[0m[0168] Retrieving image manifest registry.access.redhat.com/ubi8 
+[36mINFO[0m[0168] Returning cached image manifest              
+[36mINFO[0m[0168] Layer digest of base image is: sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f 
+[36mINFO[0m[0168] Layer digest of base image is: sha256:63f9f4c31162a6a5dacd999a0dc65007e15b2ca6b2d9360a1234c27de12e7f38 
+[36mINFO[0m[0168] Extract the content of the tgz file the / filesystem ... 
+[36mINFO[0m[0168] Tgz file to be extracted sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f 
+[36mINFO[0m[0168] Opening the gzip file: /kaniko/sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f.tgz 
+[36mINFO[0m[0168] Creating a gzip reader for: /kaniko/sha256:ce3c6836540f978b55c511d236429e26b7a45f5a6f1204ab8d4378afaf77332f.tgz 
+[36mINFO[0m[0172] File found: /cache/good.txt                  
+[36mINFO[0m[0172] File found: /kaniko/good.txt                 
+[36mINFO[0m[0172] Time elapsed: 2m52.24939278s                 

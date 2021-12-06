@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 const (
@@ -110,6 +111,9 @@ func main() {
 	logrus.Infof("Dockerfile name: %s", b.DockerFileName)
 	logrus.Infof("Extract layer files ? %v", extractLayers)
 
+	// Launch a timer to measure the time needed to parse/copy/extract
+	start := time.Now()
+
 	// Build the Dockerfile
 	logrus.Infof("Building the %s", b.DockerFileName)
 	err := b.BuildDockerFile()
@@ -148,6 +152,9 @@ func main() {
 	if (len(filesToSearch) > 0) {
 		util.FindFiles(filesToSearch)
 	}
+
+	// Time elapsed is ...
+	logrus.Infof("Time elapsed: %s",time.Since(start))
 }
 
 func reapChildProcesses() error {
