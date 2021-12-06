@@ -27,13 +27,13 @@ spec:
       - name: "IGNORE_PATHS"
         value: "/var/run"
       - name: "FILES_TO_SEARCH"
-        value: "hello.txt,node"
+        value: "good.txt"
       - name: "LOGGING_LEVEL"
         value: "info"
       - name: "LOGGING_FORMAT"
         value: "color"
       - name: "DOCKER_FILE_NAME"
-        value: "ubi8-nodejs"
+        value: "ubi8-good-bye"
     imagePullPolicy: Always
     volumeMounts:
     - name: wks-dir
