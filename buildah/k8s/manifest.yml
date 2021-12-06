@@ -61,11 +61,11 @@ spec:
       - name: LOGGING_FORMAT
         value: "color"
       - name: LOGGING_LEVEL
-        value: "debug"
+        value: "info"
       - name: WORKSPACE_DIR
         value: "/workspace"
       - name: DOCKERFILE_NAME
-        value: Dockerfile-1
+        value: ubi8-good-bye
       - name: EXTRACT_LAYERS
         value: "true"
       - name:  FILES_TO_SEARCH
@@ -78,27 +78,6 @@ spec:
       - name: workspace
         mountPath: /workspace
       imagePullPolicy: Always
-      securityContext:
-        privileged: true
-    # - name: check-after
-    #   image: registry.access.redhat.com/ubi8:8.4-211 # busybox:1.28
-    #   env:
-    #     - name: LAYERS_DIR
-    #       value: "/layers"
-    #   command: [ "/bin/sh","-c" ]
-    #   args:
-    #     - |
-    #       echo "## Check if Node exists and version"
-    #       echo "## Append $LAYERS_DIR/usr/bin to the path"
-    #       export PATH="$LAYERS_DIR/usr/bin:$PATH"
-    #       echo $PATH
-    #       type -a node
-    #       node -v
-    #   volumeMounts:
-    #     - name: layers
-    #       mountPath: /layers
-    #   securityContext:
-    #     privileged: true
   containers:
     - name: completion
       image: busybox:1.28

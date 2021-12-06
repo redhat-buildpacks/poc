@@ -255,7 +255,7 @@ You can change some ENV vars within the `./k8s/manifest.yml` file as by example:
       - name: WORKSPACE_DIR
         value: "/workspace"
       - name: DOCKERFILE_NAME
-        value: Dockerfile-1
+        value: ubi8-good-bye
       - name: EXTRACT_LAYERS
         value: "true"
       - name:  FILES_TO_SEARCH
@@ -273,7 +273,7 @@ INFO[0000] STORAGE ROOT PATH: /var/lib/containers/storage
 INFO[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage 
 INFO[0000] Buildah contextDir: /workspace/buildah-layers/context 
 INFO[0000] Buildah tempdir: /workspace/buildah-layers   
-INFO[0000] Dockerfile path: /workspace/Dockerfile-1     
+INFO[0000] Dockerfile path: /workspace/ubi8-good-bye     
 DEBU[0000] [graphdriver] trying provided driver "vfs"   
 DEBU[0000] base for stage 0: "registry.access.redhat.com/ubi8" 
 DEBU[0000] FROM "registry.access.redhat.com/ubi8"       
