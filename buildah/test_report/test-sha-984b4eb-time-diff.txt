@@ -2,6 +2,14 @@
 
 984b4eb - 2021-12-03 Charles Moulliard (HEAD -> main, origin/main) Support to extract files and search about them
 
+## Dockerfile
+
+FROM registry.access.redhat.com/ubi8
+
+RUN echo "Good" > good.txt
+
+RUN echo "Bye" > bye.txt
+
 ## Scenario
 
 ./hack/build.sh
