@@ -1,0 +1,6 @@
+FROM alpine
+
+USER dwalsh
+
+RUN touch /tmp/foobar
+COPY ./hello.txt /workspace

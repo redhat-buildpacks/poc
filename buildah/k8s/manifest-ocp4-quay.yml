@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dockerfile
+  namespace: buildpack-poc
+data:
+  Dockerfile: |
+    FROM registry.access.redhat.com/ubi8
+    RUN echo "Good" > good.txt
+    RUN echo "Bye" > bye.txt
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: buildah-poc
+  namespace: buildpack-poc
+spec:
+  volumes:
+    - name: cache
+      emptyDir: {}
+    - name: workspace
+      emptyDir: {}
+    - name: dockerfile-volume
+      configMap:
+        name: dockerfile
+  initContainers:
+    - name: bud
+      image: quay.io/snowdrop/buildah-poc:latest
+      env:
+      - name: LOGGING_FORMAT
+        value: "color"
+      - name: LOGGING_LEVEL
+        value: "trace"
+      - name: WORKSPACE_DIR
+        value: "/workspace"
+      - name: DOCKERFILE_NAME
+        value: Dockerfile
+      - name: EXTRACT_LAYERS
+        value: "true"
+      - name:  FILES_TO_SEARCH
+        value: "good.txt,bye.txt"
+      workingDir: /workspace
+      command: [ "/buildah-app" ]
+      volumeMounts:
+      - name: cache
+        mountPath: /cache
+      - name: workspace
+        mountPath: /workspace
+      - name: dockerfile-volume
+        mountPath: /workspace/Dockerfile
+        subPath: Dockerfile
+      securityContext:
+        capabilities:
+          add: [ "CAP_SETFCAP" ]
+      imagePullPolicy: Always
+  containers:
+    - name: completion
+      image: busybox:1.28
+      command: [ "/bin/sh","-c","--" ]
+      args: [ "while true; do sleep 30; done;" ]
+  # serviceAccountName: buildpack
+
