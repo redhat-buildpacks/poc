@@ -11,7 +11,6 @@ import (
 	"github.com/containers/image/v5/signature"
 	istorage "github.com/containers/image/v5/storage"
 	"github.com/containers/image/v5/transports/alltransports"
-	"github.com/containers/storage/pkg/unshare"
 	"github.com/redhat-buildpacks/poc/buildah/build"
 	"github.com/redhat-buildpacks/poc/buildah/logging"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
@@ -146,11 +145,12 @@ func main() {
 	ctx := context.TODO()
 
 	// TODO: Check how we could continue to use the debugger as the following code exec a sub-command and by consequence it exits
-	hasCapSysAdmin, err := unshare.HasCapSysAdmin()
-	if err != nil {
-		logrus.Fatalf("error checking for CAP_SYS_ADMIN: %v", err)
-	}
-	unshare.MaybeReexecUsingUserNamespace(!hasCapSysAdmin)
+	//hasCapSysAdmin, err := unshare.HasCapSysAdmin()
+	//if err != nil {
+	//	logrus.Fatalf("error checking for CAP_SYS_ADMIN: %v", err)
+	//}
+	//unshare.MaybeReexecUsingUserNamespace(!hasCapSysAdmin)
+	// unshare.MaybeReexecUsingUserNamespace(false)
 
 	b := build.InitOptions()
 	b.ExtractLayers = extractLayers
