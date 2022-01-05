@@ -106,7 +106,7 @@ func (b *BuildPackConfig) InitDefaults() {
 		SnapshotMode:   "full",
 		BuildArgs:      b.BuildArgs,
 		IgnorePaths:    b.IgnorePaths,
-		TarPath:        cacheDir + "/generated_tgz",
+		TarPath:        "generated_tgz",
 	}
 
 	logrus.Debug("KanikoOptions defined")
