@@ -1,6 +1,6 @@
 #!/bin/sh
 
-KEYWORDS="wget\|curl\|hello.txt"
+KEYWORDS="wget\|curl\|good.txt\|bye.txt"
 TGZ_FILES=$(find ./cache -name '*.tgz')
 for f in $TGZ_FILES
 do

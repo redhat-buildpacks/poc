@@ -106,6 +106,7 @@ func (b *BuildPackConfig) InitDefaults() {
 		SnapshotMode:   "full",
 		BuildArgs:      b.BuildArgs,
 		IgnorePaths:    b.IgnorePaths,
+		TarPath:        cacheDir + "/generated_tgz",
 	}
 
 	logrus.Debug("KanikoOptions defined")
@@ -119,6 +120,7 @@ func (b *BuildPackConfig) BuildDockerFile() (err error) {
 	}
 
 	logrus.Debugf("Building the %s ...", b.DockerFileName)
+	logrus.Debugf("Options used %+v", b.Opts)
 	b.NewImage, err = executor.DoBuild(&b.Opts)
 	return err
 }
