@@ -63,7 +63,6 @@ Different `ENV` variables can be defined and passed as parameters to the contain
 `DOCKER_FILE_NAME` Dockerfile to be parsed: **Dockerfile** is the default name
 `DEBUG`            To launch the `dlv` remote debugger. See [remote debugger](#remote-debugging) 
 `EXTRACT_LAYERS`   To extract from the layers (= tgz files) the files. See [extract layers](#extract-layer-files)
-`EXTRACT_LAYERS`   To extract from the layers (= tgz files) the files. See [extract layers](#extract-layer-files)
 `CNB_*`            Pass Arg to the Dockerfile. See [CNB Args](#cnb-build-args)
 `IGNORE_PATHS`     Files to be ignored by Kaniko. See [Ignore Paths](#ignore-paths). TODO: Should be also used to ignore paths during `untar` process or file search
 `FILES_TO_SEARCH`  Files to be searched post layers content extraction. See [files to search](#verify-if-files-exist)                
