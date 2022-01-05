@@ -1,0 +1,207 @@
+## Test 2
+
+8aa94e5 2021-12-08 Charles Moulliard (HEAD -> main, origin/main) Create a config to deploy buildah on ocp4
+
+## Scenario
+
+Check on the ocp4 instance if a project "buildpack-poc" exists !
+
+REGISTRY=quay.io
+docker tag kaniko-app $REGISTRY/snowdrop/kaniko-app
+docker push $REGISTRY/snowdrop/kaniko-app
+
+oc apply -f k8s/manifest-ocp4.yml
+
+## Dockerfile
+
+    FROM ubuntu:bionic
+
+    RUN apt-get update && apt-get install -y openssl ca-certificates
+
+    RUN openssl genrsa -des3 -passout pass:"foobarpwd" -out server.pass.key 2048 && \
+    openssl rsa -passin pass:"foobarpwd" -in server.pass.key -out server.key && \
+    rm server.pass.key && \
+    openssl req -new -key server.key -out server.csr -subj "/C=BE/ST=Namur/L=Florennes/O=CNCF/OU=Buildpack/CN=buildpack.io" && \
+    openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+    RUN cp server.crt /usr/local/share/ca-certificates
+
+    RUN update-ca-certificates
+
+## Report
+
+time="2022-01-05T15:00:55Z" level=info msg="The layered tzg files will be extracted to the home dir ..."
+[36mINFO[0m[0000] Starting the Kaniko application to process a Dockerfile ...
+[36mINFO[0m[0000] Initialize the BuildPackConfig and set the defaults values ...
+[36mINFO[0m[0000] Kaniko      dir: /kaniko
+[36mINFO[0m[0000] Workspace   dir: /workspace
+[36mINFO[0m[0000] Cache       dir: /cache
+[36mINFO[0m[0000] Dockerfile name: Dockerfile
+[36mINFO[0m[0000] Extract layer files ? true
+[36mINFO[0m[0000] Building the Dockerfile
+[36mINFO[0m[0000] Retrieving image manifest ubuntu:bionic
+[36mINFO[0m[0000] Retrieving image ubuntu:bionic from registry index.docker.io
+E0105 15:01:02.218347       1 aws_credentials.go:77] while getting AWS credentials NoCredentialProviders: no valid providers in chain. Deprecated.
+	For verbose messaging see aws.Config.CredentialsChainVerboseErrors
+[36mINFO[0m[0007] Built cross stage deps: map[]
+[36mINFO[0m[0007] Retrieving image manifest ubuntu:bionic
+[36mINFO[0m[0007] Returning cached image manifest
+[36mINFO[0m[0007] Executing 0 build triggers
+[36mINFO[0m[0007] Unpacking rootfs as cmd RUN apt-get update && apt-get install -y openssl ca-certificates requires it.
+[36mINFO[0m[0009] RUN apt-get update && apt-get install -y openssl ca-certificates
+[36mINFO[0m[0009] Taking snapshot of full filesystem...
+[36mINFO[0m[0010] cmd: /bin/sh
+[36mINFO[0m[0010] args: [-c apt-get update && apt-get install -y openssl ca-certificates]
+[36mINFO[0m[0010] Running: [/bin/sh -c apt-get update && apt-get install -y openssl ca-certificates]
+Get:1 http://archive.ubuntu.com/ubuntu bionic InRelease [242 kB]
+Get:2 http://archive.ubuntu.com/ubuntu bionic-updates InRelease [88.7 kB]
+Get:3 http://archive.ubuntu.com/ubuntu bionic-backports InRelease [74.6 kB]
+Get:4 http://archive.ubuntu.com/ubuntu bionic/restricted amd64 Packages [13.5 kB]
+Get:5 http://archive.ubuntu.com/ubuntu bionic/main amd64 Packages [1344 kB]
+Get:6 http://archive.ubuntu.com/ubuntu bionic/multiverse amd64 Packages [186 kB]
+Get:7 http://archive.ubuntu.com/ubuntu bionic/universe amd64 Packages [11.3 MB]
+Get:8 http://security.ubuntu.com/ubuntu bionic-security InRelease [88.7 kB]
+Get:9 http://archive.ubuntu.com/ubuntu bionic-updates/restricted amd64 Packages [749 kB]
+Get:10 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 Packages [2927 kB]
+Get:11 http://archive.ubuntu.com/ubuntu bionic-updates/universe amd64 Packages [2238 kB]
+Get:12 http://archive.ubuntu.com/ubuntu bionic-updates/multiverse amd64 Packages [34.5 kB]
+Get:13 http://archive.ubuntu.com/ubuntu bionic-backports/main amd64 Packages [11.6 kB]
+Get:14 http://archive.ubuntu.com/ubuntu bionic-backports/universe amd64 Packages [12.6 kB]
+Get:15 http://security.ubuntu.com/ubuntu bionic-security/main amd64 Packages [2489 kB]
+Get:16 http://security.ubuntu.com/ubuntu bionic-security/multiverse amd64 Packages [26.8 kB]
+Get:17 http://security.ubuntu.com/ubuntu bionic-security/restricted amd64 Packages [716 kB]
+Get:18 http://security.ubuntu.com/ubuntu bionic-security/universe amd64 Packages [1459 kB]
+Fetched 24.0 MB in 2s (12.7 MB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libssl1.1
+The following NEW packages will be installed:
+  ca-certificates libssl1.1 openssl
+0 upgraded, 3 newly installed, 0 to remove and 3 not upgraded.
+Need to get 2061 kB of archives.
+After this operation, 5668 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 libssl1.1 amd64 1.1.1-1ubuntu2.1~18.04.14 [1302 kB]
+Get:2 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 openssl amd64 1.1.1-1ubuntu2.1~18.04.14 [613 kB]
+Get:3 http://archive.ubuntu.com/ubuntu bionic-updates/main amd64 ca-certificates all 20210119~18.04.2 [145 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 2061 kB in 0s (11.2 MB/s)
+Selecting previously unselected package libssl1.1:amd64.
+(Reading database ...
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 4051 files and directories currently installed.)
+Preparing to unpack .../libssl1.1_1.1.1-1ubuntu2.1~18.04.14_amd64.deb ...
+Unpacking libssl1.1:amd64 (1.1.1-1ubuntu2.1~18.04.14) ...
+Selecting previously unselected package openssl.
+Preparing to unpack .../openssl_1.1.1-1ubuntu2.1~18.04.14_amd64.deb ...
+Unpacking openssl (1.1.1-1ubuntu2.1~18.04.14) ...
+Selecting previously unselected package ca-certificates.
+Preparing to unpack .../ca-certificates_20210119~18.04.2_all.deb ...
+Unpacking ca-certificates (20210119~18.04.2) ...
+Setting up libssl1.1:amd64 (1.1.1-1ubuntu2.1~18.04.14) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.26.1 /usr/local/share/perl/5.26.1 /usr/lib/x86_64-linux-gnu/perl5/5.26 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.26 /usr/share/perl/5.26 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+debconf: falling back to frontend: Teletype
+Setting up openssl (1.1.1-1ubuntu2.1~18.04.14) ...
+Setting up ca-certificates (20210119~18.04.2) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.26.1 /usr/local/share/perl/5.26.1 /usr/lib/x86_64-linux-gnu/perl5/5.26 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.26 /usr/share/perl/5.26 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+debconf: falling back to frontend: Teletype
+Updating certificates in /etc/ssl/certs...
+128 added, 0 removed; done.
+Processing triggers for libc-bin (2.27-3ubuntu1.4) ...
+Processing triggers for ca-certificates (20210119~18.04.2) ...
+Updating certificates in /etc/ssl/certs...
+0 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+[36mINFO[0m[0017] Taking snapshot of full filesystem...
+[36mINFO[0m[0019] RUN openssl genrsa -des3 -passout pass:"foobarpwd" -out server.pass.key 2048 && openssl rsa -passin pass:"foobarpwd" -in server.pass.key -out server.key && rm server.pass.key && openssl req -new -key server.key -out server.csr -subj "/C=BE/ST=Namur/L=Florennes/O=CNCF/OU=Buildpack/CN=buildpack.io" && openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+[36mINFO[0m[0019] cmd: /bin/sh
+[36mINFO[0m[0019] args: [-c openssl genrsa -des3 -passout pass:"foobarpwd" -out server.pass.key 2048 && openssl rsa -passin pass:"foobarpwd" -in server.pass.key -out server.key && rm server.pass.key && openssl req -new -key server.key -out server.csr -subj "/C=BE/ST=Namur/L=Florennes/O=CNCF/OU=Buildpack/CN=buildpack.io" && openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt]
+[36mINFO[0m[0019] Running: [/bin/sh -c openssl genrsa -des3 -passout pass:"foobarpwd" -out server.pass.key 2048 && openssl rsa -passin pass:"foobarpwd" -in server.pass.key -out server.key && rm server.pass.key && openssl req -new -key server.key -out server.csr -subj "/C=BE/ST=Namur/L=Florennes/O=CNCF/OU=Buildpack/CN=buildpack.io" && openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt]
+Generating RSA private key, 2048 bit long modulus (2 primes)
+..................+++++
+.................................+++++
+e is 65537 (0x010001)
+writing RSA key
+Can't load /root/.rnd into RNG
+140507293856192:error:2406F079:random number generator:RAND_load_file:Cannot open file:../crypto/rand/randfile.c:88:Filename=/root/.rnd
+Signature ok
+subject=C = BE, ST = Namur, L = Florennes, O = CNCF, OU = Buildpack, CN = buildpack.io
+Getting Private key
+[36mINFO[0m[0019] Taking snapshot of full filesystem...
+[36mINFO[0m[0020] No files were changed, appending empty layer to config. No layer added to image.
+[36mINFO[0m[0020] RUN cp server.crt /usr/local/share/ca-certificates
+[36mINFO[0m[0020] cmd: /bin/sh
+[36mINFO[0m[0020] args: [-c cp server.crt /usr/local/share/ca-certificates]
+[36mINFO[0m[0020] Running: [/bin/sh -c cp server.crt /usr/local/share/ca-certificates]
+[36mINFO[0m[0020] Taking snapshot of full filesystem...
+[36mINFO[0m[0020] RUN update-ca-certificates
+[36mINFO[0m[0020] cmd: /bin/sh
+[36mINFO[0m[0020] args: [-c update-ca-certificates]
+[36mINFO[0m[0020] Running: [/bin/sh -c update-ca-certificates]
+Updating certificates in /etc/ssl/certs...
+1 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+[36mINFO[0m[0021] Taking snapshot of full filesystem...
+1781551248 false
+3168666050 false
+4163719933 false
+998834111 false
+config.json false
+server.crt false
+server.csr false
+server.key false
+ssl true
+[36mINFO[0m[0021] Reading dir content of: /kaniko
+[36mINFO[0m[0021] Export the layers as tar gzip files under the /cache ...
+[36mINFO[0m[0021] Generated 4 layers
+[36mINFO[0m[0021] Tar layer file: /kaniko/sha256:284055322776031bac33723839acb0db2d063a525ba4fa1fd268a831c7553b26.tgz
+[36mINFO[0m[0022] Tar layer file: /kaniko/sha256:4da9c8210c2f862e225e9797a5cd587b16734ab2b98d626c82bed7fa4a4a9105.tgz
+[36mINFO[0m[0023] Tar layer file: /kaniko/sha256:fca8012640c8ab692504032f202dce03290d75461753b18484df6478c073a36c.tgz
+[36mINFO[0m[0023] Tar layer file: /kaniko/sha256:f90764e49189138136b75abccb5cb8431b288b347da93886d33a55aa6238f826.tgz
+[36mINFO[0m[0023] Copy the files created from the Kaniko dir to the /cache dir ...
+[36mINFO[0m[0024] Kaniko stage is: ubuntu:bionic, index: 0
+[36mINFO[0m[0024] Retrieving image manifest ubuntu:bionic
+[36mINFO[0m[0024] Returning cached image manifest
+[36mINFO[0m[0024] Layer digest of base image is: sha256:284055322776031bac33723839acb0db2d063a525ba4fa1fd268a831c7553b26
+[36mINFO[0m[0024] Extract the content of the tgz file the / filesystem ...
+[36mINFO[0m[0024] Tgz file to be extracted sha256:4da9c8210c2f862e225e9797a5cd587b16734ab2b98d626c82bed7fa4a4a9105
+[36mINFO[0m[0024] Opening the gzip file: /kaniko/sha256:4da9c8210c2f862e225e9797a5cd587b16734ab2b98d626c82bed7fa4a4a9105.tgz
+[36mINFO[0m[0024] Creating a gzip reader for: /kaniko/sha256:4da9c8210c2f862e225e9797a5cd587b16734ab2b98d626c82bed7fa4a4a9105.tgz
+[36mINFO[0m[0025] Tgz file to be extracted sha256:fca8012640c8ab692504032f202dce03290d75461753b18484df6478c073a36c
+[36mINFO[0m[0025] Opening the gzip file: /kaniko/sha256:fca8012640c8ab692504032f202dce03290d75461753b18484df6478c073a36c.tgz
+[36mINFO[0m[0025] Creating a gzip reader for: /kaniko/sha256:fca8012640c8ab692504032f202dce03290d75461753b18484df6478c073a36c.tgz
+[36mINFO[0m[0025] Tgz file to be extracted sha256:f90764e49189138136b75abccb5cb8431b288b347da93886d33a55aa6238f826
+[36mINFO[0m[0025] Opening the gzip file: /kaniko/sha256:f90764e49189138136b75abccb5cb8431b288b347da93886d33a55aa6238f826.tgz
+[36mINFO[0m[0025] Creating a gzip reader for: /kaniko/sha256:f90764e49189138136b75abccb5cb8431b288b347da93886d33a55aa6238f826.tgz
+[36mINFO[0m[0025] Time elapsed: 25.85384611s

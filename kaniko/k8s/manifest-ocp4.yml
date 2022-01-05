@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dockerfile
+  namespace: buildpack-poc
+data:
+  Dockerfile: |
+    FROM ubuntu:bionic
+    RUN apt update -y && apt install wget -y
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dockerfile1
+  namespace: buildpack-poc
+data:
+  Dockerfile: |
+    FROM ubuntu:bionic
+
+    RUN apt-get update && apt-get install -y openssl ca-certificates
+
+    RUN openssl genrsa -des3 -passout pass:"foobarpwd" -out server.pass.key 2048 && \
+    openssl rsa -passin pass:"foobarpwd" -in server.pass.key -out server.key && \
+    rm server.pass.key && \
+    openssl req -new -key server.key -out server.csr -subj "/C=BE/ST=Namur/L=Florennes/O=CNCF/OU=Buildpack/CN=buildpack.io" && \
+    openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+    RUN cp server.crt /usr/local/share/ca-certificates
+    # COPY server.crt /usr/local/share/ca-certificates
+
+    RUN update-ca-certificates
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+  namespace: buildpack-poc
+spec:
+  volumes:
+    - name: cache-dir
+      emptyDir: {}
+    - name: wks-dir
+      emptyDir: {}
+    - name: dockerfile-volume
+      configMap:
+        name: dockerfile1
+  initContainers:
+    - name: build
+      image:  quay.io/snowdrop/kaniko-app:latest
+      command: [ "/kaniko-app" ]
+      env:
+        - name: "EXTRACT_LAYERS"
+          value: "true"
+        - name: "IGNORE_PATHS"
+          value: "/var/run"
+        - name: "FILES_TO_SEARCH"
+          value: "wget"
+        - name: "LOGGING_LEVEL"
+          value: "info"
+        - name: "LOGGING_FORMAT"
+          value: "color"
+        - name: "DOCKER_FILE_NAME"
+          value: "Dockerfile"
+      imagePullPolicy: Always
+      volumeMounts:
+        - name: wks-dir
+          mountPath: /workspace
+        - name: cache-dir
+          mountPath: /cache
+        - name: dockerfile-volume
+          mountPath: /workspace/Dockerfile
+          subPath: Dockerfile
+  containers:
+    - name: completion
+      image: alpine:3
+      command: [ "/bin/sh","-c" ]
+      args:
+        - |
+          echo "## Build completed successfully"
