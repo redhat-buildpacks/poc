@@ -107,6 +107,7 @@ func (b *BuildPackConfig) InitDefaults() {
 		BuildArgs:      b.BuildArgs,
 		IgnorePaths:    b.IgnorePaths,
 		TarPath:        "generated_tgz",
+		Destinations:   []string{"hello_img"},
 	}
 
 	logrus.Debug("KanikoOptions defined")
