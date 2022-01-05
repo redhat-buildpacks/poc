@@ -108,6 +108,7 @@ func (b *BuildPackConfig) InitDefaults() {
 		IgnorePaths:    b.IgnorePaths,
 		TarPath:        "myTarBall",
 		Destinations:   []string{"my_image"},
+		ForceBuildMetadata: true,
 	}
 
 	logrus.Debug("KanikoOptions defined")
