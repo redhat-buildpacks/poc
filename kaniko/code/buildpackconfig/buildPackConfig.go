@@ -98,7 +98,7 @@ func (b *BuildPackConfig) InitDefaults() {
 
 	// init the Kaniko options
 	b.Opts = config.KanikoOptions{
-		CacheOptions:   config.CacheOptions{CacheDir: cacheDir},
+		//CacheOptions:   config.CacheOptions{CacheDir: cacheDir},
 		DockerfilePath: dockerFilePath,
 		IgnoreVarRun:   true,
 		NoPush:         true,
@@ -106,8 +106,8 @@ func (b *BuildPackConfig) InitDefaults() {
 		SnapshotMode:   "full",
 		BuildArgs:      b.BuildArgs,
 		IgnorePaths:    b.IgnorePaths,
-		TarPath:        "generated_tgz",
-		Destinations:   []string{"hello_img"},
+		TarPath:        "myTarBall",
+		Destinations:   []string{"my_image"},
 	}
 
 	logrus.Debug("KanikoOptions defined")
@@ -123,7 +123,14 @@ func (b *BuildPackConfig) BuildDockerFile() (err error) {
 	logrus.Debugf("Building the %s ...", b.DockerFileName)
 	logrus.Debugf("Options used %+v", b.Opts)
 	b.NewImage, err = executor.DoBuild(&b.Opts)
-	return err
+	if (err != nil) {
+		return err
+	}
+
+	// Push the image to its destination
+	logrus.Info("Push the image to its destination")
+	err = executor.DoPush(b.NewImage, &b.Opts)
+    return err
 }
 
 func (b *BuildPackConfig) ExtractLayersFromNewImageToKanikoDir() {
