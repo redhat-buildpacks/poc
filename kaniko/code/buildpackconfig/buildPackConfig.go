@@ -2,6 +2,7 @@ package buildpackconfig
 
 import (
 	"archive/tar"
+	"compress/gzip"
 	"encoding/json"
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
@@ -24,9 +25,9 @@ const (
 	kanikoDir                 = "/kaniko"
 	cacheDir                  = "/cache"
 	workspaceDir              = "/workspace"
-	defaultDockerFileName = "Dockerfile"
-	layerTarFileName      = "newlayer.tgz"
-	destination           = "new_image"
+	defaultDockerFileName     = "Dockerfile"
+	layerTarFileName          = "newlayer.tar"
+	destination               = "new_image"
 	DOCKER_FILE_NAME_ENV_NAME = "DOCKER_FILE_NAME"
 	IGNORE_PATHS_ENV_NAME     = "IGNORE_PATHS"
 )
@@ -180,15 +181,20 @@ func (b *BuildPackConfig) ExtractLayersFromNewImageToKanikoDir() {
 	b.TarPaths = tarFiles
 }
 
-func (b *BuildPackConfig) ExtractTGZFile(baseHash v1.Hash) {
-	for _, tarFile := range b.TarPaths {
-		if tarFile.Name != baseHash.String() {
-			logrus.Infof("Tgz file to be extracted %s", tarFile.Name)
-			err := b.untarFile(tarFile.Path, b.HomeDir)
-			if err != nil {
+func (b *BuildPackConfig) ExtractImageTarFile(destinationTarPath string) {
+	err := b.untar(destinationTarPath, b.Opts.CacheDir,true)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (b *BuildPackConfig) ExtractTarGZFiles() {
+	for _, s := range util.FilterFiles(b.Opts.CacheDir, ".tar.gz") {
+		logrus.Infof("Tgz file to be extracted %s", s)
+		err := b.untar(s,b.Opts.CacheDir,true)
+		if err != nil {
 				panic(err)
 			}
-		}
 	}
 }
 
@@ -231,16 +237,25 @@ func (b *BuildPackConfig) SaveImageJSONConfig() {
 	// readFileContent(c)
 }
 
-func (b *BuildPackConfig) untarFile(tgzFilePath string, targetDir string) (err error) {
-
-	// create a Reader of the gzip file
-	gzf, err := util.UnGzip(tgzFilePath)
+func (b *BuildPackConfig) untar(tarFilePath string, targetDir string, isGzip bool) (err error) {
+	var gzr io.Reader
+	// Try first to open the file
+	f, err := os.Open(tarFilePath)
 	if err != nil {
-		logrus.Panicf("Something wrong happened ... %s", err)
+		return err
 	}
 
-	// Open the tar file from the tgz reader
-	tr := tar.NewReader(gzf)
+	logrus.Infof("Creating a reader for: %s", f.Name())
+	if isGzip {
+		gzr, err = gzip.NewReader(f)
+		if err != nil {
+			return err
+		}
+	} else {
+		gzr = f
+	}
+
+	tr := tar.NewReader(gzr)
 	// Get each tar segment
 	for true {
 		hdr, err := tr.Next()

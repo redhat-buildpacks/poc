@@ -1,11 +1,13 @@
 package util
 
 import (
+	"archive/tar"
 	"compress/gzip"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -152,21 +154,36 @@ func FindFiles(filesToSearch []string) error {
 	return nil
 }
 
-func UnGzip(gzipFilePath string) (gzf io.Reader, err error) {
-	logrus.Infof("Opening the gzip file: %s", gzipFilePath)
-	f, err := os.Open(gzipFilePath)
-	if err != nil {
-		panic(err)
-	}
-	logrus.Infof("Creating a gzip reader for: %s", f.Name())
-	gzf, err = gzip.NewReader(f)
-	if err != nil {
-		panic(err)
-	}
+func UnGzip(r io.Reader) (gzf io.Reader, err error) {
+	logrus.Info("Creating a gzip reader")
+	gzf, err = gzip.NewReader(r)
 	return gzf, nil
+}
+
+func UnTar(tarFilePath string) (tarR io.Reader, err error) {
+	logrus.Infof("Opening the tar file: %s", tarFilePath)
+	f, err := os.Open(tarFilePath)
+	if err != nil {
+		panic(err)
+	}
+	logrus.Infof("Creating a reader for: %s", f.Name())
+	tarR = tar.NewReader(f)
+	return tarR, nil
 }
 
 func FileExists(path string) bool {
 	_, err := os.Stat(path)
 	return !errors.Is(err, os.ErrNotExist)
+}
+
+func FilterFiles(root, ext string) []string {
+	var a []string
+	filepath.WalkDir(root, func(s string, d fs.DirEntry, e error) error {
+		if e != nil { return e }
+		if filepath.Ext(d.Name()) == ext {
+			a = append(a, s)
+		}
+		return nil
+	})
+	return a
 }

@@ -139,29 +139,13 @@ func main() {
 		panic(err)
 	}
 
-	// TODO: To be reviewed to check if we still need it or not
+	logrus.Infof("Extract the content of the tarball file %s under the cache %s",b.Opts.TarPath,b.Opts.CacheDir)
+	b.ExtractImageTarFile(dstPath)
+	logrus.Info("Extract the laye file(s)")
+	b.ExtractTarGZFiles()
 
-	// Save the Config and Manifest files of the new image created
-	//b.SaveImageJSONConfig()
-	//b.SaveImageRawManifest()
+	logrus.Info("Read the manifest to get the sha of the new files created")
 
-	// Log the content of the Kaniko dir
-	//logrus.Infof("Reading dir content of: %s", b.KanikoDir)
-	// util.ReadFilesFromPath(b.KanikoDir)
-
-	// Export the layers from the new Image as tar gzip file under the Kaniko dir
-	//logrus.Infof("Export the layers as tar gzip files under the %s ...", b.CacheDir)
-	//b.ExtractLayersFromNewImageToKanikoDir()
-
-	//logrus.Infof("Copy the files created from the Kaniko dir to the %s dir ...", b.CacheDir)
-	//b.CopyTGZFilesToCacheDir()
-
-	// Find the digest/hash of the Base Image
-	//baseImageHash := b.FindBaseImageDigest()
-
-	// Explode the layers created under the container / filesystem
-	//logrus.Info("Extract the content of the tgz file the / filesystem ...")
-	//b.ExtractTGZFile(baseImageHash)
 
 	// Check if files exist
 	if (len(filesToSearch) > 0) {
