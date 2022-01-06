@@ -182,7 +182,7 @@ func (b *BuildPackConfig) ExtractLayersFromNewImageToKanikoDir() {
 }
 
 func (b *BuildPackConfig) ExtractImageTarFile(destinationTarPath string) {
-	err := b.untar(destinationTarPath, b.Opts.CacheDir,true)
+	err := b.untar(destinationTarPath, b.Opts.CacheDir,false)
 	if err != nil {
 		panic(err)
 	}
