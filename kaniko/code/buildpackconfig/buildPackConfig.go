@@ -24,7 +24,9 @@ const (
 	kanikoDir                 = "/kaniko"
 	cacheDir                  = "/cache"
 	workspaceDir              = "/workspace"
-	defaultDockerFileName     = "Dockerfile"
+	defaultDockerFileName = "Dockerfile"
+	layerTarFileName      = "newlayer.tgz"
+	destination           = "new_image"
 	DOCKER_FILE_NAME_ENV_NAME = "DOCKER_FILE_NAME"
 	IGNORE_PATHS_ENV_NAME     = "IGNORE_PATHS"
 )
@@ -34,6 +36,7 @@ var ignorePaths = []string{""}
 type BuildPackConfig struct {
 	LayerPath      string
 	CacheDir       string
+	Destination    string
 	KanikoDir      string
 	WorkspaceDir   string
 	DockerFileName string
@@ -41,19 +44,22 @@ type BuildPackConfig struct {
 	NewImage       v1.Image
 	BuildArgs      []string
 	CnbEnvVars     map[string]string
-	TarPaths       []store.TarFile
-	HomeDir        string
+	TarPaths         []store.TarFile
+	LayerTarFileName string
+	HomeDir          string
 	ExtractLayers  bool
 	IgnorePaths    []string
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
 	return &BuildPackConfig{
-		LayerPath:    "",
-		CacheDir:     cacheDir,
-		WorkspaceDir: workspaceDir,
-		KanikoDir:    kanikoDir,
-		HomeDir:      homeDir,
+		LayerPath:        "",
+		CacheDir:         cacheDir,
+		WorkspaceDir:     workspaceDir,
+		KanikoDir:        kanikoDir,
+		HomeDir:          homeDir,
+		LayerTarFileName: layerTarFileName,
+		Destination:      destination,
 	}
 }
 
@@ -106,8 +112,8 @@ func (b *BuildPackConfig) InitDefaults() {
 		SnapshotMode:   "full",
 		BuildArgs:      b.BuildArgs,
 		IgnorePaths:    b.IgnorePaths,
-		TarPath:        "myTarBall",
-		Destinations:   []string{"my_image"},
+		TarPath:        b.LayerTarFileName,
+		Destinations:   []string{b.Destination},
 		ForceBuildMetadata: true,
 	}
 
