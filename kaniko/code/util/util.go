@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
-	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -177,13 +176,17 @@ func FileExists(path string) bool {
 }
 
 func FilterFiles(root, ext string) []string {
-	var a []string
-	filepath.WalkDir(root, func(s string, d fs.DirEntry, e error) error {
-		if e != nil { return e }
-		if filepath.Ext(d.Name()) == ext {
-			a = append(a, s)
+	var files []string
+	filepath.Walk(root, func(path string, info os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+		logrus.Infof("Cache file: %s, ext: %s",info.Name(),filepath.Ext(path) )
+		if !info.IsDir() && filepath.Ext(path) == ext {
+			files = append(files, path)
 		}
 		return nil
 	})
-	return a
+	logrus.Infof("Files found: %d",len(files))
+	return files
 }

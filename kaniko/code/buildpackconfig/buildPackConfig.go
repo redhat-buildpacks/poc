@@ -4,9 +4,11 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
 	"github.com/GoogleContainerTools/kaniko/pkg/executor"
+	"github.com/google/go-containerregistry/pkg/v1/tarball"
 	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
 	fs_util "github.com/GoogleContainerTools/kaniko/pkg/util"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
@@ -16,6 +18,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -128,10 +131,6 @@ func (b *BuildPackConfig) BuildDockerFile() (err error) {
 	if err := os.Chdir("/"); err != nil {
 		panic(err)
 	}
-	//logrus.Debugf("Moving to kaniko home dir: %s", b.KanikoDir)
-	//if err := os.Chdir(b.KanikoDir); err != nil {
-	//	panic(err)
-	//}
 
 	logrus.Debugf("Building the %s ...", b.DockerFileName)
 	logrus.Debugf("Options used %+v", b.Opts)
@@ -188,13 +187,16 @@ func (b *BuildPackConfig) ExtractImageTarFile(destinationTarPath string) {
 	}
 }
 
-func (b *BuildPackConfig) ExtractTarGZFiles() {
-	for _, s := range util.FilterFiles(b.Opts.CacheDir, ".tar.gz") {
-		logrus.Infof("Tgz file to be extracted %s", s)
-		err := b.untar(s,b.Opts.CacheDir,true)
-		if err != nil {
+func (b *BuildPackConfig) ExtractTarGZFilesWithoutBaseImage(baseTarGzipFile string) {
+	fullPath := path.Join(b.Opts.CacheDir,baseTarGzipFile)
+	for _, f := range util.FilterFiles(b.Opts.CacheDir, ".gz") {
+		if f != fullPath {
+			logrus.Infof("Tgz file to be extracted %s", f)
+			err := b.untar(f, b.Opts.CacheDir, true)
+			if err != nil {
 				panic(err)
 			}
+		}
 	}
 }
 
@@ -263,7 +265,7 @@ func (b *BuildPackConfig) untar(tarFilePath string, targetDir string, isGzip boo
 			break
 		}
 		if err != nil {
-			logrus.Fatalf("ExtractTarGz: Next() failed: %v", err)
+			logrus.Infof("ExtractTarGz: Next() failed: %v", err)
 		}
 
 		// the target location where the dir/file should be created
@@ -347,6 +349,24 @@ func (b *BuildPackConfig) FindBaseImageDigest() v1.Hash {
 		}
 	}
 	return digest
+}
+
+func (b *BuildPackConfig) LoadDescriptorAndConfig() (tarball.Manifest, error) {
+	var m tarball.Manifest
+	f, err := os.Open(path.Join(b.Opts.CacheDir,"manifest.json"))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.NewDecoder(f).Decode(&m); err != nil {
+		return nil, err
+	}
+
+	if &m == nil {
+		return nil, errors.New("no valid manifest.json in tarball")
+	}
+
+	return m, nil
 }
 
 func saveLayer(layer v1.Layer, path string) error {

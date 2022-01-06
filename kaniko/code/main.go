@@ -141,11 +141,20 @@ func main() {
 
 	logrus.Infof("Extract the content of the tarball file %s under the cache %s",b.Opts.TarPath,b.Opts.CacheDir)
 	b.ExtractImageTarFile(dstPath)
-	logrus.Info("Extract the laye file(s)")
-	b.ExtractTarGZFiles()
+	logrus.Info("Extract the layer file(s)")
+	//baseImageHash := b.FindBaseImageDigest()
+	//logrus.Infof("Hash of the base image is: %s",baseImageHash.String())
+	descriptor, err := b.LoadDescriptorAndConfig()
+	if (err != nil) {
+		panic(err)
+	}
 
-	logrus.Info("Read the manifest to get the sha of the new files created")
-
+	logrus.Infof("%+v\n", descriptor)
+	layers := descriptor[0].Layers
+/*	for i := 1; i < len(layers); i++ {
+		logrus.Infof("Layer: %s", layers[i])
+	}*/
+	b.ExtractTarGZFilesWithoutBaseImage(layers[0])
 
 	// Check if files exist
 	if (len(filesToSearch) > 0) {
