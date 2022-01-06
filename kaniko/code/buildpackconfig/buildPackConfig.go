@@ -104,7 +104,7 @@ func (b *BuildPackConfig) InitDefaults() {
 
 	// init the Kaniko options
 	b.Opts = config.KanikoOptions{
-		//CacheOptions:   config.CacheOptions{CacheDir: cacheDir},
+		CacheOptions:   config.CacheOptions{CacheDir: cacheDir},
 		DockerfilePath: dockerFilePath,
 		IgnoreVarRun:   true,
 		NoPush:         true,
@@ -122,10 +122,15 @@ func (b *BuildPackConfig) InitDefaults() {
 
 func (b *BuildPackConfig) BuildDockerFile() (err error) {
 
-	logrus.Debugf("Moving to kaniko home dir: %s", b.KanikoDir)
-	if err := os.Chdir(b.KanikoDir); err != nil {
+	// If we look to the Kaniko code, they are moving under the root dire directory
+	logrus.Debug("Moving to root dir")
+	if err := os.Chdir("/"); err != nil {
 		panic(err)
 	}
+	//logrus.Debugf("Moving to kaniko home dir: %s", b.KanikoDir)
+	//if err := os.Chdir(b.KanikoDir); err != nil {
+	//	panic(err)
+	//}
 
 	logrus.Debugf("Building the %s ...", b.DockerFileName)
 	logrus.Debugf("Options used %+v", b.Opts)
