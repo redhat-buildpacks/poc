@@ -40,7 +40,7 @@ jobs:
 
       - name: Deploy the buildah pod to perform a Dockerfile build
         working-directory: buildah
-        run: kubectl apply -f ./k8s/manifest.yml
+        run: kubectl apply -f ./k8s/manifest-cloud.yml
 
       - name: Check pod's status
         run: kubectl -n buildpack logs buildah-poc -c bud
