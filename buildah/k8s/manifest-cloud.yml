@@ -20,51 +20,49 @@ data:
     RUN echo "Good" > good.txt
     RUN echo "Bye" > bye.txt
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: buildah-poc
   namespace: buildpack
 spec:
-  volumes:
-    - name: cache
-      emptyDir: {}
-    - name: workspace
-      emptyDir: {}
-    - name: dockerfile-volume
-      configMap:
-        name: dockerfile
-  initContainers:
-    - name: bud
-      image: localhost:5000/buildah-app
-      env:
-      - name: LOGGING_FORMAT
-        value: "color"
-      - name: LOGGING_LEVEL
-        value: "info"
-      - name: ROOT_FS_DIR
-        value: "/"
-      - name: WORKSPACE_DIR
-        value: "/workspace"
-      - name: EXTRACT_LAYERS
-        value: "true"
-      - name:  FILES_TO_SEARCH
-        value: "good.txt"
-      workingDir: /workspace
-      command: [ "/buildah-app" ]
-      volumeMounts:
-      - name: cache
-        mountPath: /cache
-      - name: workspace
-        mountPath: /workspace
-      - name: dockerfile-volume
-        mountPath: /workspace/Dockerfile
-        subPath: Dockerfile
-      imagePullPolicy: Always
-  containers:
-    - name: completion
-      image: busybox:1.28
-      command: [ "/bin/sh","-c","--" ]
-      args: [ "while true; do sleep 30; done;" ]
-  serviceAccountName: buildpack
+  template:
+    spec:
+     volumes:
+       - name: cache
+         emptyDir: {}
+       - name: workspace
+         emptyDir: {}
+       - name: dockerfile-volume
+         configMap:
+           name: dockerfile
+     restartPolicy: Never
+     containers:
+       - name: bud
+         image: localhost:5000/buildah-app
+         env:
+         - name: LOGGING_FORMAT
+           value: "color"
+         - name: LOGGING_LEVEL
+           value: "info"
+         - name: ROOT_FS_DIR
+           value: "/"
+         - name: WORKSPACE_DIR
+           value: "/workspace"
+         - name: EXTRACT_LAYERS
+           value: "true"
+         - name:  FILES_TO_SEARCH
+           value: "good.txt"
+         workingDir: /workspace
+         command: [ "/buildah-app" ]
+         volumeMounts:
+         - name: cache
+           mountPath: /cache
+         - name: workspace
+           mountPath: /workspace
+         - name: dockerfile-volume
+           mountPath: /workspace/Dockerfile
+           subPath: Dockerfile
+         imagePullPolicy: Always
+     serviceAccountName: buildpack
 
