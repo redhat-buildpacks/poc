@@ -14,7 +14,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build the Buildah Poc
-        run: pushd buildah && ./hack/build.sh && popd
+        working-directory: buildah
+        run: ./hack/build.sh
 
       - name: clean resident local docker
         if: ${{ env.ACT }}
