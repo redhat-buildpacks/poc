@@ -1,10 +1,10 @@
 while true; do
-  if kubectl -n buildpack wait --timeout=-1s --for=condition=complete job/buildah-poc 2>/dev/null; then
+  if kubectl -n buildpack wait --timeout=300s --for=condition=complete job/buildah-poc 2>/dev/null; then
     job_result=0
     break
   fi
 
-  if kubectl -n buildpack wait --timeout=-1s --for=condition=failed job/buildah-poc 2>/dev/null; then
+  if kubectl -n buildpack wait --timeout=300s --for=condition=failed job/buildah-poc 2>/dev/null; then
     job_result=1
     break
   fi
