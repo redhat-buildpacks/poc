@@ -42,7 +42,7 @@ jobs:
         working-directory: buildah
         run: |
           kubectl apply -f ./k8s/manifest-cloud.yml
-          kubectl wait -n buildpack --for=condition=ContainersReady pod -ljob-name=buildah-poc 2>/dev/null
+          kubectl wait -n buildpack --for=condition=Ready pod -ljob-name=buildah-poc 2>/dev/null
           kubectl logs -n buildpack job/buildah-poc -f --ignore-errors=true
 
       - name: "Wait till job's finished and check status: complete or failed"
