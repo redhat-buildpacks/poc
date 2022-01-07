@@ -18,3 +18,4 @@ if [[ $job_result -eq 1 ]]; then
 fi
 
 echo "Job succeeded"
+exit 0
