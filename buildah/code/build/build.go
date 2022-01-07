@@ -25,6 +25,7 @@ type BuildahParameters struct {
 	StorageRunRootDir string
 	GraphDriverName   string
 	ExtractLayers     bool
+	RootFSDir         string
 }
 
 func InitOptions() *BuildahParameters {
@@ -53,6 +54,12 @@ func InitOptions() *BuildahParameters {
 		b.StorageRunRootDir = "/var/run/containers/storage"
 	}
 	logrus.Infof("STORAGE RUN ROOT PATH: %s", b.StorageRunRootDir)
+
+	b.RootFSDir = os.Getenv("ROOT_FS_DIR")
+	if b.RootFSDir == "" {
+		b.RootFSDir = "/"
+	}
+	logrus.Infof("ROOT FS DIR (where files should be extracted): %s", b.RootFSDir)
 
 	var transientMounts []string
 
@@ -98,8 +105,7 @@ func InitOptions() *BuildahParameters {
 
 func (b *BuildahParameters) ExtractTGZFile(path string) {
 	logrus.Infof("Tgz file to be extracted %s",path)
-	// TODO: Add a var to define the Root FS dir
-	err := b.untarFile(path, "/")
+	err := b.untarFile(path, b.RootFSDir)
 	if err != nil {
 		panic(err)
 	}

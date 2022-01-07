@@ -132,6 +132,8 @@ docker run \
   -it buildah-app
 ```
 
+**NOTE**: You can change the path where the files should be extracted using the env var `ROOT_FS_DIR`. Default is `/`
+
 ### Verify if files exist
 
 To check/control if files added from the layers exist under the root filesystem, please use the following `ENV` var `FILES_TO_SEARCH`

@@ -32,6 +32,8 @@ spec:
         value: "color"
       - name: LOGGING_LEVEL
         value: "trace"
+      - name: ROOT_FS_DIR
+        value: "/"
       - name: WORKSPACE_DIR
         value: "/workspace"
       - name: DOCKERFILE_NAME
