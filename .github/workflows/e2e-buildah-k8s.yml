@@ -42,8 +42,8 @@ jobs:
         working-directory: buildah
         run: kubectl apply -f ./k8s/manifest-cloud.yml
 
-      - name: Check pod's status
-        run: kubectl -n buildpack logs buildah-poc -c bud
+      - name: Wait till pod's status is running
+        run: kc -n buildpack wait --for=condition=ready pod buildah-poc
 
       - name: Delete cluster
         run: kind delete cluster
