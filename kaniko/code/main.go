@@ -151,7 +151,7 @@ func main() {
 
 	logrus.Infof("%+v\n", descriptor)
 	layers := descriptor[0].Layers
-/*	for i := 1; i < len(layers); i++ {
+	/*	for i := 1; i < len(layers); i++ {
 		logrus.Infof("Layer: %s", layers[i])
 	}*/
 	b.ExtractTarGZFilesWithoutBaseImage(layers[0])
