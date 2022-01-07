@@ -1,0 +1,31 @@
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches:
+      - main
+jobs:
+  tomcat_e2e_test:
+    runs-on: ubuntu-latest
+    env:
+      KIND_CL_NAME: e2e-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build the Buildah Poc
+        run: pushd buildah && ./hack/build.sh && popd
+
+      - name: clean resident local docker
+        if: ${{ env.ACT }}
+        continue-on-error: true
+        run: |
+          for DIMG in "$KIND_CL_NAME-control-plane "; do
+            docker stop $DIMG ; docker rm $DIMG ;
+          done ;
+          sleep 1
+      - name: Create Kubernetes Kind Cluster
+        uses: container-tools/kind-action@v1.7.0
+        with:
+          cluster_name: e2e-test
+          registry: false
