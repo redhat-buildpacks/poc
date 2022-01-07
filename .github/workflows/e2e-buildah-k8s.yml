@@ -38,11 +38,11 @@ jobs:
           docker tag buildah-app $REGISTRY/buildah-app
           docker push $REGISTRY/buildah-app
 
-      - name: Deploy the buildah pod to perform a Dockerfile build
+      - name: Deploy the buildah job to perform a Dockerfile build
         working-directory: buildah
         run: kubectl apply -f ./k8s/manifest-cloud.yml
 
-      - name: Wait till pod's status is running
+      - name: "Wait till job's finished and check status: complete or failed"
         working-directory: buildah
         run: ./hack/check_job_status.sh
 
