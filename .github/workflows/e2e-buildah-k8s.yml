@@ -7,7 +7,7 @@ on:
 jobs:
   buildah_e2e_test:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '#buildah') }}
+    if: ${{ contains(github.event.head_commit.message, '#buildah') }}
     env:
       KIND_CL_NAME: e2e-test
     steps:
