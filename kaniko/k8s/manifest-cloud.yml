@@ -24,7 +24,7 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: kaniko
+  name: kaniko-poc
   namespace: buildpack
 spec:
   template:
