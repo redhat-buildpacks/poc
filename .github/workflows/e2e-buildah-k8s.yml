@@ -5,6 +5,57 @@ on:
     branches:
       - main
 jobs:
+  kaniko_e2e_test:
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.event.head_commit.message, '#kaniko') }}
+    env:
+      KIND_CL_NAME: e2e-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build the Kaniko Poc
+        working-directory: kaniko
+        run: |
+          cd code
+          go mod vendor
+          cd ..
+          ./hack/build.sh
+
+      - name: Clean resident local docker
+        if: ${{ env.ACT }}
+        continue-on-error: true
+        run: |
+          for DIMG in "$KIND_CL_NAME-control-plane "; do
+            docker stop $DIMG ; docker rm $DIMG ;
+          done ;
+          sleep 1
+
+      - name: Create Kubernetes Kind Cluster
+        uses: container-tools/kind-action@v1.7.0
+        with:
+          cluster_name: e2e-test
+          registry: true
+
+      - name: Tag and push the image
+        run: |
+          docker tag kaniko-app $KIND_REGISTRY/kaniko-app
+          docker push $KIND_REGISTRY/kaniko-app
+
+      - name: Deploy the kaniko job to perform a Dockerfile build
+        working-directory: kaniko
+        run: |
+          kubectl apply -f ./k8s/manifest-cloud.yml
+          sleep 10s
+          kubectl get pods -n buildpack
+          kubectl logs -n buildpack job/kaniko-poc -f --ignore-errors=true
+
+      - name: "Wait till job's finished and check status: complete or failed"
+        working-directory: buildah
+        run: ./hack/check_job_status.sh
+
+      - name: Delete cluster
+        run: kind delete cluster
   buildah_e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#buildah') }}

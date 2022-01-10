@@ -1,0 +1,64 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: buildpack
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: buildpack
+  namespace: buildpack
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dockerfile
+  namespace: buildpack
+data:
+  Dockerfile: |
+    FROM registry.access.redhat.com/ubi8
+    RUN echo "Good" > good.txt
+    RUN echo "Bye" > bye.txt
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko
+  namespace: kaniko
+spec:
+  template:
+    spec:
+      volumes:
+        - name: cache
+          emptyDir: {}
+        - name: workspace
+          emptyDir: {}
+        - name: dockerfile-volume
+          configMap:
+            name: dockerfile
+      containers:
+      - name: build
+        image:  kind-registry:5000/kaniko-app
+        command: [ "/kaniko-app" ]
+        env:
+          - name: "EXTRACT_LAYERS"
+            value: "true"
+          - name: "IGNORE_PATHS"
+            value: "/var/run"
+          - name: "FILES_TO_SEARCH"
+            value: "good.txt"
+          - name: "LOGGING_LEVEL"
+            value: "info"
+          - name: "LOGGING_FORMAT"
+            value: "color"
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: cache
+            mountPath: /cache
+          - name: workspace
+            mountPath: /workspace
+          - name: dockerfile-volume
+            mountPath: /workspace/Dockerfile
+            subPath: Dockerfile
+      serviceAccountName: buildpack
