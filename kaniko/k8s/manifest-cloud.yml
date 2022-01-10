@@ -47,7 +47,7 @@ spec:
           - name: "IGNORE_PATHS"
             value: "/var/run"
           - name: "FILES_TO_SEARCH"
-            value: "good.txt"
+            value: "good.txt,bye.txt"
           - name: "LOGGING_LEVEL"
             value: "info"
           - name: "LOGGING_FORMAT"
