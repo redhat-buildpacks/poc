@@ -25,7 +25,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: kaniko
-  namespace: kaniko
+  namespace: buildpack
 spec:
   template:
     spec:
