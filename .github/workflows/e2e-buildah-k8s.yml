@@ -34,9 +34,8 @@ jobs:
 
       - name: Tag and push the image
         run: |
-          REGISTRY="localhost:5000"
-          docker tag buildah-app $REGISTRY/buildah-app
-          docker push $REGISTRY/buildah-app
+          docker tag buildah-app $KIND_REGISTRY/buildah-app
+          docker push $KIND_REGISTRY/buildah-app
 
       - name: Deploy the buildah job to perform a Dockerfile build
         working-directory: buildah
