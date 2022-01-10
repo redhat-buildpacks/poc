@@ -39,7 +39,7 @@ spec:
      restartPolicy: Never
      containers:
        - name: bud
-         image: localhost:5000/buildah-app
+         image: kind-registry:5000/buildah-app
          env:
          - name: LOGGING_FORMAT
            value: "color"
