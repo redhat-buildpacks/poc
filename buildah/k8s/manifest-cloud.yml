@@ -44,7 +44,7 @@ spec:
          - name: LOGGING_FORMAT
            value: "color"
          - name: LOGGING_LEVEL
-           value: "info"
+           value: "debug"
          - name: ROOT_FS_DIR
            value: "/"
          - name: WORKSPACE_DIR
