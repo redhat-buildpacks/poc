@@ -8,12 +8,10 @@ jobs:
   e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#gen') }}
-    env:
-      engine: github.event.head_commit.message
     steps:
       - name: set building engine
         run: |
-          echo "Engine: " ${{ env.engine}}
+          echo "Commit msg: " ${{ env.github.event.head_commit.message }}
   kaniko_e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#kaniko') }}
