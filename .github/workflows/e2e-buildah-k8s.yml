@@ -5,6 +5,15 @@ on:
     branches:
       - main
 jobs:
+  e2e_test:
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.event.head_commit.message, '#gen') }}
+    env:
+      engine: github.event.head_commit.message
+    steps:
+      - name: set building engine
+        run: |
+          echo "Engine: " ${{ env.engine}}
   kaniko_e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#kaniko') }}
