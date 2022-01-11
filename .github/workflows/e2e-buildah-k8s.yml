@@ -10,16 +10,24 @@ jobs:
     if: ${{ contains(github.event.head_commit.message, '#gen') }}
     env:
       COMMIT_MSG: ${{ github.event.head_commit.message }}
+      KIND_CL_NAME: e2e-test
     steps:
       - name: Set building engine
         run: |
-          echo "Commit msg: " $COMMIT_MSG
           if [[ "$COMMIT_MSG" == *"gen"* ]]; then
             echo "ENGINE=buildah"
           else
             echo "ENGINE=kaniko"
           fi
           echo "Engine set: $ENGINE"
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build the $ENGINE Poc
+        working-directory: $ENGINE
+        run: ./hack/build.sh
+
   kaniko_e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#kaniko') }}
@@ -31,11 +39,7 @@ jobs:
 
       - name: Build the Kaniko Poc
         working-directory: kaniko
-        run: |
-          cd code
-          go mod vendor
-          cd ..
-          ./hack/build.sh
+        run: ./hack/build.sh
 
       - name: Clean resident local docker
         if: ${{ env.ACT }}
