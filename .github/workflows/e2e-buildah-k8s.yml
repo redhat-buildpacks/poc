@@ -18,13 +18,13 @@ jobs:
           else
             echo "ENGINE=kaniko"
           fi
-          echo "Engine set: $ENGINE"
+          echo "Engine set: $env.ENGINE"
 
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build the $ENGINE Poc
-        working-directory: $ENGINE
+      - name: Build the $env.ENGINE Poc
+        working-directory: $env.ENGINE
         run: ./hack/build.sh
 
   kaniko_e2e_test:
