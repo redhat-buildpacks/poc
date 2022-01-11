@@ -14,7 +14,7 @@ jobs:
       - name: Set building engine
         run: |
           echo "Commit msg: " ${{ env.COMMIT_MSG }}
-          if [[ ${{ env.COMMIT_MSG }} == *"gen"* ]]; then
+          if [[ ${{ env.COMMIT_MSG }} == *"#gen"* ]]; then
             echo "ENGINE=buildah"
           else
             echo "ENGINE=kaniko"
