@@ -14,11 +14,10 @@ jobs:
       - name: Set building engine
         run: |
           if [[ "$COMMIT_MSG" == *"buildah"* ]]; then
-            echo "ENGINE=buildah"
+            echo "ENGINE=buildah" >> $GITHUB_ENV
           else
-            echo "ENGINE=kaniko"
+            echo "ENGINE=kaniko" >> $GITHUB_ENV
           fi
-          echo "Engine set: ${{ env.ENGINE }}"
 
       - name: Checkout
         uses: actions/checkout@v2
