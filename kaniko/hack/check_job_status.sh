@@ -9,6 +9,8 @@ while true; do
     break
   fi
 
+  kubectl -n buildpack get job/kaniko-poc -o yaml
+
   sleep 3
 done
 
