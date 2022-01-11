@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Set building engine
         run: |
-          if [[ "$COMMIT_MSG" == *"gen"* ]]; then
+          if [[ "$COMMIT_MSG" == *"buildah"* ]]; then
             echo "ENGINE=buildah"
           else
             echo "ENGINE=kaniko"
@@ -30,7 +30,7 @@ jobs:
 
   kaniko_e2e_test:
     runs-on: ubuntu-latest
-    if: ${{ contains(github.event.head_commit.message, '#kaniko') }}
+    if: ${{ contains(github.event.head_commit.message, '#kanikoo') }}
     env:
       KIND_CL_NAME: e2e-test
     steps:
