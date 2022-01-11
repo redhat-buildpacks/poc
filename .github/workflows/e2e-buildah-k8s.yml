@@ -8,10 +8,18 @@ jobs:
   e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#gen') }}
+    env:
+      COMMIT_MSG: github.event.head_commit.message
     steps:
-      - name: set building engine
+      - name: Set building engine
         run: |
-          echo "Commit msg: " ${{ env.github.event.head_commit.message }}
+          echo "Commit msg: " ${{ env.COMMIT_MSG }}
+          if [[ ${{ env.COMMIT_MSG }} == *"gen"* ]]; then
+            echo "ENGINE=buildah"
+          else
+            echo "ENGINE=kaniko"
+          fi
+          echo "Engine set: ${{ env.ENGINE }}"
   kaniko_e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#kaniko') }}
