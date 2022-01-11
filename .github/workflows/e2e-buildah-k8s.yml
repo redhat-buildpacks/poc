@@ -46,6 +46,45 @@ jobs:
           docker tag ${{ env.ENGINE }}-app $KIND_REGISTRY/${{ env.ENGINE }}-app
           docker push $KIND_REGISTRY/${{ env.ENGINE }}-app
 
+      - name: Deploy the ${{ env.ENGINE }} job to perform a Dockerfile build
+        working-directory: ${{ env.ENGINE }}
+        run: |
+          kubectl apply -f ./k8s/manifest-cloud.yml
+          sleep 10s
+          kubectl get pods -n buildpack
+          kubectl logs -n buildpack job/${{ env.ENGINE }}-poc -f --ignore-errors=true
+
+      - name: "Wait till job's finished and check status: complete or failed"
+        working-directory: ${{ env.ENGINE }}
+        # ./hack/check_job_status.sh
+        run: |
+          while true; do
+            if kubectl -n buildpack wait --timeout=300s --for=condition=complete job/${{ env.ENGINE }}-poc 2>/dev/null; then
+              job_result=0
+              break
+            fi
+
+            if kubectl -n buildpack wait --timeout=300s --for=condition=failed job/${{ env.ENGINE }}-poc 2>/dev/null; then
+              job_result=1
+              break
+            fi
+
+            kubectl -n buildpack get job/${{ env.ENGINE }}-poc -o yaml
+
+            sleep 3
+          done
+
+          if [[ $job_result -eq 1 ]]; then
+            echo "Job failed!"
+            exit 1
+          fi
+
+          echo "Job succeeded"
+          exit 0
+
+      - name: Delete cluster
+        run: kind delete cluster
+
   kaniko_e2e_test:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.head_commit.message, '#kanikoo') }}
