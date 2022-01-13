@@ -90,6 +90,4 @@ jobs:
       - name: Delete cluster
         run: kind delete cluster
 
-  clean:
-
 
