@@ -1,7 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: buildpack
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -9,16 +5,7 @@ metadata:
   name: buildpack
   namespace: buildpack
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dockerfile
-  namespace: buildpack
-data:
-  Dockerfile: |
-    FROM registry.access.redhat.com/ubi8
-    RUN echo "Good" > good.txt
-    RUN echo "Bye" > bye.txt
+# DON'T FORGET TO CREATE THE CONFIGMAP
 ---
 apiVersion: batch/v1
 kind: Job
