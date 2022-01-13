@@ -12,7 +12,7 @@ jobs:
       KIND_CL_NAME: e2e-test
     strategy:
       matrix:
-        dockerfile_name: [ ubi8-good-bye, ubuntu-wget ]
+        dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
     steps:
       - name: Set building engine
         run: |
