@@ -11,6 +11,7 @@ import (
 	"github.com/containers/image/v5/signature"
 	istorage "github.com/containers/image/v5/storage"
 	"github.com/containers/image/v5/transports/alltransports"
+	"github.com/containers/storage/pkg/unshare"
 	"github.com/redhat-buildpacks/poc/buildah/build"
 	"github.com/redhat-buildpacks/poc/buildah/logging"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
@@ -119,6 +120,7 @@ func main() {
 	if buildah.InitReexec() {
 		return
 	}
+	unshare.MaybeReexecUsingUserNamespace(true)
 
 	// Configure the Logger with ENV vars or default values
 	initLog()
