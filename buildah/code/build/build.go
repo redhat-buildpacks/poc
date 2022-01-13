@@ -70,7 +70,7 @@ func InitOptions() *BuildahParameters {
 	dateStamp := fmt.Sprintf("%d", time.Now().UnixNano())
 	buildahImage := fmt.Sprintf("buildpack-buildah:%s-%d", dateStamp, 1)
 
-	output := &bytes.Buffer{}
+	output := io.MultiWriter(os.Stderr, &bytes.Buffer{})
 
 	// Define image build options
 	b.BuildOptions = define.BuildOptions{
