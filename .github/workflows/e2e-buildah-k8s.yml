@@ -53,7 +53,7 @@ jobs:
         working-directory: ${{ env.ENGINE }}
         run: |
           kubectl create ns buildpack
-          kubectl create -n buildpack configmap dockerfile --from-file ./wks/${{ matrix.dockerfile_name }}
+          kubectl create -n buildpack configmap dockerfile --from-file=Dockerfile=./wks/${{ matrix.dockerfile_name }}
           echo "Build and parse the Dockerfile: ${{ matrix.dockerfile_name }}"
           kubectl apply -f ./k8s/manifest-cloud.yml
           sleep 10s
