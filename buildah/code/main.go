@@ -54,6 +54,7 @@ var (
 	extractLayers bool     // Extract layers from tgz files. Default is false
 	filesToSearch []string // List of files to search to check if they exist under the updated FS
 	opts		  globalOptions
+	b             *build.BuildahParameters //
 )
 
 type globalOptions struct {
@@ -151,8 +152,6 @@ func main() {
 		}
 	}
 
-	ctx := context.TODO()
-
 	// TODO: Check how we could continue to use the debugger as the following code exec a sub-command and by consequence it exits
 	//hasCapSysAdmin, err := unshare.HasCapSysAdmin()
 	//if err != nil {
@@ -161,7 +160,7 @@ func main() {
 	//unshare.MaybeReexecUsingUserNamespace(!hasCapSysAdmin)
 	// unshare.MaybeReexecUsingUserNamespace(false)
 
-	b := build.InitOptions()
+	b = build.InitOptions()
 	b.ExtractLayers = extractLayers
 
 	os.Setenv("BUILDAH_TEMP_DIR", b.TempDir)
@@ -189,77 +188,88 @@ func main() {
 		for _, dockerFile := range opts.metadata.Dockerfiles {
 			pathToDockerFile := filepath.Join(b.WorkspaceDir, dockerFile.Path)
 			logrus.Infof("Dockerfile path: %s", pathToDockerFile)
-			// GetStore attempts to find an already-created Store object matching the
-			// specified location and graph driver, and if it can't, it creates and
-			// initializes a new Store object, and the underlying storage that it controls.
-			store, err := storage.GetStore(b.StoreOptions)
-			if err != nil {
-				logrus.Fatal("error creating buildah storage !", err)
-			}
 
-			// Launch a timer to measure the time needed to parse/copy/extract
-			start := time.Now()
-
-			/* Parse the content of the Dockerfile to execute the different commands: FROM, RUN, ...
-			   Return the:
-			   - imageID: id of the new image created. String of 64 chars.
-			     NOTE: The first 12 chars corresponds to the `id` displayed using `sudo buildah --storage-driver vfs images`
-			   - digest: image repository name prefixed "localhost/". e.g: localhost/buildpack-buildah:TAG@sha256:64_CHAR_SHA
-			*/
-			imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, pathToDockerFile)
-			if err != nil {
-				logrus.Fatalf("Build image failed: %s", err)
-			}
-
-			logrus.Infof("Image id: %s", imageID)
-			logrus.Infof("Image digest: %s", digest.String())
-
-			/* Converts a URL-like image name to a types.ImageReference
-				   and create an imageSource
-			       NOTE: An imageSource is a service, possibly remote (= slow), to download components of a single image or a named image set (manifest list).
-			       This is primarily useful for copying images around; for examining their properties, Image (below)
-			*/
-			ref, err := istorage.Transport.NewStoreReference(store, nil, imageID)
-			if err != nil {
-				logrus.Fatalf("Error parsing the image source: %s", imageID, err)
-			}
-
-			// Show the content of the Image MANIFEST stored under the local storage
-			// ShowRawManifestContent(ref)
-
-			// Show the OCI content of the Image
-			//ShowOCIContent(ref)
-
-			logrus.Infof("Image repository id: %s", imageID[0:11])
-			logrus.Info("Image built successfully :-)")
-
-			// Let's try to copy the layers from the local storage to the local Cache volume as
-			// OCI folder
-			ociImageReference, err := CopyImage(ref, imageID)
-			if err != nil {
-				logrus.Fatalf("Image not copied from local storage to OCI path.", err)
-			}
-
-			// Get the path of the new layer file created under OCI:///
-			pathOCINewLayer := GetPathLayerTarGZIpfile(ociImageReference, imageID)
-
-			if b.ExtractLayers {
-				b.ExtractTGZFile(pathOCINewLayer)
-			}
-
-			// Check if files exist
-			if len(filesToSearch) > 0 {
-				util.FindFiles(filesToSearch)
-			}
-
-			// Time elapsed is ...
-			logrus.Infof("Time elapsed: %s", time.Since(start))
+			// Process now the Dockerfile
+			processDockerfile(pathToDockerFile)
 		}
 	} else {
 		// When no metadata.toml file is used, parse the dockerfile directly
 		dockerFileName := filepath.Join(b.WorkspaceDir, dockerfileNameToParse)
 		logrus.Infof("Dockerfile path: %s", dockerFileName)
+
+		// Process now the Dockerfile
+		processDockerfile(dockerFileName)
 	}
+}
+
+func processDockerfile(pathToDockerFile string) {
+	ctx := context.TODO()
+
+	// GetStore attempts to find an already-created Store object matching the
+	// specified location and graph driver, and if it can't, it creates and
+	// initializes a new Store object, and the underlying storage that it controls.
+	store, err := storage.GetStore(b.StoreOptions)
+	if err != nil {
+		logrus.Fatal("error creating buildah storage !", err)
+	}
+
+	// Launch a timer to measure the time needed to parse/copy/extract
+	start := time.Now()
+
+	/* Parse the content of the Dockerfile to execute the different commands: FROM, RUN, ...
+	   Return the:
+	   - imageID: id of the new image created. String of 64 chars.
+	     NOTE: The first 12 chars corresponds to the `id` displayed using `sudo buildah --storage-driver vfs images`
+	   - digest: image repository name prefixed "localhost/". e.g: localhost/buildpack-buildah:TAG@sha256:64_CHAR_SHA
+	*/
+	imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, pathToDockerFile)
+	if err != nil {
+		logrus.Fatalf("Build image failed: %s", err)
+	}
+
+	logrus.Infof("Image id: %s", imageID)
+	logrus.Infof("Image digest: %s", digest.String())
+
+	/* Converts a URL-like image name to a types.ImageReference
+		   and create an imageSource
+	       NOTE: An imageSource is a service, possibly remote (= slow), to download components of a single image or a named image set (manifest list).
+	       This is primarily useful for copying images around; for examining their properties, Image (below)
+	*/
+	ref, err := istorage.Transport.NewStoreReference(store, nil, imageID)
+	if err != nil {
+		logrus.Fatalf("Error parsing the image source: %s", imageID, err)
+	}
+
+	// Show the content of the Image MANIFEST stored under the local storage
+	// ShowRawManifestContent(ref)
+
+	// Show the OCI content of the Image
+	//ShowOCIContent(ref)
+
+	logrus.Infof("Image repository id: %s", imageID[0:11])
+	logrus.Info("Image built successfully :-)")
+
+	// Let's try to copy the layers from the local storage to the local Cache volume as
+	// OCI folder
+	ociImageReference, err := CopyImage(ref, imageID)
+	if err != nil {
+		logrus.Fatalf("Image not copied from local storage to OCI path.", err)
+	}
+
+	// Get the path of the new layer file created under OCI:///
+	pathOCINewLayer := GetPathLayerTarGZIpfile(ociImageReference, imageID)
+
+	if b.ExtractLayers {
+		b.ExtractTGZFile(pathOCINewLayer)
+	}
+
+	// Check if files exist
+	if len(filesToSearch) > 0 {
+		util.FindFiles(filesToSearch)
+	}
+
+	// Time elapsed is ...
+	logrus.Infof("Time elapsed: %s", time.Since(start))
 }
 
 // getPolicyContext returns a *signature.PolicyContext based on opts.
