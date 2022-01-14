@@ -12,7 +12,7 @@ func JsonIndent(desc string, in []byte) {
 	if err == nil {
 		logrus.Infof("%s: %s\n", desc, &buf)
 	} else {
-		logrus.Fatalf("Cannot indent the JSON raw content !",err)
+		logrus.Fatalf("Cannot indent the JSON raw content ! %s",err)
 	}
 }
 
@@ -21,7 +21,7 @@ func JsonMarshal(desc string, c interface{}) {
 	if err == nil {
 		logrus.Infof("%s: %s\n", desc, string(out))
 	} else {
-		logrus.Fatalf("Cannot marshal !",err)
+		logrus.Fatal("Cannot marshal !",err)
 	}
 }
 

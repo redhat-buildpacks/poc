@@ -3,6 +3,7 @@ module github.com/redhat-buildpacks/poc/buildah
 go 1.16
 
 require (
+    github.com/BurntSushi/toml v1.0.0
 	github.com/containers/buildah v1.23.1
 	github.com/containers/common v0.44.3 // indirect
 	github.com/containers/image/v5 v5.16.1
