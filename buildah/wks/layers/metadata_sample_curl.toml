@@ -7,13 +7,6 @@ id = "samples/curl"
 version = "0.0.1"
 extension = true
 
-[[buildpacks]]
-api = "0.7"
-homepage = "https://github.com/buildpacks/samples/tree/main/extensions/rebasable"
-id = "samples/rebasable"
-version = "0.0.1"
-extension = true
-
 [[dockerfiles]]
 extension_id = "samples/curl"
 path = "/layers/samples_curl/Dockerfile"
@@ -27,9 +20,3 @@ value = "some-arg-build-value"
 [[dockerfiles.args]]
 name = "some_arg"
 value = "some-arg-launch-value"
-
-[[dockerfiles]]
-extension_id = "samples/rebasable"
-path = "/layers/samples_rebasable/Dockerfile"
-build = true
-run = true

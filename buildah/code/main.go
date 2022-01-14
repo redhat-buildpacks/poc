@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"github.com/containers/buildah"
 	"github.com/containers/buildah/imagebuildah"
 	"github.com/containers/image/v5/copy"
@@ -14,6 +15,7 @@ import (
 	"github.com/containers/storage/pkg/unshare"
 	"github.com/redhat-buildpacks/poc/buildah/build"
 	"github.com/redhat-buildpacks/poc/buildah/logging"
+	"github.com/redhat-buildpacks/poc/buildah/model"
 	"github.com/redhat-buildpacks/poc/buildah/parse"
 	"github.com/redhat-buildpacks/poc/buildah/util"
 	"strconv"
@@ -51,19 +53,21 @@ var (
 	logTimestamp  bool     // Timestamp in log output
 	extractLayers bool     // Extract layers from tgz files. Default is false
 	filesToSearch []string // List of files to search to check if they exist under the updated FS
+	opts		  globalOptions
 )
 
 type globalOptions struct {
-	debug              bool                    // Enable debug output
-	policyPath         string                  // Path to a signature verification policy file
-	insecurePolicy     bool                    // Use an "allow everything" signature verification policy
-	registriesDirPath  string                  // Path to a "registries.d" registry configuration directory
-	overrideArch       string                  // Architecture to use for choosing images, instead of the runtime one
-	overrideOS         string                  // OS to use for choosing images, instead of the runtime one
-	overrideVariant    string                  // Architecture variant to use for choosing images, instead of the runtime one
-	commandTimeout     time.Duration           // Timeout for the command execution
-	registriesConfPath string                  // Path to the "registries.conf" file
-	tmpDir             string                  // Path to use for big temporary files
+	debug              bool           // Enable debug output
+	policyPath         string         // Path to a signature verification policy file
+	insecurePolicy     bool           // Use an "allow everything" signature verification policy
+	registriesDirPath  string         // Path to a "registries.d" registry configuration directory
+	overrideArch       string         // Architecture to use for choosing images, instead of the runtime one
+	overrideOS         string         // OS to use for choosing images, instead of the runtime one
+	overrideVariant    string         // Architecture variant to use for choosing images, instead of the runtime one
+	commandTimeout     time.Duration  // Timeout for the command execution
+	registriesConfPath string         // Path to the "registries.conf" file
+	tmpDir             string         // Path to use for big temporary files
+	metadata           model.Metadata // Metadata file containing the data populated by the Lifecycle builder
 }
 
 func initLog() {
@@ -128,8 +132,11 @@ func main() {
 	// Init the variables of the application using the ENV var
 	initGlobalVar()
 
+	// TODO: To be reviewed and perhaps merged with initGlobalVar
+	opts := initGlobalOptions()
+
 	if _, ok := os.LookupEnv("DEBUG"); ok && (len(os.Args) <= 1 || os.Args[1] != "from-debugger") {
-		args := []string {
+		args := []string{
 			"--listen=:2345",
 			"--headless=true",
 			"--api-version=2",
@@ -160,85 +167,99 @@ func main() {
 	os.Setenv("BUILDAH_TEMP_DIR", b.TempDir)
 	logrus.Infof("Buildah tempdir: %s", b.TempDir)
 
+	metadatafileNameToParse := os.Getenv("METADATA_FILE_NAME")
+
 	dockerfileNameToParse := os.Getenv("DOCKERFILE_NAME")
-	if (dockerfileNameToParse == "") {
+	if dockerfileNameToParse == "" {
 		dockerfileNameToParse = "Dockerfile"
 	}
 
-	dockerFileName := filepath.Join(b.WorkspaceDir, dockerfileNameToParse)
-	logrus.Infof("Dockerfile path: %s", dockerFileName)
-
-	// storeOptions, err := storage.DefaultStoreOptions(false,0)
-
-	// GetStore attempts to find an already-created Store object matching the
-	// specified location and graph driver, and if it can't, it creates and
-	// initializes a new Store object, and the underlying storage that it controls.
-	store, err := storage.GetStore(b.StoreOptions)
-	if err != nil {
-		logrus.Fatal("error creating buildah storage !", err)
-	}
-
-	// Launch a timer to measure the time needed to parse/copy/extract
-	start := time.Now()
-
-	/* Parse the content of the Dockerfile to execute the different commands: FROM, RUN, ...
-	   Return the:
-	   - imageID: id of the new image created. String of 64 chars.
-	     NOTE: The first 12 chars corresponds to the `id` displayed using `sudo buildah --storage-driver vfs images`
-	   - digest: image repository name prefixed "localhost/". e.g: localhost/buildpack-buildah:TAG@sha256:64_CHAR_SHA
-	*/
-	imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, dockerFileName)
-	if err != nil {
-		logrus.Fatalf("Build image failed: %s", err)
-	}
-	err = reapChildProcesses()
+	// TODO: Check how to use this function using DLV debugger
+	err := reapChildProcesses()
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	logrus.Infof("Image id: %s", imageID)
-	logrus.Infof("Image digest: %s", digest.String())
+	// Parse the Metadata toml file
+	if metadatafileNameToParse != "" {
+		// TODO : Create a var to specify the layers path
+		if _, err := toml.DecodeFile(filepath.Join(b.WorkspaceDir, "layers", metadatafileNameToParse), &opts.metadata); err != nil {
+			logrus.Fatal(err)
+		}
+		for _, dockerFile := range opts.metadata.Dockerfiles {
+			pathToDockerFile := filepath.Join(b.WorkspaceDir, dockerFile.Path)
+			logrus.Infof("Dockerfile path: %s", pathToDockerFile)
+			// GetStore attempts to find an already-created Store object matching the
+			// specified location and graph driver, and if it can't, it creates and
+			// initializes a new Store object, and the underlying storage that it controls.
+			store, err := storage.GetStore(b.StoreOptions)
+			if err != nil {
+				logrus.Fatal("error creating buildah storage !", err)
+			}
 
-	/* Converts a URL-like image name to a types.ImageReference
-		   and create an imageSource
-	       NOTE: An imageSource is a service, possibly remote (= slow), to download components of a single image or a named image set (manifest list).
-	       This is primarily useful for copying images around; for examining their properties, Image (below)
-	*/
-	ref, err := istorage.Transport.NewStoreReference(store, nil, imageID)
-	if err != nil {
-		logrus.Fatalf("Error parsing the image source: %s", imageID, err)
+			// Launch a timer to measure the time needed to parse/copy/extract
+			start := time.Now()
+
+			/* Parse the content of the Dockerfile to execute the different commands: FROM, RUN, ...
+			   Return the:
+			   - imageID: id of the new image created. String of 64 chars.
+			     NOTE: The first 12 chars corresponds to the `id` displayed using `sudo buildah --storage-driver vfs images`
+			   - digest: image repository name prefixed "localhost/". e.g: localhost/buildpack-buildah:TAG@sha256:64_CHAR_SHA
+			*/
+			imageID, digest, err := imagebuildah.BuildDockerfiles(ctx, store, b.BuildOptions, pathToDockerFile)
+			if err != nil {
+				logrus.Fatalf("Build image failed: %s", err)
+			}
+
+			logrus.Infof("Image id: %s", imageID)
+			logrus.Infof("Image digest: %s", digest.String())
+
+			/* Converts a URL-like image name to a types.ImageReference
+				   and create an imageSource
+			       NOTE: An imageSource is a service, possibly remote (= slow), to download components of a single image or a named image set (manifest list).
+			       This is primarily useful for copying images around; for examining their properties, Image (below)
+			*/
+			ref, err := istorage.Transport.NewStoreReference(store, nil, imageID)
+			if err != nil {
+				logrus.Fatalf("Error parsing the image source: %s", imageID, err)
+			}
+
+			// Show the content of the Image MANIFEST stored under the local storage
+			// ShowRawManifestContent(ref)
+
+			// Show the OCI content of the Image
+			//ShowOCIContent(ref)
+
+			logrus.Infof("Image repository id: %s", imageID[0:11])
+			logrus.Info("Image built successfully :-)")
+
+			// Let's try to copy the layers from the local storage to the local Cache volume as
+			// OCI folder
+			ociImageReference, err := CopyImage(ref, imageID)
+			if err != nil {
+				logrus.Fatalf("Image not copied from local storage to OCI path.", err)
+			}
+
+			// Get the path of the new layer file created under OCI:///
+			pathOCINewLayer := GetPathLayerTarGZIpfile(ociImageReference, imageID)
+
+			if b.ExtractLayers {
+				b.ExtractTGZFile(pathOCINewLayer)
+			}
+
+			// Check if files exist
+			if len(filesToSearch) > 0 {
+				util.FindFiles(filesToSearch)
+			}
+
+			// Time elapsed is ...
+			logrus.Infof("Time elapsed: %s", time.Since(start))
+		}
+	} else {
+		// When no metadata.toml file is used, parse the dockerfile directly
+		dockerFileName := filepath.Join(b.WorkspaceDir, dockerfileNameToParse)
+		logrus.Infof("Dockerfile path: %s", dockerFileName)
 	}
-
-	// Show the content of the Image MANIFEST stored under the local storage
-	// ShowRawManifestContent(ref)
-
-	// Show the OCI content of the Image
-	//ShowOCIContent(ref)
-
-	logrus.Infof("Image repository id: %s",imageID[0:11])
-	logrus.Info("Image built successfully :-)")
-
-	// Let's try to copy the layers from the local storage to the local Cache volume as
-	// OCI folder
-	ociImageReference, err := CopyImage(ref, imageID)
-	if (err != nil) {
-		logrus.Fatalf("Image not copied from local storage to OCI path.",err)
-	}
-
-	// Get the path of the new layer file created under OCI:///
-	pathOCINewLayer := GetPathLayerTarGZIpfile(ociImageReference, imageID)
-
-	if(b.ExtractLayers) {
-		b.ExtractTGZFile(pathOCINewLayer)
-	}
-
-	// Check if files exist
-	if (len(filesToSearch) > 0) {
-		util.FindFiles(filesToSearch)
-	}
-
-	// Time elapsed is ...
-	logrus.Infof("Time elapsed: %s",time.Since(start))
 }
 
 // getPolicyContext returns a *signature.PolicyContext based on opts.
@@ -272,7 +293,7 @@ func ShowRawManifestContent(ref types.ImageReference) {
 	if err != nil {
 		logrus.Fatalf("Error while getting the raw manifest", err)
 	}
-	parse.JsonIndent("Image manifest",rawManifest)
+	parse.JsonIndent("Image manifest", rawManifest)
 }
 
 func ShowOCIContent(ref types.ImageReference) {
@@ -288,11 +309,10 @@ func ShowOCIContent(ref types.ImageReference) {
 	if err != nil {
 		logrus.Fatalf("Error parsing OCI Config", err)
 	}
-	parse.JsonMarshal("OCI Config",config)
+	parse.JsonMarshal("OCI Config", config)
 }
 
 func CopyImage(srcRef types.ImageReference, imageID string) (types.ImageReference, error) {
-	opts := initGlobalOptions()
 
 	policyContext, err := opts.getPolicyContext()
 	if err != nil {
@@ -320,19 +340,18 @@ func CopyImage(srcRef types.ImageReference, imageID string) (types.ImageReferenc
 		OciEncryptConfig:      nil,
 	})
 
-
 	if err != nil {
 		return nil, err
 	} else {
-		logrus.Infof("Image copied to %s",destURL)
+		logrus.Infof("Image copied to %s", destURL)
 	}
 	return destRef, nil
 }
 
 func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) string {
-	src, err := destRef.NewImageSource(context.TODO(),nil)
+	src, err := destRef.NewImageSource(context.TODO(), nil)
 	if err != nil {
-		logrus.Fatalf("Image source cannot be created",err)
+		logrus.Fatalf("Image source cannot be created", err)
 	}
 
 	defer func() {
@@ -346,7 +365,7 @@ func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) strin
 
 	img, err := image.FromUnparsedImage(context.TODO(), nil, image.UnparsedInstance(src, nil))
 	if err != nil {
-		logrus.Fatalf("Error parsing manifest for image",err)
+		logrus.Fatalf("Error parsing manifest for image", err)
 	}
 	// Get the layers from the source and log the Layer SHA
 	blobs := img.LayerInfos()
@@ -357,20 +376,20 @@ func GetPathLayerTarGZIpfile(destRef types.ImageReference, imageID string) strin
 	// Get the last layer from the Layers as it corresponds to our new image
 	lastLayer := blobs[len(blobs)-1]
 	sha := lastLayer.Digest.Hex()
-	logrus.Infof("Last layer: %s",sha)
+	logrus.Infof("Last layer: %s", sha)
 	pathTarGZipLayer := "/cache/" + imageID[0:11] + "/blobs/sha256/" + sha
-	logrus.Infof("Path to the TarGzipLayer file: %s",pathTarGZipLayer)
+	logrus.Infof("Path to the TarGzipLayer file: %s", pathTarGZipLayer)
 
 	return pathTarGZipLayer
 }
 
-func initGlobalOptions() (*globalOptions) {
+func initGlobalOptions() *globalOptions {
 	return &globalOptions{}
 }
 
 // parseManifestFormat parses format parameter for copy and sync command.
 // It returns string value to use as manifest MIME type
-func parseManifestFormat(manifestFormat string) (string) {
+func parseManifestFormat(manifestFormat string) string {
 	switch manifestFormat {
 	case "oci":
 		return imgspecv1.MediaTypeImageManifest
