@@ -2,34 +2,38 @@ processes = []
 
 [[buildpacks]]
 api = "0.7"
-homepage = "https://github.com/buildpacks/samples/tree/main/extensions/curl"
-id = "samples/curl"
+homepage = "https://github.com/buildpacks/sample/tree/main/extensions/curl"
+id = "sample/curl"
 version = "0.0.1"
 extension = true
 
 [[buildpacks]]
 api = "0.7"
-homepage = "https://github.com/buildpacks/samples/tree/main/extensions/rebasable"
-id = "samples/rebasable"
+homepage = "https://github.com/buildpacks/sample/tree/main/extensions/rebasable"
+id = "sample/rebasable"
 version = "0.0.1"
 extension = true
 
 [[dockerfiles]]
-extension_id = "samples/curl"
-path = "/layers/samples_curl/Dockerfile"
+extension_id = "sample/curl"
+path = "/layers/curl/Dockerfile"
 build = true
 run = true
 
-[[dockerfiles.args]]
+[[dockerfiles.args.build]]
 name = "some_arg"
 value = "some-arg-build-value"
 
-[[dockerfiles.args]]
+[[dockerfiles.args.build]]
+name = "base_image"
+value = "ubuntu"
+
+[[dockerfiles.args.run]]
 name = "some_arg"
 value = "some-arg-launch-value"
 
 [[dockerfiles]]
-extension_id = "samples/rebasable"
-path = "/layers/samples_rebasable/Dockerfile"
+extension_id = "sample/rebasable"
+path = "/layers/rebasable/Dockerfile"
 build = true
 run = true

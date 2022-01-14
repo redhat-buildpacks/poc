@@ -167,6 +167,7 @@ func main() {
 	logrus.Infof("Buildah tempdir: %s", b.TempDir)
 
 	metadatafileNameToParse := os.Getenv("METADATA_FILE_NAME")
+	logrus.Infof("METADATA TOML FILE: %s", metadatafileNameToParse)
 
 	dockerfileNameToParse := os.Getenv("DOCKERFILE_NAME")
 	if dockerfileNameToParse == "" {
@@ -183,11 +184,19 @@ func main() {
 	if metadatafileNameToParse != "" {
 		// TODO : Create a var to specify the layers path
 		if _, err := toml.DecodeFile(filepath.Join(b.WorkspaceDir, "layers", metadatafileNameToParse), &opts.metadata); err != nil {
+			logrus.Infof("METADATA toml path: %s",filepath.Join(b.WorkspaceDir, "layers", metadatafileNameToParse))
 			logrus.Fatal(err)
 		}
 		for _, dockerFile := range opts.metadata.Dockerfiles {
 			pathToDockerFile := filepath.Join(b.WorkspaceDir, dockerFile.Path)
 			logrus.Infof("Dockerfile path: %s", pathToDockerFile)
+
+			// Set up the Build args to be used by Buildah
+			var argMap = make(map[string]string)
+			for _, buildArg := range dockerFile.Args.BuildArg {
+				argMap[buildArg.Key] = buildArg.Value
+			}
+			b.BuildOptions.Args = argMap
 
 			// Process now the Dockerfile
 			processDockerfile(pathToDockerFile)

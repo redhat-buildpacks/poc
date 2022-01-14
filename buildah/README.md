@@ -6,6 +6,7 @@ Table of Contents
     * [Vagrant](#vagrant)
     * [Container](#container)
     * [Process a different Dockerfile](#process-a-different-dockerfile)
+    * [CNB Build args](#cnb-build-args)
     * [Use a metadata.toml file](#use-a-metadatatoml-file)
     * [Extract the new layer created](#extract-the-new-layer-created)
     * [Verify if files exist](#verify-if-files-exist)
@@ -131,6 +132,31 @@ docker run \
   -e WORKSPACE_DIR=/wks \
   -e LOGGING_LEVEL=debug \
   -e DOCKERFILE_NAME="Dockerfile-1" \
+  -v $(pwd)/wks:/wks \
+  -v $(pwd)/cache:/cache \
+  -it buildah-app
+```
+
+### CNB Build args
+
+When the Dockerfile contains some `ARG arg_value` such as this is the case using a buildpack image
+
+```dockerfile
+ARG base_image
+FROM ${base_image}
+...
+```
+then, we must pass them as `ENV vars` to the container. Our application will then convert the ENV var into TODO
+
+```bash
+docker run \
+  --security-opt seccomp=unconfined \
+  -e GRAPH_DRIVER=vfs \
+  -e WORKSPACE_DIR=/wks \
+  -e LOGGING_LEVEL=debug \
+  -e LOGGING_FORMAT=color \
+  -e base_image="ubuntu:bionic" \
+  -e METADATA_FILE_NAME="metadata_sample_curl.toml" \
   -v $(pwd)/wks:/wks \
   -v $(pwd)/cache:/cache \
   -it buildah-app

@@ -1,5 +1,5 @@
-#ARG base_image
-#FROM ${base_image}
+ARG base_image
+FROM ${base_image}
 
 FROM ubuntu
 
