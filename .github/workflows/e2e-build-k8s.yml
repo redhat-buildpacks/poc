@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
-        dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
-    steps:
+        # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
+        dockerfile_name: [ Dockerfile ]
       - name: Set building engine
         run: |
           if [[ "$COMMIT_MSG" == *"buildah"* ]]; then
@@ -44,6 +44,7 @@ jobs:
         with:
           cluster_name: e2e-test
           registry: true
+          config: ./hack/kind-config.yml
 
       - name: Tag and push the image
         run: |
@@ -59,10 +60,15 @@ jobs:
       - name: Deploy the ${{ env.ENGINE }} job to perform a Dockerfile build
         working-directory: ${{ env.ENGINE }}
         run: |
+          # kubectl create ns buildpack
+          # kubectl create -n buildpack configmap dockerfile --from-file=Dockerfile=./wks/${{ matrix.dockerfile_name }}
+          # echo "Build and parse the Dockerfile: ${{ matrix.dockerfile_name }}"
+          # kubectl apply -f ./k8s/manifest-cloud.yml
+
           kubectl create ns buildpack
-          kubectl create -n buildpack configmap dockerfile --from-file=Dockerfile=./wks/${{ matrix.dockerfile_name }}
+          helm -n buildpack install buildah-poc -f values.yaml --set dockerfilenameToBuild=${{ matrix.dockerfile_name }} ./k8s/helm
           echo "Build and parse the Dockerfile: ${{ matrix.dockerfile_name }}"
-          kubectl apply -f ./k8s/manifest-cloud.yml
+
           sleep 10s
           kubectl get pods -n buildpack
           kubectl logs -n buildpack job/${{ env.ENGINE }}-poc -f --ignore-errors=true

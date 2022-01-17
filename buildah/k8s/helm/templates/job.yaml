@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "buildah-poc.fullname" . }}
+  labels:
+    {{- include "buildah-poc.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      volumes:
+        - name: cache
+          emptyDir: {}
+        - name: workspace
+          hostPath:
+            path: "/workspace"
+      serviceAccountName: {{ include "buildah-poc.serviceAccountName" . }}
+      restartPolicy: Never
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: LOGGING_FORMAT
+              value: "color"
+            - name: LOGGING_LEVEL
+              value: "debug"
+            - name: ROOT_FS_DIR
+              value: "/"
+            - name: WORKSPACE_DIR
+              value: "/workspace"
+            - name: EXTRACT_LAYERS
+              value: "true"
+            - name:  FILES_TO_SEARCH
+              value: "good.txt"
+            - name: DOCKERFILE_NAME
+              value: {{ .Values.dockerfilenameToBuild }}
+          workingDir: /workspace
+          command: [ "/buildah-app" ]
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+            - name: workspace
+              mountPath: /workspace
+

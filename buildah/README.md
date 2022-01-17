@@ -349,3 +349,14 @@ To delete the pod, do
 ```bash
 kubectl delete -f k8s/manifest.yml
 ```
+
+### Helm
+
+```bash
+pushd k8s/helm
+kubectl create ns buildpack
+helm -n buildpack install -f values.yaml buildah-poc .
+helm -n buildpack uninstall buildah-poc
+kubectl delete ns buildpack
+popd
+```
