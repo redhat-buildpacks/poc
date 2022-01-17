@@ -67,9 +67,11 @@ jobs:
           # kubectl apply -f ./k8s/manifest-cloud.yml
 
           kubectl create ns buildpack
-          helm -n buildpack install buildah-poc -f values.yaml --set dockerfilenameToBuild=${{ matrix.dockerfile_name }} ./k8s/helm
-          echo "Build and parse the Dockerfile: ${{ matrix.dockerfile_name }}"
+          pushd k8s/helm
+          helm -n buildpack install buildah-poc -f values.yaml --set dockerfilenameToBuild=${{ matrix.dockerfile_name }} .
+          popd
 
+          echo "Building and parsing the Dockerfile: ${{ matrix.dockerfile_name }} ..."
           sleep 10s
           kubectl get pods -n buildpack
           kubectl logs -n buildpack job/${{ env.ENGINE }}-poc -f --ignore-errors=true
