@@ -40,6 +40,8 @@ spec:
            value: "true"
          - name:  FILES_TO_SEARCH
            value: "good.txt"
+         - name: DOCKERFILE_NAME
+           value: "Dockerfile"
          workingDir: /workspace
          command: [ "/buildah-app" ]
          volumeMounts:
