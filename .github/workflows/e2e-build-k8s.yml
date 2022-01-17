@@ -42,11 +42,10 @@ jobs:
 
       - name: Create Kubernetes Kind Cluster
         uses: container-tools/kind-action@v1.7.0
-        working-directory: ${{ env.ENGINE }}
         with:
           cluster_name: e2e-test
           registry: true
-          config: ./hack/kind-config.yml
+          config: ./${{ env.ENGINE }}/hack/kind-config.yml
 
       - name: Tag and push the image
         run: |
