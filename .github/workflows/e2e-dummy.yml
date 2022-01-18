@@ -30,7 +30,6 @@ jobs:
           cluster_name: e2e-test
           registry: true
           config: ./${{ env.ENGINE }}/hack/kind-config.yml
-          log_level: 9
 
       - name: Tag and push the image
         run: |
@@ -40,10 +39,41 @@ jobs:
 
       - name: Deploy a k8s hello app
         run: |
-          kubectl create deployment hello-server --image=kind-registry:5000/hello-app:1.0
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: hello
+            labels:
+              app: hello
+          spec:
+            volumes:
+              - name: workspace
+                hostPath:
+                  path: "/workspace"
+            restartPolicy: Never
+            initContainers:
+              - name: dummy
+                image: alpine:3
+                command: [ "/bin/sh","-c" ]
+                args:
+                  - |
+                    ls -la /workspace
+                volumeMounts:
+                  - name: workspace
+                    mountPath: /workspace
+            containers:
+               - name: bud
+                 image: kind-registry:5000/hello-app:1.0
+                 volumeMounts:
+                   - name: workspace
+                     mountPath: /workspace
+          EOF
+
+          kubectl logs -lapp=hello -c dummy
 
           while true; do
-            if kubectl -n default wait --for=condition=ready pod -lapp=hello-server 2>/dev/null; then
+            if kubectl -n default wait --for=condition=ready pod -lapp=hello 2>/dev/null; then
               pod_status=0
               break
             fi
