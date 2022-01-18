@@ -7,7 +7,7 @@ containerdConfigPatches:
 nodes:
   - role: control-plane
     extraMounts:
-      - hostPath: ${{ github.workspace }}/${{ env.ENGINE }} /wks
+      - hostPath: ${{ github.workspace }}/${{ env.ENGINE }}/wks
         containerPath: /workspace
     extraPortMappings:
       - containerPort: 80
