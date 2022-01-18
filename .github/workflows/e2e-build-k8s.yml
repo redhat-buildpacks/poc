@@ -63,7 +63,8 @@ jobs:
           kubectl create ns buildpack
           pushd k8s/helm
           # helm -n buildpack install buildah-poc -f values.yaml --set buildah.dockerfilenameToBuild=${{ matrix.dockerfile_name }} .
-          helm -n buildpack install buildah-poc -f values.yaml --set buildah.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set buildah.filesToSearch=${{ matrix.filesToSearch }}.
+          echo "Test using: ${{ matrix.metadataTomlFileName }} and ${{ matrix.filesToSearch }} to search"
+          helm -n buildpack install buildah-poc -f values.yaml --set buildah.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set buildah.filesToSearch=${{ matrix.filesToSearch }} .
           popd
 
           echo "Building and parsing the Dockerfile: ${{ matrix.dockerfile_name }} ..."
