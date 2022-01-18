@@ -16,6 +16,8 @@ jobs:
         include:
           - metadataTomlFileName: metadata_sample_curl.toml
             filesToSearch: curl
+          - metadataTomlFileName: metadata_ubuntu_cert.toml
+            filesToSearch: /usr/local/share/ca-certificates/server.crt
         # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
         # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
         dockerfile_name: [ ubi8-good-bye ubi8-nodejs ubuntu-wget ubuntu-cert ]
