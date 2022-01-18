@@ -15,19 +15,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Clean resident local docker
-        if: ${{ env.ACT }}
-        continue-on-error: true
-        run: |
-          for DIMG in "$KIND_CL_NAME-control-plane "; do
-            docker stop $DIMG ; docker rm $DIMG ;
-          done ;
-          sleep 1
-
-      - name: Create Kubernetes Kind Cluster
+      - name: Create Kubernetes using Kind tool
         uses: container-tools/kind-action@v1.7.0
         with:
-          cluster_name: e2e-test
           registry: true
           config: ./${{ env.ENGINE }}/hack/kind-config.yml
 
@@ -70,6 +60,7 @@ jobs:
                      mountPath: /workspace
           EOF
 
+          sleep 10s
           kubectl logs -lapp=hello -c dummy -f
 
           #while true; do
