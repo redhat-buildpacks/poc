@@ -13,10 +13,12 @@ jobs:
     if: ${{ contains(github.event.head_commit.message, '#buildah') || contains(github.event.head_commit.message, '#kaniko') }}
     strategy:
       matrix:
+        include:
+          - metadataTomlFileName: metadata_sample_curl.toml
+            filesToSearch: curl
         # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
         # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
         dockerfile_name: [ ubi8-good-bye ubi8-nodejs ubuntu-wget ubuntu-cert ]
-        metadataTomlFileName: [ metadata_sample_curl.toml ]
 
     steps:
       - name: Set building engine
@@ -61,7 +63,7 @@ jobs:
           kubectl create ns buildpack
           pushd k8s/helm
           # helm -n buildpack install buildah-poc -f values.yaml --set buildah.dockerfilenameToBuild=${{ matrix.dockerfile_name }} .
-          helm -n buildpack install buildah-poc -f values.yaml --set buildah.metadataTomlFileName=${{ matrix.metadataTomlFileName }} .
+          helm -n buildpack install buildah-poc -f values.yaml --set buildah.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set buildah.filesToSearch=${{ matrix.filesToSearch }}.
           popd
 
           echo "Building and parsing the Dockerfile: ${{ matrix.dockerfile_name }} ..."

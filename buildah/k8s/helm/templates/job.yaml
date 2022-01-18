@@ -23,14 +23,22 @@ spec:
             - name: LOGGING_LEVEL
               value: {{ .Values.buildah.loggingLevel }}
             {{- end }}
+            {{- if .Values.buildah.rootFSDir }}
             - name: ROOT_FS_DIR
-              value: "/"
+              value: {{ .Values.buildah.rootFSDir }}
+            {{- end }}
+            {{- if .Values.buildah.workspaceDir }}
             - name: WORKSPACE_DIR
-              value: "/workspace"
+              value: {{  .Values.buildah.workspaceDir }}
+            {{- end }}
+            {{- if .Values.buildah.extractLayers }}
             - name: EXTRACT_LAYERS
-              value: "true"
+              value: {{ .Values.buildah.extractLayers }}
+            {{- end }}
+            {{- if .Values.buildah.filesToSearch }}
             - name:  FILES_TO_SEARCH
-              value: "good.txt"
+              value: {{ .Values.buildah.filesToSearch }}
+            {{- end }}
             {{- if .Values.buildah.dockerfilenameToBuild }}
             - name: DOCKERFILE_NAME
               value: {{ .Values.buildah.dockerfilenameToBuild }}

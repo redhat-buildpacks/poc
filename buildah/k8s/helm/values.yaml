@@ -11,7 +11,10 @@ buildah:
   dockerfilenameToBuild: ""
   metadataTomlFileName: ""
   loggingLevel: info
-
+  extractLayers: true
+  rootFSDir: /
+  workspaceDir: /workspace
+  filesToSearch: ""
 
 imagePullSecrets: []
 nameOverride: ""
