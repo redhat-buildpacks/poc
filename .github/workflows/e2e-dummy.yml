@@ -19,13 +19,19 @@ jobs:
         uses: container-tools/kind-action@v1.7.0
         with:
           registry: true
-          config: ./${{ env.ENGINE }}/hack/kind-config.yml
+          # config: ./${{ env.ENGINE }}/hack/kind-config.yml
 
       - name: Tag and push the image
+        working-directory: ${{ env.ENGINE }}
         run: |
-          docker pull gcr.io/google-samples/hello-app:1.0
-          docker tag gcr.io/google-samples/hello-app:1.0 $KIND_REGISTRY/hello-app:1.0
-          docker push $KIND_REGISTRY/hello-app:1.0
+          cat <<'EOF' > Dockerfile
+          FROM gcr.io/google-samples/hello-app:1.0
+          COPY ./wks/ /workspace
+          EOF
+          docker build -t buildah-app .
+
+          docker tag hello-app $KIND_REGISTRY/hello-app
+          docker push $KIND_REGISTRY/hello-app
 
       - name: Deploy a k8s hello app
         run: |
@@ -39,8 +45,7 @@ jobs:
           spec:
             volumes:
               - name: workspace
-                hostPath:
-                  path: "/workspace"
+                empty: {}
             restartPolicy: Never
             initContainers:
               - name: dummy
@@ -48,19 +53,20 @@ jobs:
                 command: [ "/bin/sh","-c" ]
                 args:
                   - |
-                    ls -la /workspace
+                    ls -la /wks
                 volumeMounts:
                   - name: workspace
                     mountPath: /workspace
             containers:
                - name: bud
-                 image: kind-registry:5000/hello-app:1.0
+                 image: kind-registry:5000/hello-app
                  volumeMounts:
                    - name: workspace
                      mountPath: /workspace
           EOF
 
           sleep 10s
+
           kubectl logs -lapp=hello -c dummy -f
 
           #while true; do
