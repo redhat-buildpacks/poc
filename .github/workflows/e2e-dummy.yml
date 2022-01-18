@@ -45,7 +45,7 @@ jobs:
           spec:
             volumes:
               - name: workspace
-                empty: {}
+                emptyDir: {}
             restartPolicy: Never
             initContainers:
               - name: dummy
