@@ -29,8 +29,14 @@ spec:
               value: "true"
             - name:  FILES_TO_SEARCH
               value: "good.txt"
+            {{- if .Values.dockerfilenameToBuild -}}
             - name: DOCKERFILE_NAME
               value: {{ .Values.dockerfilenameToBuild }}
+            {{- end }}
+            {{- if .Values.metadataTomlFileName -}}
+            - name: METADATA_FILE_NAME
+              value: {{ .Values.metadataTomlFileName }}
+            {{- end }}
           workingDir: /workspace
           command: [ "/buildah-app" ]
           volumeMounts:

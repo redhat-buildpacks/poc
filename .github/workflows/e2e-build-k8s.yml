@@ -16,6 +16,7 @@ jobs:
         # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
         # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
         dockerfile_name: [ ubi8-good-bye ubi8-nodejs ubuntu-wget ubuntu-cert ]
+        metadataTomlFileName: [ metadata_sample_curl ]
 
     steps:
       - name: Set building engine
@@ -59,7 +60,8 @@ jobs:
         run: |
           kubectl create ns buildpack
           pushd k8s/helm
-          helm -n buildpack install buildah-poc -f values.yaml --set dockerfilenameToBuild=${{ matrix.dockerfile_name }} .
+          # helm -n buildpack install buildah-poc -f values.yaml --set dockerfilenameToBuild=${{ matrix.dockerfile_name }} .
+          helm -n buildpack install buildah-poc -f values.yaml --set metadataTomlFileName={{ matrix.metadataTomlFileName }} .
           popd
 
           echo "Building and parsing the Dockerfile: ${{ matrix.dockerfile_name }} ..."
