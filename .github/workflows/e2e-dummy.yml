@@ -19,7 +19,6 @@ jobs:
         uses: container-tools/kind-action@v1.7.0
         with:
           registry: true
-          # config: ./${{ env.ENGINE }}/hack/kind-config.yml
 
       - name: Tag and push the image
         working-directory: ${{ env.ENGINE }}
@@ -28,10 +27,10 @@ jobs:
           FROM gcr.io/google-samples/hello-app:1.0
           COPY ./wks/ /workspace
           EOF
-          docker build -t hello-app .
+          docker build -t my-hello-app:1.0 .
 
-          docker tag hello-app $KIND_REGISTRY/hello-app
-          docker push $KIND_REGISTRY/hello-app
+          docker tag my-hello-app:1.0 $KIND_REGISTRY/my-hello-app:1.0
+          docker push $KIND_REGISTRY/my-hello-app:1.0
 
       - name: Deploy a k8s hello app
         run: |
@@ -43,32 +42,22 @@ jobs:
             labels:
               app: hello
           spec:
-            volumes:
-              - name: workspace
-                emptyDir: {}
             restartPolicy: Never
             initContainers:
               - name: dummy
-                image: alpine:3
+                image: kind-registry:5000/my-hello-app:1.0
                 command: [ "/bin/sh","-c" ]
                 args:
                   - |
                     ls -la /
                     ls -la /workspace
-                volumeMounts:
-                  - name: workspace
-                    mountPath: /workspace
             containers:
                - name: bud
                  image: kind-registry:5000/hello-app
-                 volumeMounts:
-                   - name: workspace
-                     mountPath: /workspace
           EOF
 
           sleep 10s
-
-          kubectl logs -lapp=hello -c dummy -f
+          kubectl logs -n default -lapp=hello -c dummy --tail=-1
 
           #while true; do
           #  if kubectl -n default wait --for=condition=ready pod -lapp=hello 2>/dev/null; then
