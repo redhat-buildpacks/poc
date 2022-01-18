@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       KIND_CL_NAME: e2e-dummy
-    if: github.event.head_commit.message == *"dummy"*
+    if: github.event.head_commit.message == '*"dummy"*'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
