@@ -19,8 +19,10 @@ spec:
           env:
             - name: LOGGING_FORMAT
               value: "color"
+            {{- if .Values.buildah.loggingLevel }}
             - name: LOGGING_LEVEL
-              value: "debug"
+              value: {{ .Values.buildah.loggingLevel }}
+            {{- end }}
             - name: ROOT_FS_DIR
               value: "/"
             - name: WORKSPACE_DIR
@@ -29,13 +31,13 @@ spec:
               value: "true"
             - name:  FILES_TO_SEARCH
               value: "good.txt"
-            {{- if .Values.dockerfilenameToBuild }}
+            {{- if .Values.buildah.dockerfilenameToBuild }}
             - name: DOCKERFILE_NAME
-              value: {{ .Values.dockerfilenameToBuild }}
+              value: {{ .Values.buildah.dockerfilenameToBuild }}
             {{- end }}
-            {{- if .Values.metadataTomlFileName }}
+            {{- if .Values.buildah.metadataTomlFileName }}
             - name: METADATA_FILE_NAME
-              value: {{ .Values.metadataTomlFileName }}
+              value: {{ .Values.buildah.metadataTomlFileName }}
             {{- end }}
           workingDir: /workspace
           command: [ "/buildah-app" ]

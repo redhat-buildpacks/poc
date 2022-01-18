@@ -7,8 +7,11 @@ image:
   pullPolicy: IfNotPresent
   tag: ""
 
-dockerfilenameToBuild: ""
-metadataTomlFileName: ""
+buildah:
+  dockerfilenameToBuild: ""
+  metadataTomlFileName: ""
+  loggingLevel: info
+
 
 imagePullSecrets: []
 nameOverride: ""
