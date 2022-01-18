@@ -16,6 +16,7 @@ jobs:
         # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
         # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
         dockerfile_name: [ Dockerfile ]
+
     steps:
       - name: Set building engine
         run: |
