@@ -8,7 +8,7 @@ nodes:
   - role: control-plane
     extraMounts:
       - # hostPath: ${{ github.workspace }}/${{ env.ENGINE }}/wks
-        hostPath: ~/work/poc/poc/buildah/wks
+        hostPath: /
         containerPath: /workspace
     extraPortMappings:
       - containerPort: 80
