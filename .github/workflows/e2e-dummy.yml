@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       KIND_CL_NAME: e2e-dummy
+      ENGINE: buildah
     if: contains(github.event.head_commit.message, 'dummy')
     steps:
       - name: Checkout
@@ -28,6 +29,8 @@ jobs:
         with:
           cluster_name: e2e-test
           registry: true
+          config: ./${{ env.ENGINE }}/hack/kind-config.yml
+          log_level: 6
 
       - name: Tag and push the image
         run: |
