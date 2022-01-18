@@ -69,7 +69,6 @@ jobs:
 
           echo "Building and parsing the Dockerfile: ${{ matrix.dockerfile_name }} ..."
           sleep 10s
-          kubectl logs -n buildpack -ljob-name=buildah-poc -c dummy
           kubectl logs -n buildpack job/${{ env.ENGINE }}-poc -f --ignore-errors=true
 
       - name: "Wait till job's finished and check status: complete or failed"
