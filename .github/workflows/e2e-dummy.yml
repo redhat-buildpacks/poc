@@ -38,7 +38,22 @@ jobs:
       - name: Deploy a k8s hello app
         run: |
           kubectl create deployment hello-server --image=kind-registry:5000/hello-app:1.0
-          kubectl get pods -n default -w
+
+          while true; do
+            if kubectl -n default wait --for=condition=ready pod -lapp=hello-server 2>/dev/null; then
+              pod_status=0
+              break
+            fi
+            sleep 3
+          done
+
+          if [[ $pod_status -eq 1 ]]; then
+              echo "Pod failed to start!"
+              exit 1
+          fi
+
+          echo "Pod succeeded to start"
+          exit 0
 
       - name: Delete cluster
         run: kind delete cluster
