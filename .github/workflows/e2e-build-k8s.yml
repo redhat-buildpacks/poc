@@ -20,7 +20,6 @@ jobs:
             filesToSearch: /usr/local/share/ca-certificates/server.crt
         # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
         # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
-        dockerfile_name: [ ubi8-good-bye ubi8-nodejs ubuntu-wget ubuntu-cert ]
 
     steps:
       - name: Set building engine
@@ -69,7 +68,7 @@ jobs:
           helm -n buildpack install buildah-poc -f values.yaml --set buildah.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set buildah.filesToSearch=${{ matrix.filesToSearch }} .
           popd
 
-          echo "Building and parsing the Dockerfile: ${{ matrix.dockerfile_name }} ..."
+          echo "Starting to build/parse the Dockerfile..."
           sleep 10s
           kubectl logs -n buildpack job/${{ env.ENGINE }}-poc -f --ignore-errors=true
 
