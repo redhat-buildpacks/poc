@@ -7,7 +7,7 @@ containerdConfigPatches:
 nodes:
   - role: control-plane
     extraMounts:
-      - hostPath: $(pwd)/wks
+      - hostPath: $(pwd)/$ENGINE/wks
         containerPath: /workspace
     extraPortMappings:
       - containerPort: 80
