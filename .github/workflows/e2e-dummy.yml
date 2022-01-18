@@ -37,7 +37,6 @@ jobs:
 
       - name: Deploy a k8s hello app
         run: |
-          kubectl delete deployment hello-server
           kubectl create deployment hello-server --image=localhost:5000/hello-app:1.0
           kc get pods -n default -w
 
