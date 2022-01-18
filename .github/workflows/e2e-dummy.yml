@@ -30,7 +30,7 @@ jobs:
           cluster_name: e2e-test
           registry: true
           config: ./${{ env.ENGINE }}/hack/kind-config.yml
-          log_level: 6
+          log_level: 9
 
       - name: Tag and push the image
         run: |
