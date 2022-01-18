@@ -36,21 +36,12 @@ jobs:
         working-directory: ${{ env.ENGINE }}
         run: ./hack/build.sh
 
-      - name: Clean resident local docker
-        if: ${{ env.ACT }}
-        continue-on-error: true
-        run: |
-          for DIMG in "$KIND_CL_NAME-control-plane "; do
-            docker stop $DIMG ; docker rm $DIMG ;
-          done ;
-          sleep 1
-
-      - name: Create Kubernetes Kind Cluster
+      - name: Create Kubernetes cluster using Kind tool
         uses: container-tools/kind-action@v1.7.0
         with:
           cluster_name: e2e-test
           registry: true
-          config: ./${{ env.ENGINE }}/hack/kind-config.yml
+          # config: ./${{ env.ENGINE }}/hack/kind-config.yml
 
       - name: Tag and push the image
         run: |

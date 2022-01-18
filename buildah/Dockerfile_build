@@ -14,6 +14,7 @@ FROM base AS builder
 
 WORKDIR /go/src/buildah-app
 COPY ./code/ .
+COPY ./wks/ /workspace
 
 # Build the buildah app using compilation flags
 RUN go build -tags 'containers_image_openpgp exclude_graphdriver_devicemapper exclude_graphdriver_btrfs' -gcflags "all=-N -l" -o /buildah-app main.go
@@ -25,6 +26,7 @@ FROM registry.access.redhat.com/ubi8-minimal
 
 COPY --from=debugger /root/go/bin/dlv /usr/local/bin/
 COPY --from=builder /buildah-app /buildah-app
+COPY --from=builder /workspace /workspace
 
 COPY config/policy.json /etc/containers/
 COPY config/registries.conf /etc/containers/
