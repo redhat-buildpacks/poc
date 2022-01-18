@@ -37,7 +37,7 @@ jobs:
 
       - name: Deploy a k8s hello app
         run: |
-          kubectl create deployment hello-server --image=localhost:5000/hello-app:1.0
+          kubectl create deployment hello-server --image=kind-registry:5000/hello-app:1.0
           kubectl get pods -n default -w
 
       - name: Delete cluster
