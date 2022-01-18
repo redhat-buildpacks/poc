@@ -33,7 +33,7 @@ spec:
             {{- end }}
             {{- if .Values.buildah.extractLayers }}
             - name: EXTRACT_LAYERS
-              value: {{ .Values.buildah.extractLayers }}
+              value: {{ .Values.buildah.extractLayers | quote }}
             {{- end }}
             {{- if .Values.buildah.filesToSearch }}
             - name:  FILES_TO_SEARCH
