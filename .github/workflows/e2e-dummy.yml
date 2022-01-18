@@ -53,7 +53,8 @@ jobs:
                 command: [ "/bin/sh","-c" ]
                 args:
                   - |
-                    ls -la /wks
+                    ls -la /
+                    ls -la /workspace
                 volumeMounts:
                   - name: workspace
                     mountPath: /workspace
