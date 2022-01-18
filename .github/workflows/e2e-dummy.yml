@@ -57,23 +57,23 @@ jobs:
           EOF
 
           sleep 10s
-          kubectl logs -n default -lapp=hello -c dummy --tail=-1
+          # kubectl logs -n default -lapp=hello -c dummy --tail=-1
 
-          #while true; do
-          #  if kubectl -n default wait --for=condition=ready pod -lapp=hello 2>/dev/null; then
-          #    pod_status=0
-          #    break
-          #  fi
-          #  sleep 3
-          #done
-          #
-          #if [[ $pod_status -eq 1 ]]; then
-          #    echo "Pod failed to start!"
-          #    exit 1
-          #fi
-          #
-          #echo "Pod succeeded to start"
-          #exit 0
+          while true; do
+            if kubectl -n default wait --for=condition=ready pod -lapp=hello 2>/dev/null; then
+              pod_status=0
+              break
+            fi
+            sleep 3
+          done
+
+          if [[ $pod_status -eq 1 ]]; then
+              echo "Pod failed to start!"
+              exit 1
+          fi
+
+          echo "Pod succeeded to start"
+          exit 0
 
       - name: Delete cluster
         run: kind delete cluster
