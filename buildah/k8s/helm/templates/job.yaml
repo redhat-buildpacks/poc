@@ -10,21 +10,8 @@ spec:
       volumes:
         - name: cache
           emptyDir: {}
-        - name: workspace
-          hostPath:
-            path: "/workspace"
       serviceAccountName: {{ include "buildah-poc.serviceAccountName" . }}
       restartPolicy: Never
-      initContainers:
-        - name: dummy
-          image: alpine:3
-          command: [ "/bin/sh","-c" ]
-          args:
-            - |
-              ls -la /workspace
-          volumeMounts:
-            - name: workspace
-              mountPath: /workspace
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}
@@ -49,6 +36,4 @@ spec:
           volumeMounts:
             - name: cache
               mountPath: /cache
-            - name: workspace
-              mountPath: /workspace
 
