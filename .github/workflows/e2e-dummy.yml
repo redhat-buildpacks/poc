@@ -1,0 +1,48 @@
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches:
+      - main
+jobs:
+  e2e_test:
+    runs-on: ubuntu-latest
+    env:
+      KIND_CL_NAME: e2e-dummy
+    if: github.event.head_commit.message == *"dummy"*
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Clean resident local docker
+        if: ${{ env.ACT }}
+        continue-on-error: true
+        run: |
+          for DIMG in "$KIND_CL_NAME-control-plane "; do
+            docker stop $DIMG ; docker rm $DIMG ;
+          done ;
+          sleep 1
+
+      - name: Create Kubernetes Kind Cluster
+        uses: container-tools/kind-action@v1.7.0
+        with:
+          cluster_name: e2e-test
+          registry: true
+          config: ./${{ env.ENGINE }}/hack/kind-config.yml
+
+      - name: Tag and push the image
+        run: |
+          docker pull gcr.io/google-samples/hello-app:1.0
+          docker tag gcr.io/google-samples/hello-app:1.0 $KIND_REGISTRY/hello-app:1.0
+          docker push $KIND_REGISTRY/hello-app:1.0
+
+      - name: Deploy a k8s hello app
+        run: |
+          kubectl delete deployment hello-server
+          kubectl create deployment hello-server --image=localhost:5000/hello-app:1.0
+          kc get pods -n default -w
+
+      - name: Delete cluster
+        run: kind delete cluster
+
+
