@@ -28,7 +28,7 @@ jobs:
           FROM gcr.io/google-samples/hello-app:1.0
           COPY ./wks/ /workspace
           EOF
-          docker build -t buildah-app .
+          docker build -t hello-app .
 
           docker tag hello-app $KIND_REGISTRY/hello-app
           docker push $KIND_REGISTRY/hello-app
