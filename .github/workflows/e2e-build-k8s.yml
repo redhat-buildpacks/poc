@@ -15,7 +15,7 @@ jobs:
       matrix:
         # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
         # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
-        dockerfile_name: [ Dockerfile ]
+        dockerfile_name: [ ubi8-good-bye ubi8-nodejs ubuntu-wget ubuntu-cert ]
 
     steps:
       - name: Set building engine
@@ -57,11 +57,6 @@ jobs:
       - name: Deploy the ${{ env.ENGINE }} job to perform a Dockerfile build
         working-directory: ${{ env.ENGINE }}
         run: |
-          # kubectl create ns buildpack
-          # kubectl create -n buildpack configmap dockerfile --from-file=Dockerfile=./wks/${{ matrix.dockerfile_name }}
-          # echo "Build and parse the Dockerfile: ${{ matrix.dockerfile_name }}"
-          # kubectl apply -f ./k8s/manifest-cloud.yml
-
           kubectl create ns buildpack
           pushd k8s/helm
           helm -n buildpack install buildah-poc -f values.yaml --set dockerfilenameToBuild=${{ matrix.dockerfile_name }} .
