@@ -13,6 +13,10 @@ Table of Contents
     * [How to verify what it happened](#how-to-verify-what-it-happened)
     * [Remote debugging](#remote-debugging)
     * [Kubernetes](#kubernetes)
+    * [Using Helm to deploy the buildah poc](#using-helm-to-deploy-the-buildah-poc)
+      * [Kubernetes installation](#kubernetes-installation)
+      * [OpenShift deployment](#openshift-deployment)
+
 
 ## Buildah App
 
@@ -350,13 +354,49 @@ To delete the pod, do
 kubectl delete -f k8s/manifest.yml
 ```
 
-### Helm
+### Using Helm to deploy the buildah poc
+
+- Tag and push the `buildah-app` to the registry local or remote
+- Create a YAML file containing the values to be tested
+  and that Helm will use to override what it exists within the default values.yaml file.
 
 ```bash
 pushd k8s/helm
-kubectl create ns buildpack
-helm -n buildpack install -f values.yaml buildah-poc .
-helm -n buildpack uninstall buildah-poc
-kubectl delete ns buildpack
+cat <<EOF > my-values.yml
+buildah:
+  metadataTomlFileName: metadata_sample_curl.toml
+  filesToSearch: curl
+
+image:
+  repository: quay.io/snowdrop/buildah-app  # or kind-registry:5000/buildah-app
+EOF
+popd
+```
+
+#### Kubernetes installation
+
+```bash
+pushd k8s/helm
+namespace=buildpack-poc
+kubectl create ns $namespace
+helm -n $namespace install -f values.yaml -f my-values.yml buildah-poc .
+helm -n $namespace uninstall buildah-poc
+kubectl delete ns $namespace
+popd
+```
+
+#### OpenShift deployment
+
+```bash
+pushd k8s/helm
+oc login --token=xxxxxx --server=https://c100-e.eu-de.containers.cloud.ibm.com:30111
+
+project=buildpack-poc
+oc new-project $project
+
+helm -n $project install -f values.yaml -f my-values.yml buildah-poc .
+helm -n $project uninstall buildah-poc
+
+oc delete project $project-poc
 popd
 ```

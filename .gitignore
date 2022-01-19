@@ -9,3 +9,4 @@ out
 /buildah/code/vendor/
 /buildah/vol/
 /buildah/cache/
+/buildah/k8s/helm/my-values.yml
