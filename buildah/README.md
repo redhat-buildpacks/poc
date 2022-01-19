@@ -379,7 +379,7 @@ popd
 pushd k8s/helm
 namespace=buildpack-poc
 kubectl create ns $namespace
-helm -n $namespace install -f values.yaml -f my-values.yml buildah-poc .
+helm -n $namespace install -f my-values.yml buildah-poc .
 helm -n $namespace uninstall buildah-poc
 kubectl delete ns $namespace
 popd
@@ -394,7 +394,7 @@ oc login --token=xxxxxx --server=https://c100-e.eu-de.containers.cloud.ibm.com:3
 project=buildpack-poc
 oc new-project $project
 
-helm -n $project install -f values.yaml -f my-values.yml buildah-poc .
+helm -n $project install -f my-values.yml buildah-poc .
 helm -n $project uninstall buildah-poc
 
 oc delete project $project-poc
