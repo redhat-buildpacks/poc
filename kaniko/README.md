@@ -37,22 +37,14 @@ which is the hash of the compressed layer.
 
 ## How to build and run the application
 
-To play with the application, first download the dependencies using `go mod vendor` to avoid that for every `docker build`, docker reloads all the dependencies.
-```bash
-cd code
-go mod vendor
-cd ..
-```
-
-**NOTE**: The commands reported hereafter should be executed in your terminal under: `$(pwd)/kaniko`
-
-Build next the container image of the `kaniko-app`.
+To play with the application, build first the go application and build a container image of the `kaniko-app`.
 ```bash
 ./hack/build.sh
 ```
 Launch the `kaniko-app` container
 ```bash
 docker run \
+       -e DOCKER_FILE_NAME="Dockerfile" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
