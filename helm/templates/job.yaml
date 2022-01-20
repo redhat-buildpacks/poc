@@ -48,7 +48,6 @@ spec:
               value: {{ .Values.buildah.metadataTomlFileName }}
             {{- end }}
           workingDir: /workspace
-          command: [ "/buildah-app" ]
           volumeMounts:
             - name: cache
               mountPath: /cache
