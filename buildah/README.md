@@ -361,7 +361,7 @@ kubectl delete -f k8s/manifest.yml
   and that Helm will use to override what it exists within the default values.yaml file.
 
 ```bash
-pushd k8s/helm
+pushd helm
 cat <<EOF > my-values.yml
 buildah:
   metadataTomlFileName: metadata_sample_curl.toml
@@ -376,7 +376,7 @@ popd
 #### Kubernetes installation
 
 ```bash
-pushd k8s/helm
+pushd helm
 namespace=buildpack-poc
 kubectl create ns $namespace
 helm -n $namespace install -f my-values.yml buildah-poc .
@@ -388,7 +388,7 @@ popd
 #### OpenShift deployment
 
 ```bash
-pushd k8s/helm
+pushd helm
 oc login --token=xxxxxx --server=https://c100-e.eu-de.containers.cloud.ibm.com:30111
 
 project=buildpack-poc

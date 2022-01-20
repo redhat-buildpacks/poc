@@ -59,10 +59,9 @@ jobs:
           sudo chmod +x /usr/local/bin/helm
 
       - name: Deploy the ${{ env.ENGINE }} job to perform a Dockerfile build
-        working-directory: ${{ env.ENGINE }}
         run: |
           kubectl create ns buildpack
-          pushd k8s/helm
+          pushd helm
 
           echo "Test using: ${{ matrix.metadataTomlFileName }} and ${{ matrix.filesToSearch }} to search"
           helm -n buildpack install ${{ env.ENGINE }}-poc -f values.yaml --set buildah.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set buildah.filesToSearch=${{ matrix.filesToSearch }} .
@@ -73,7 +72,6 @@ jobs:
           kubectl logs -n buildpack job/${{ env.ENGINE }}-poc -f --ignore-errors=true
 
       - name: "Wait till job's finished and check status: complete or failed"
-        working-directory: ${{ env.ENGINE }}
         run: |
           while true; do
             if kubectl -n buildpack wait --timeout=300s --for=condition=complete job/${{ env.ENGINE }}-poc 2>/dev/null; then
