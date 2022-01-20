@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "buildah-poc.name" -}}
+{{- define "engine-poc.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "buildah-poc.fullname" -}}
+{{- define "engine-poc.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "buildah-poc.chart" -}}
+{{- define "engine-poc.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "buildah-poc.labels" -}}
-helm.sh/chart: {{ include "buildah-poc.chart" . }}
-{{ include "buildah-poc.selectorLabels" . }}
+{{- define "engine-poc.labels" -}}
+helm.sh/chart: {{ include "engine-poc.chart" . }}
+{{ include "engine-poc.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "buildah-poc.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "buildah-poc.name" . }}
+{{- define "engine-poc.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "engine-poc.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "buildah-poc.serviceAccountName" -}}
+{{- define "engine-poc.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "buildah-poc.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "engine-poc.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

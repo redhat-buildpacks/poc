@@ -1,16 +1,16 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "buildah-poc.fullname" . }}
+  name: {{ include "engine-poc.fullname" . }}
   labels:
-    {{- include "buildah-poc.labels" . | nindent 4 }}
+    {{- include "engine-poc.labels" . | nindent 4 }}
 spec:
   template:
     spec:
       volumes:
         - name: cache
           emptyDir: {}
-      serviceAccountName: {{ include "buildah-poc.serviceAccountName" . }}
+      serviceAccountName: {{ include "engine-poc.serviceAccountName" . }}
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}
