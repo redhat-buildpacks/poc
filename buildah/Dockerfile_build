@@ -7,9 +7,9 @@ RUN microdnf -y install golang gcc
 FROM base AS debugger
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.7.3
 
-# ###################
-# ## Build the go app
-# ###################
+####################
+## Build the go app
+####################
 FROM base AS builder
 
 WORKDIR /go/src/buildah-app
@@ -19,9 +19,9 @@ COPY ./wks/ /workspace
 # Build the buildah app using compilation flags
 RUN go build -tags 'containers_image_openpgp exclude_graphdriver_devicemapper exclude_graphdriver_btrfs' -gcflags "all=-N -l" -o /buildah-app main.go
 
-#####################################
+######################################
 # Setup the env to run the buildah app
-#####################################
+######################################
 FROM registry.access.redhat.com/ubi8-minimal
 
 COPY --from=debugger /root/go/bin/dlv /usr/local/bin/
