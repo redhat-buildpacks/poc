@@ -2,10 +2,6 @@ package main
 
 import (
 	"fmt"
-	cfg "github.com/redhat-buildpacks/poc/kaniko/buildpackconfig"
-	"github.com/redhat-buildpacks/poc/kaniko/logging"
-	util "github.com/redhat-buildpacks/poc/kaniko/util"
-	logrus "github.com/sirupsen/logrus"
 	"os"
 	"path"
 	"strconv"
@@ -13,6 +9,14 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/BurntSushi/toml"
+	logrus "github.com/sirupsen/logrus"
+
+	cfg "github.com/redhat-buildpacks/poc/kaniko/buildpackconfig"
+	"github.com/redhat-buildpacks/poc/kaniko/logging"
+	"github.com/redhat-buildpacks/poc/kaniko/model"
+	util "github.com/redhat-buildpacks/poc/kaniko/util"
 )
 
 const (
@@ -25,6 +29,8 @@ const (
 	DefaultLevel        = "info"
 	DefaultLogTimestamp = false
 	DefaultLogFormat    = "text"
+
+	defaultMetadataFileName   = "/layers/config/metadata.toml"
 )
 
 var (
@@ -115,15 +121,50 @@ func main() {
 	// Launch a timer to measure the time needed to parse/copy/extract
 	start := time.Now()
 
-	// Build the Dockerfile
-	logrus.Infof("Building the %s", b.DockerFileName)
-	err := b.BuildDockerFile()
+	logrus.Info("Finding the Dockerfiles to build ...")
+	metadatafileNameToParse := os.Getenv("METADATA_FILE_NAME")
+	logrus.Infof("METADATA TOML FILE: %s", metadatafileNameToParse)
+	if metadatafileNameToParse == "" {
+		metadatafileNameToParse = defaultMetadataFileName
+	}
+
+	logrus.Info("Finding base image to provide ...")
+	baseimage := os.Getenv("CNB_BASE_IMAGE")
+	logrus.Infof("CNB_BASE_IMAGE: %s", baseimage)
+
+	// Read metadata toml
+	meta := model.Metadata{}
+	_, err := toml.DecodeFile(metadatafileNameToParse, &meta)
 	if err != nil {
 		panic(err)
 	}
-	err = reapChildProcesses()
-	if err != nil {
-		panic(err)
+
+	toMultiArg := func(args []model.DockerfileArg) []string {
+		var result []string
+		for _, arg := range args {
+			result = append(result, fmt.Sprintf("%s=%s", arg.Key, arg.Value))
+		}
+
+		result = append(result, fmt.Sprintf(`base_image=%s`, baseimage))
+		return result
+	}
+
+	for _, d := range meta.Dockerfiles {
+		// Define opts
+		opts := b.Opts
+		opts.DockerfilePath = d.Path
+		opts.BuildArgs = toMultiArg(d.Args)
+
+		// Build the Dockerfile
+		fmt.Printf("Building the %s\n", opts.DockerfilePath)
+		err := b.BuildDockerFile(opts)
+		if err != nil {
+			panic(err)
+		}
+		err = reapChildProcesses()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Log the content of the Kaniko dir

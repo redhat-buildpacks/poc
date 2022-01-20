@@ -5,33 +5,33 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"errors"
-	"github.com/GoogleContainerTools/kaniko/pkg/config"
-	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
-	"github.com/GoogleContainerTools/kaniko/pkg/executor"
-	"github.com/google/go-containerregistry/pkg/v1/tarball"
-	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
-	fs_util "github.com/GoogleContainerTools/kaniko/pkg/util"
-	v1 "github.com/google/go-containerregistry/pkg/v1"
-	"github.com/redhat-buildpacks/poc/kaniko/store"
-	"github.com/redhat-buildpacks/poc/kaniko/util"
-	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/GoogleContainerTools/kaniko/pkg/config"
+	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
+	"github.com/GoogleContainerTools/kaniko/pkg/executor"
+	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
+	fs_util "github.com/GoogleContainerTools/kaniko/pkg/util"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/tarball"
+	"github.com/sirupsen/logrus"
+
+	"github.com/redhat-buildpacks/poc/kaniko/store"
+	"github.com/redhat-buildpacks/poc/kaniko/util"
 )
 
 const (
 	homeDir                   = "/"
 	kanikoDir                 = "/kaniko"
-	cacheDir                  = "/cache"
+	cacheDir                  = "/layers/kaniko"
 	workspaceDir              = "/workspace"
-	defaultDockerFileName     = "Dockerfile"
 	layerTarFileName          = "newlayer.tar"
 	destination               = "new_image"
-	DOCKER_FILE_NAME_ENV_NAME = "DOCKER_FILE_NAME"
 	IGNORE_PATHS_ENV_NAME     = "IGNORE_PATHS"
 )
 
@@ -68,16 +68,7 @@ func NewBuildPackConfig() *BuildPackConfig {
 }
 
 func (b *BuildPackConfig) InitDefaults() {
-
-	logrus.Debug("Check if DOCKER_FILE_NAME env is defined...")
-	b.DockerFileName = util.GetValFromEnVar(DOCKER_FILE_NAME_ENV_NAME)
-	if b.DockerFileName == "" {
-		b.DockerFileName = defaultDockerFileName
-	}
-	logrus.Debugf("DockerfileName is: %s", b.DockerFileName)
-
 	logrus.Debug("Check if IGNORE_PATHS env is defined...")
-
 	result := util.GetValFromEnVar(IGNORE_PATHS_ENV_NAME)
 	if result == "" {
 		b.IgnorePaths = ignorePaths
@@ -92,29 +83,13 @@ func (b *BuildPackConfig) InitDefaults() {
 		})
 	}
 
-	logrus.Debug("Checking if CNB_* env var have been declared ...")
-	b.CnbEnvVars = util.GetCNBEnvVar()
-	logrus.Debugf("CNB ENV var is: %s", b.CnbEnvVars)
-
-	// Convert the CNB ENV vars to Kaniko BuildArgs
-	for k, v := range b.CnbEnvVars {
-		logrus.Debugf("CNB env key: %s, value: %s", k, v)
-		arg := k + "=" + v
-		b.BuildArgs = append(b.BuildArgs, arg)
-	}
-
-	// setup the path to access the Dockerfile within the workspace dir
-	dockerFilePath := b.WorkspaceDir + "/" + b.DockerFileName
-
 	// init the Kaniko options
 	b.Opts = config.KanikoOptions{
 		CacheOptions:   config.CacheOptions{CacheDir: cacheDir},
-		DockerfilePath: dockerFilePath,
 		IgnoreVarRun:   true,
 		NoPush:         true,
 		SrcContext:     b.WorkspaceDir,
 		SnapshotMode:   "full",
-		BuildArgs:      b.BuildArgs,
 		IgnorePaths:    b.IgnorePaths,
 		TarPath:        b.LayerTarFileName,
 		Destinations:   []string{b.Destination},
@@ -124,7 +99,7 @@ func (b *BuildPackConfig) InitDefaults() {
 	logrus.Debug("KanikoOptions defined")
 }
 
-func (b *BuildPackConfig) BuildDockerFile() (err error) {
+func (b *BuildPackConfig) BuildDockerFile(opts config.KanikoOptions) (err error) {
 
 	// If we look to the Kaniko code, they are moving under the root dire directory
 	logrus.Debug("Moving to root dir")
@@ -133,15 +108,15 @@ func (b *BuildPackConfig) BuildDockerFile() (err error) {
 	}
 
 	logrus.Debugf("Building the %s ...", b.DockerFileName)
-	logrus.Debugf("Options used %+v", b.Opts)
-	b.NewImage, err = executor.DoBuild(&b.Opts)
+	logrus.Debugf("Options used %+v", opts)
+	b.NewImage, err = executor.DoBuild(&opts)
 	if (err != nil) {
 		return err
 	}
 
 	// Push the image to its destination
 	logrus.Info("Push the image to its destination")
-	err = executor.DoPush(b.NewImage, &b.Opts)
+	err = executor.DoPush(b.NewImage, &opts)
     return err
 }
 
