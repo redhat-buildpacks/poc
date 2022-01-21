@@ -9,13 +9,11 @@ import (
 	util "github.com/redhat-buildpacks/poc/kaniko/util"
 	logrus "github.com/sirupsen/logrus"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 )
 
 const (
@@ -46,10 +44,6 @@ type globalOptions struct {
 }
 
 func init() {
-	envVal := util.GetValFromEnVar(FILES_TO_SEARCH_ENV_NAME)
-	if envVal != "" {
-		filesToSearch = strings.Split(envVal, ",")
-	}
 
 	logLevel = util.GetValFromEnVar(LOGGING_LEVEL_ENV_NAME)
 	if logLevel == "" {
@@ -73,6 +67,19 @@ func init() {
 		}
 	}
 
+	if err := logging.Configure(logLevel, logFormat, logTimestamp); err != nil {
+		panic(err)
+	}
+}
+
+func main() {
+	logrus.Info("Starting Kaniko application to process Dockerfile(s) ...")
+
+	// Create a buildPackConfig and set the default values
+	logrus.Info("Initialize the BuildPackConfig and set the defaults values ...")
+	b := cfg.NewBuildPackConfig()
+	b.InitDefaults()
+
 	extractLayersStr := util.GetValFromEnVar(EXTRACT_LAYERS_ENV_NAME)
 	if extractLayersStr == "" {
 		logrus.Info("The layered tzg files will NOT be extracted to the home dir ...")
@@ -86,20 +93,13 @@ func init() {
 			logrus.Info("The layered tzg files will be extracted to the home dir ...")
 		}
 	}
-
-	if err := logging.Configure(logLevel, logFormat, logTimestamp); err != nil {
-		panic(err)
-	}
-}
-
-func main() {
-	logrus.Info("Starting Kaniko application to process Dockerfile(s) ...")
-
-	// Create a buildPackConfig and set the default values
-	logrus.Info("Initialize the BuildPackConfig and set the defaults values ...")
-	b := cfg.NewBuildPackConfig()
-	b.InitDefaults()
 	b.ExtractLayers = extractLayers
+
+	envVal := util.GetValFromEnVar(FILES_TO_SEARCH_ENV_NAME)
+	if envVal != "" {
+		filesToSearch = strings.Split(envVal, ",")
+	}
+	b.FilesToSearch = filesToSearch
 
 	// TODO: To be reviewed in order to better manage that section
 	opts := initGlobalOptions()
@@ -150,7 +150,7 @@ func main() {
 			}
 
 			// Process now the Dockerfile
-			processDockerfile(pathToDockerFile)
+			b.ProcessDockerfile(pathToDockerFile)
 		}
 	} else {
 		// When no metadata.toml file is used, parse the dockerfile directly
@@ -158,60 +158,10 @@ func main() {
 		logrus.Infof("Dockerfile path: %s", pathToDockerFile)
 
 		// Process now the Dockerfile
-		processDockerfile(pathToDockerFile)
+		b.ProcessDockerfile(pathToDockerFile)
 	}
 }
 
-func processDockerfile(pathToDockerFile string) {
-	// Launch a timer to measure the time needed to parse/copy/extract
-	start := time.Now()
-
-	// Build the Dockerfile
-	b.DockerFileName = pathToDockerFile
-	logrus.Infof("Building the %s", b.DockerFileName)
-	err := b.BuildDockerFile()
-	if err != nil {
-		panic(err)
-	}
-
-	// Log the content of the Kaniko dir
-	logrus.Infof("Reading dir content of: %s", b.KanikoDir)
-	util.ReadFilesFromPath(b.KanikoDir)
-
-	// Copy the tgz layer file to the Cache dir
-	srcPath := path.Join("/", b.LayerTarFileName)
-	dstPath := path.Join(b.CacheDir, b.LayerTarFileName)
-	logrus.Infof("Copy the %s file to the %s dir ...", srcPath, dstPath)
-	err = util.File(srcPath, dstPath)
-	if (err != nil) {
-		panic(err)
-	}
-
-	logrus.Infof("Extract the content of the tarball file %s under the cache %s",b.Opts.TarPath,b.Opts.CacheDir)
-	b.ExtractImageTarFile(dstPath)
-	logrus.Info("Extract the layer file(s)")
-	//baseImageHash := b.FindBaseImageDigest()
-	//logrus.Infof("Hash of the base image is: %s",baseImageHash.String())
-	descriptor, err := b.LoadDescriptorAndConfig()
-	if (err != nil) {
-		panic(err)
-	}
-
-	logrus.Infof("%+v\n", descriptor)
-	layers := descriptor[0].Layers
-	/*	for i := 1; i < len(layers); i++ {
-		logrus.Infof("Layer: %s", layers[i])
-	}*/
-	b.ExtractTarGZFilesWithoutBaseImage(layers[0])
-
-	// Check if files exist
-	if (len(filesToSearch) > 0) {
-		util.FindFiles(filesToSearch)
-	}
-
-	// Time elapsed is ...
-	logrus.Infof("Time elapsed: %s",time.Since(start))
-}
 func initGlobalOptions() *globalOptions {
 	return &globalOptions{}
 }

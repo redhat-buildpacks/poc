@@ -21,6 +21,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -53,6 +54,7 @@ type BuildPackConfig struct {
 	HomeDir          string
 	ExtractLayers  bool
 	IgnorePaths    []string
+	FilesToSearch  []string
 }
 
 func NewBuildPackConfig() *BuildPackConfig {
@@ -124,6 +126,52 @@ func (b *BuildPackConfig) InitDefaults() {
 	logrus.Debug("KanikoOptions defined")
 }
 
+func (b *BuildPackConfig) ProcessDockerfile(pathToDockerFile string) {
+	// Launch a timer to measure the time needed to parse/copy/extract
+	start := time.Now()
+
+	// Build the Dockerfile
+	b.Opts.DockerfilePath = pathToDockerFile
+	logrus.Infof("Building the %s", b.Opts.DockerfilePath)
+	err := b.BuildDockerFile()
+	if err != nil {
+		panic(err)
+	}
+
+	// Log the content of the Kaniko dir
+	logrus.Infof("Reading dir content of: %s", b.KanikoDir)
+	util.ReadFilesFromPath(b.KanikoDir)
+
+	// Copy the tgz layer file to the Cache dir
+	srcPath := path.Join("/", b.LayerTarFileName)
+	dstPath := path.Join(b.CacheDir, b.LayerTarFileName)
+	logrus.Infof("Copy the %s file to the %s dir ...", srcPath, dstPath)
+	err = util.File(srcPath, dstPath)
+	if (err != nil) {
+		panic(err)
+	}
+
+	logrus.Infof("Extract the content of the tarball file %s under the cache %s",b.Opts.TarPath,b.Opts.CacheDir)
+	b.ExtractImageTarFile(dstPath)
+	logrus.Info("Extract the layer file(s)")
+	descriptor, err := b.LoadDescriptorAndConfig()
+	if (err != nil) {
+		panic(err)
+	}
+
+	logrus.Infof("%+v\n", descriptor)
+	layers := descriptor[0].Layers
+	b.ExtractTarGZFilesWithoutBaseImage(layers[0])
+
+	// Check if files exist
+	if (len(b.FilesToSearch) > 0) {
+		util.FindFiles(b.FilesToSearch)
+	}
+
+	// Time elapsed is ...
+	logrus.Infof("Time elapsed: %s",time.Since(start))
+}
+
 func (b *BuildPackConfig) BuildDockerFile() (err error) {
 
 	// If we look to the Kaniko code, they are moving under the root dire directory
@@ -132,7 +180,6 @@ func (b *BuildPackConfig) BuildDockerFile() (err error) {
 		panic(err)
 	}
 
-	logrus.Debugf("Building the %s ...", b.DockerFileName)
 	logrus.Debugf("Options used %+v", b.Opts)
 	b.NewImage, err = executor.DoBuild(&b.Opts)
 	if (err != nil) {
