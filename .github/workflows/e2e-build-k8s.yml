@@ -8,7 +8,6 @@ jobs:
   e2e_test:
     runs-on: ubuntu-latest
     env:
-      COMMIT_MSG: ${{ github.event.head_commit.message }}
       KIND_CL_NAME: e2e-test
     if: ${{ contains(github.event.head_commit.message, '#buildah') || contains(github.event.head_commit.message, '#kaniko') }}
     strategy:
@@ -22,16 +21,13 @@ jobs:
         # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
 
     steps:
-      - name: Set building engine
-        run: |
-          if [[ "${{ env.COMMIT_MSG }}" == "#buildah" ]]; then
-            echo "ENGINE=buildah" >> $GITHUB_ENV
-          elif [[ "${{ env.COMMIT_MSG }}" == "#kaniko" ]]; then
-            echo "ENGINE=kaniko" >> $GITHUB_ENV
-          else
-            echo "No build engine specified. Break the job"
-            exit 1
-          fi
+      - name: Set buildah engine
+        if: "contains(github.event.head_commit.message, '#buildah')"
+        run: echo "ENGINE=buildah" >> $GITHUB_ENV
+
+      - name: Set kaniko engine
+        if: "contains(github.event.head_commit.message, '#kaniko')"
+        run: echo "ENGINE=buildah" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v2
