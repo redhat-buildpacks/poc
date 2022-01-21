@@ -4,9 +4,14 @@ out
 .DS_Store
 /layer_cmd/
 /out.txt
+
+/buildah/code/vendor/
+/buildah/cache/
+/buildah/workspace/
+
 /kaniko/code/vendor/
 /kaniko/cache/
-/buildah/code/vendor/
-/buildah/vol/
-/buildah/cache/
+/kaniko/workspace/
+
 /helm/my-values.yml
+

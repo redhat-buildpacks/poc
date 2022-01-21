@@ -1,8 +1,6 @@
 ARG base_image
 FROM ${base_image}
 
-FROM ubuntu
-
 ARG some_arg
 RUN echo ${some_arg} > /opt/arg.txt
 

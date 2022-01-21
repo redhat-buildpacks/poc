@@ -53,11 +53,11 @@ Launch the `kaniko-app` container
 
 ```bash
 docker run \
-       -e DOCKER_FILE_NAME="Dockerfile" \
-       -v $(pwd)/../workspace:/workspace \
-       -e EXTRACT_LAYERS=true \
-       -v $(pwd)/cache:/cache \
-       -it kaniko-app
+  -e DOCKER_FILE_NAME="Dockerfile" \
+  -v $(pwd)/../workspace:/workspace \
+  -e EXTRACT_LAYERS=true \
+  -v $(pwd)/cache:/cache \
+  -it kaniko-app
 ```
 
 Different `ENV` variables can be defined and passed as parameters to the containerized engine:
@@ -74,13 +74,13 @@ Example using `DOCKER_FILE_NAME` env var
 
 ```bash
 docker run \
-   -e DOCKER_FILE_NAME="alpine" \
-   -e LOGGING_LEVEL=info \
-   -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
-   -e EXTRACT_LAYERS=true \
-   -v $(pwd)/../workspace:/workspace \
-   -v $(pwd)/cache:/cache \
-   -it kaniko-app
+  -e DOCKER_FILE_NAME="alpine" \
+  -e LOGGING_LEVEL=info \
+  -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
+  -e EXTRACT_LAYERS=true \
+  -v $(pwd)/../workspace:/workspace \
+  -v $(pwd)/cache:/cache \
+  -it kaniko-app
 ```
 
 To verify that the `kaniko` application is working fine, execute the following command
@@ -136,14 +136,14 @@ using the ENV var `METADATA_FILE_NAME`. This file should be created under the `w
 
 ```bash
 docker run \
-   -e LOGGING_LEVEL=info \
-   -e IGNORE_PATHS="/var/spool/mail,/var/mail" \
-   -e EXTRACT_LAYERS=true \
-   -e FILES_TO_SEARCH="curl" \
-   -e METADATA_FILE_NAME=metadata_curl.toml \
-   -v $(pwd)/../workspace:/workspace \
-   -v $(pwd)/cache:/cache \
-   -it kaniko-app
+  -e LOGGING_LEVEL=info \
+  -e IGNORE_PATHS="/var/spool/mail,/var/mail" \
+  -e EXTRACT_LAYERS=true \
+  -e FILES_TO_SEARCH="curl" \
+  -e METADATA_FILE_NAME=metadata_curl.toml \
+  -v $(pwd)/../workspace:/workspace \
+  -v $(pwd)/cache:/cache \
+  -it kaniko-app
 ```
 
 ## Remote debugging
