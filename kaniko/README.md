@@ -63,6 +63,7 @@ Example using `DOCKER_FILE_NAME` env var
 ```bash
 docker run \
        -e DOCKER_FILE_NAME="alpine" \
+       -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
        -v $(pwd)/workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
@@ -74,7 +75,7 @@ dockerfile="ubi8-nodejs"
 filesToSearch="node,hello.txt"
 docker run \
   -e EXTRACT_LAYERS=true \
-  -e IGNORE_PATHS="/proc" \
+  -e IGNORE_PATHS="/proc,/usr/lib" \
   -e FILES_TO_SEARCH=${filesToSearch} \
   -e LOGGING_LEVEL=info \
   -e LOGGING_FORMAT=color \
@@ -137,6 +138,7 @@ then, we must pass them as `ENV vars` to the container. Our application will the
 docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
+       -e IGNORE_PATHS="/usr/lib" \
        -e CNB_BaseImage="ubuntu:bionic" \
        -e DOCKER_FILE_NAME="base-image-arg" \
        -v $(pwd)/workspace:/workspace \
@@ -152,7 +154,7 @@ Multiple paths can be defined using as separator `,`.
 ```bash
 docker run \
        -e EXTRACT_LAYERS=false \
-       -e IGNORE_PATHS="/var/spool/mail" \
+       -e IGNORE_PATHS="/var/spool/mail,/usr/lib" \
        -e FILES_TO_SEARCH="hello.txt,curl" \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
@@ -164,7 +166,6 @@ docker run \
 
 **NOTE**: If the ENV var is not set, then an empty array of string is passed to Kaniko Opts
 
-
 ## Extract layer files
 
 By default, the layer tgz files are not extracted to the home dir of the container's filesystem. Nevertheless, the files part
@@ -175,6 +176,7 @@ To extract the layers files, enable the following ENV var `EXTRACT_LAYERS=true`
 ```bash
 docker run \
        -e EXTRACT_LAYERS=true \
+       -e IGNORE_PATHS="/usr/lib" \
        -e LOGGING_FORMAT=color \
        -e DOCKER_FILE_NAME="alpine" \
        -v $(pwd)/workspace:/workspace \
@@ -190,6 +192,7 @@ To check/control if files added from the layers exist under the root filesystem,
 docker run \
        -e EXTRACT_LAYERS=true \
        -e FILES_TO_SEARCH="hello.txt,curl" \
+       -e IGNORE_PATHS="/usr/lib" \      
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
        -e DOCKER_FILE_NAME="alpine" \
