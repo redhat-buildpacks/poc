@@ -46,6 +46,7 @@ Launch the `kaniko-app` container
 docker run \
        -e DOCKER_FILE_NAME="Dockerfile" \
        -v $(pwd)/workspace:/workspace \
+       -e EXTRACT_LAYERS=true \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
@@ -62,11 +63,13 @@ Different `ENV` variables can be defined and passed as parameters to the contain
 Example using `DOCKER_FILE_NAME` env var
 ```bash
 docker run \
-       -e DOCKER_FILE_NAME="alpine" \
-       -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
-       -v $(pwd)/workspace:/workspace \
-       -v $(pwd)/cache:/cache \
-       -it kaniko-app
+   -e DOCKER_FILE_NAME="alpine" \
+   -e LOGGING_LEVEL=info \
+   -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
+   -e EXTRACT_LAYERS=true \
+   -v $(pwd)/workspace:/workspace \
+   -v $(pwd)/cache:/cache \
+   -it kaniko-app
 ```
 
 To verify that the `kaniko` application is working fine, execute the following command
@@ -138,6 +141,7 @@ then, we must pass them as `ENV vars` to the container. Our application will the
 docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
+       -e EXTRACT_LAYERS=true \
        -e IGNORE_PATHS="/usr/lib" \
        -e CNB_BaseImage="ubuntu:bionic" \
        -e DOCKER_FILE_NAME="base-image-arg" \
@@ -153,7 +157,7 @@ Multiple paths can be defined using as separator `,`.
 
 ```bash
 docker run \
-       -e EXTRACT_LAYERS=false \
+       -e EXTRACT_LAYERS=true \
        -e IGNORE_PATHS="/var/spool/mail,/usr/lib" \
        -e FILES_TO_SEARCH="hello.txt,curl" \
        -e LOGGING_LEVEL=debug \
