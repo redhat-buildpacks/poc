@@ -380,7 +380,7 @@ popd
 pushd helm
 namespace=buildpack-poc
 kubectl create ns $namespace
-helm -n $namespace install -f my-values.yml buildah-poc .
+helm -n $namespace install -f my-values.yml engine-poc .
 helm -n $namespace uninstall buildah-poc
 kubectl delete ns $namespace
 popd

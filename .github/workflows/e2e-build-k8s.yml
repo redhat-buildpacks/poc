@@ -62,7 +62,7 @@ jobs:
           pushd helm
 
           echo "Test using: ${{ matrix.metadataTomlFileName }} and ${{ matrix.filesToSearch }} to search"
-          helm -n buildpack install ${{ env.ENGINE }}-poc -f values.yaml --set image.repository=kind-registry:5000/${{ env.ENGINE }}-app --set engine.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set engine.filesToSearch=${{ matrix.filesToSearch }} .
+          helm -n buildpack install engine-poc -f values.yaml --set image.repository=kind-registry:5000/${{ env.ENGINE }}-app --set engine.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set engine.filesToSearch=${{ matrix.filesToSearch }} .
           popd
 
           echo "Starting to build/parse the Dockerfile..."
