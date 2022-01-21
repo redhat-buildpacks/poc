@@ -127,7 +127,7 @@ docker run \
    -e LOGGING_LEVEL=info \
    -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
    -e EXTRACT_LAYERS=true \
-   -e METADATA_FILE_NAME=metadata_sample_curl.toml \
+   -e METADATA_FILE_NAME=metadata_multi_stages_curl.toml \
    -v $(pwd)/workspace:/workspace \
    -v $(pwd)/cache:/cache \
    -it kaniko-app
