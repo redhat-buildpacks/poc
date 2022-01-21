@@ -67,22 +67,22 @@ jobs:
 
           echo "Starting to build/parse the Dockerfile..."
           sleep 10s
-          kubectl logs -n buildpack job/${{ env.ENGINE }}-poc -f --ignore-errors=true
+          kubectl logs -n buildpack job/engine-poc -f --ignore-errors=true
 
       - name: "Wait till job's finished and check status: complete or failed"
         run: |
           while true; do
-            if kubectl -n buildpack wait --timeout=300s --for=condition=complete job/${{ env.ENGINE }}-poc 2>/dev/null; then
+            if kubectl -n buildpack wait --timeout=300s --for=condition=complete job/engine-poc 2>/dev/null; then
               job_result=0
               break
             fi
 
-            if kubectl -n buildpack wait --timeout=300s --for=condition=failed job/${{ env.ENGINE }}-poc 2>/dev/null; then
+            if kubectl -n buildpack wait --timeout=300s --for=condition=failed job/engine-poc 2>/dev/null; then
               job_result=1
               break
             fi
 
-            kubectl -n buildpack get job/${{ env.ENGINE }}-poc -o yaml
+            kubectl -n buildpack get job/engine-poc -o yaml
 
             sleep 3
           done
