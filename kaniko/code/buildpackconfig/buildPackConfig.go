@@ -8,10 +8,10 @@ import (
 	"github.com/GoogleContainerTools/kaniko/pkg/config"
 	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
 	"github.com/GoogleContainerTools/kaniko/pkg/executor"
-	"github.com/google/go-containerregistry/pkg/v1/tarball"
 	image_util "github.com/GoogleContainerTools/kaniko/pkg/image"
 	fs_util "github.com/GoogleContainerTools/kaniko/pkg/util"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/tarball"
 	"github.com/redhat-buildpacks/poc/kaniko/store"
 	"github.com/redhat-buildpacks/poc/kaniko/util"
 	"github.com/sirupsen/logrus"
@@ -181,6 +181,7 @@ func (b *BuildPackConfig) ExtractLayersFromNewImageToKanikoDir() {
 }
 
 func (b *BuildPackConfig) ExtractImageTarFile(destinationTarPath string) {
+	logrus.Infof("Untar the Image Tar File to %s",destinationTarPath)
 	err := b.untar(destinationTarPath, b.Opts.CacheDir,false)
 	if err != nil {
 		panic(err)
