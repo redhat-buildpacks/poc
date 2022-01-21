@@ -24,9 +24,9 @@ jobs:
     steps:
       - name: Set building engine
         run: |
-          if [[ "$COMMIT_MSG" == "#buildah" ]]; then
+          if [[ "${{ env.COMMIT_MSG }}" == "#buildah" ]]; then
             echo "ENGINE=buildah" >> $GITHUB_ENV
-          elif [[ "$COMMIT_MSG" == "#kaniko" ]]; then
+          elif [[ "${{ env.COMMIT_MSG }}" == "#kaniko" ]]; then
             echo "ENGINE=kaniko" >> $GITHUB_ENV
           else
             echo "No build engine specified. Break the job"
