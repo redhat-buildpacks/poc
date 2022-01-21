@@ -1,3 +1,6 @@
+######################################
+## Base image containing go, gcc, ...
+######################################
 FROM registry.access.redhat.com/ubi8-minimal AS base
 RUN microdnf -y install golang gcc
 
@@ -18,9 +21,9 @@ COPY ./workspace/ /workspace
 # Build the kaniko app using compilation flags
 RUN GOOS=linux GOARCH=amd64 go build -tags 'containers_image_openpgp exclude_graphdriver_devicemapper exclude_graphdriver_btrfs' -gcflags "all=-N -l" -o /kaniko-app *.go
 
-################################
+#######################################
 ## Install the CA Red Hat certificates
-################################
+#######################################
 FROM registry.access.redhat.com/ubi8-minimal AS certs
 
 RUN \
@@ -34,11 +37,10 @@ RUN \
 ######################################
 FROM registry.access.redhat.com/ubi8-minimal
 
-COPY --from=certs /ca-certificates.crt /kaniko/ssl/certs/
-COPY --from=debugger /root/go/bin/dlv /usr/local/bin/
-COPY --from=builder /kaniko-app /kaniko-app
-COPY --from=builder /workspace /workspace
-COPY --from=busybox:1.32.0 /bin/mkdir /busybox/mkdir
+COPY --from=certs     /ca-certificates.crt /kaniko/ssl/certs/
+COPY --from=debugger  /root/go/bin/dlv     /usr/local/bin/
+COPY --from=builder   /kaniko-app          /kaniko-app
+COPY --from=builder   /workspace           /workspace
 
 ENV HOME /root
 ENV USER root
