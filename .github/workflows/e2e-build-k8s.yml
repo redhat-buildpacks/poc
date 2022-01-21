@@ -27,7 +27,7 @@ jobs:
           if [[ "$COMMIT_MSG" == *"buildah"* ]]; then
             echo "ENGINE=buildah" >> $GITHUB_ENV
           elif [[ "$COMMIT_MSG" == *"kaniko"* ]]; then
-            echo "ENGINE=buildah" >> $GITHUB_ENV
+            echo "ENGINE=kaniko" >> $GITHUB_ENV
           else
             echo "No build engine specified. Break the job"
             exit 1
