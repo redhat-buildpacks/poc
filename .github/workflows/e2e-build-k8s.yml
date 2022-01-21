@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - metadataTomlFileName: metadata_sample_curl.toml
+          - metadataTomlFileName: metadata_curl.toml
             filesToSearch: curl
           - metadataTomlFileName: metadata_ubuntu_cert.toml
             filesToSearch: /usr/local/share/ca-certificates/server.crt
@@ -64,7 +64,7 @@ jobs:
           pushd helm
 
           echo "Test using: ${{ matrix.metadataTomlFileName }} and ${{ matrix.filesToSearch }} to search"
-          helm -n buildpack install ${{ env.ENGINE }}-poc -f values.yaml --set buildah.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set buildah.filesToSearch=${{ matrix.filesToSearch }} .
+          helm -n buildpack install ${{ env.ENGINE }}-poc -f values.yaml --set engine.metadataTomlFileName=${{ matrix.metadataTomlFileName }} --set engine.filesToSearch=${{ matrix.filesToSearch }} .
           popd
 
           echo "Starting to build/parse the Dockerfile..."

@@ -1,0 +1,24 @@
+[[buildpacks]]
+api = "0.7"
+homepage = "https://github.com/buildpacks/samples/tree/main/extensions/curl"
+id = "sample/curl"
+version = "0.0.1"
+extension = true
+
+[[dockerfiles]]
+extension_id = "sample/curl"
+path = "/layers/curl/Dockerfile"
+build = true
+run = true
+
+[[dockerfiles.args.build]]
+name = "some_arg"
+value = "some-arg-build-value"
+
+[[dockerfiles.args.build]]
+name = "base_image"
+value = "ubuntu"
+
+[[dockerfiles.args.run]]
+name = "some_arg"
+value = "some-arg-launch-value"

@@ -51,7 +51,7 @@ Launch the `kaniko-app` container
 ```bash
 docker run \
        -e DOCKER_FILE_NAME="Dockerfile" \
-       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/../workspace:/workspace \
        -e EXTRACT_LAYERS=true \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
@@ -75,7 +75,7 @@ docker run \
    -e LOGGING_LEVEL=info \
    -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
    -e EXTRACT_LAYERS=true \
-   -v $(pwd)/workspace:/workspace \
+   -v $(pwd)/../workspace:/workspace \
    -v $(pwd)/cache:/cache \
    -it kaniko-app
 ```
@@ -92,7 +92,7 @@ docker run \
   -e LOGGING_LEVEL=info \
   -e LOGGING_FORMAT=color \
   -e DOCKER_FILE_NAME=${dockerfile} \
-  -v $(pwd)/workspace:/workspace \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it kaniko-app:latest
 -->
@@ -138,7 +138,7 @@ docker run \
    -e EXTRACT_LAYERS=true \
    -e FILES_TO_SEARCH="curl" \
    -e METADATA_FILE_NAME=metadata_curl.toml \
-   -v $(pwd)/workspace:/workspace \
+   -v $(pwd)/../workspace:/workspace \
    -v $(pwd)/cache:/cache \
    -it kaniko-app
 ```
@@ -151,7 +151,7 @@ To use the dlv remote debugger, simply pass as `ENV` var `DEBUG=true` and the po
 docker run \
   -e DEBUG=true \
   -p 2345:2345 \
-  -v $(pwd)/workspace:/workspace \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it kaniko-app
 ```
@@ -176,7 +176,7 @@ docker run \
        -e IGNORE_PATHS="/usr/lib" \
        -e CNB_BaseImage="ubuntu:bionic" \
        -e DOCKER_FILE_NAME="base-image-arg" \
-       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/../workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
@@ -194,7 +194,7 @@ docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
        -e DOCKER_FILE_NAME="alpine" \
-       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/../workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
@@ -214,7 +214,7 @@ docker run \
        -e IGNORE_PATHS="/usr/lib" \
        -e LOGGING_FORMAT=color \
        -e DOCKER_FILE_NAME="alpine" \
-       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/../workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ```
@@ -231,7 +231,7 @@ docker run \
        -e LOGGING_LEVEL=debug \
        -e LOGGING_FORMAT=color \
        -e DOCKER_FILE_NAME="alpine" \
-       -v $(pwd)/workspace:/workspace \
+       -v $(pwd)/../workspace:/workspace \
        -v $(pwd)/cache:/cache \
        -it kaniko-app
 ...
@@ -265,7 +265,7 @@ and the following [bash script](scripts/kind-reg.sh) where the following config 
 
 ```yaml
   extraMounts:
-    - hostPath: $(pwd)/workspace  # PLEASE CHANGE ME
+    - hostPath: $(pwd)/../workspace  # PLEASE CHANGE ME
       containerPath: /workspace
     - hostPath: $(pwd)/cache      # PLEASE CHANGE ME
       containerPath: /cache

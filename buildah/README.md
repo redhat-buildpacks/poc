@@ -39,22 +39,22 @@ go build -tags exclude_graphdriver_devicemapper -o out/bud *.go
 popd
 ```
 
-Copy the `dockerfile` to be parsed to the `/home/vagrant/wks` folder
+Copy the `dockerfile` to be parsed to the `/home/vagrant/workspace` folder
 ```bash
-cp $HOME/poc/buildah/wks/Dockerfile $HOME/wks
+cp $HOME/poc/buildah/workspace/Dockerfile $HOME/workspace
 ```
 
 To parse the [Dockerfile](buildah/Dockerfile) pushed under the `WORKSPACE_DIR`, simply execute the
 `bud` go application. It will process it and will generate an image
 ```bash
-[vagrant@centos7 buildah]$ sudo WORKSPACE_DIR="/home/vagrant/wks" $HOME/poc/buildah/code/out/bud
+[vagrant@centos7 buildah]$ sudo WORKSPACE_DIR="/home/vagrant/workspace" $HOME/poc/buildah/code/out/bud
 WARN[0000] Failpwd
-PACE DIR: /home/vagrant/wks             
+PACE DIR: /home/vagrant/workspace             
 INFO[0000] GRAPH_DRIVER: vfs                            
 INFO[0000] STORAGE ROOT PATH: /var/lib/containers/storage 
 INFO[0000] STORAGE RUN ROOT PATH: /var/run/containers/storage 
-INFO[0000] Buildah tempdir: /home/vagrant/wks/buildah-layers 
-INFO[0000] Dockerfile: /home/vagrant/wks/Dockerfile     
+INFO[0000] Buildah tempdir: /home/vagrant/workspace/buildah-layers 
+INFO[0000] Dockerfile: /home/vagrant/workspace/Dockerfile     
 INFO[0027] Image id: bf4b432845dc71930dfcb9905d9a3de25c76f14763c0b69b97d87504ea228979 
 INFO[0027] Image built successfully :-) 
 ```
@@ -87,8 +87,8 @@ docker run \
   -e GRAPH_DRIVER=vfs \
   -e LOGGING_LEVEL=info \
   -e LOGGING_FORMAT=color \
-  -e WORKSPACE_DIR=/wks \
-  -v $(pwd)/wks:/wks \
+  -e WORKSPACE_DIR=/workspace \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
@@ -99,8 +99,8 @@ docker run \
   -e GRAPH_DRIVER=vfs \
   -e LOGGING_LEVEL=info \
   -e LOGGING_FORMAT=color \
-  -e WORKSPACE_DIR=/wks \
-  -v $(pwd)/wks:/wks \
+  -e WORKSPACE_DIR=/workspace \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it buildah-app > ./test_report/test-sha-f2b7739.txt
 ```
@@ -118,9 +118,9 @@ docker run \
   -e GRAPH_DRIVER=vfs \
   -e LOGGING_LEVEL=info \
   -e LOGGING_FORMAT=color \
-  -e WORKSPACE_DIR=/wks \
-  -e METADATA_FILE_NAME=metadata_sample_curl.toml \
-  -v $(pwd)/wks:/wks \
+  -e WORKSPACE_DIR=/workspace \
+  -e METADATA_FILE_NAME=metadata_curl.toml \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
@@ -133,10 +133,10 @@ To parse a different Dockerfile, then pass as ENV var the following key `DOCKERF
 docker run \
   --security-opt seccomp=unconfined \
   -e GRAPH_DRIVER=vfs \
-  -e WORKSPACE_DIR=/wks \
+  -e WORKSPACE_DIR=/workspace \
   -e LOGGING_LEVEL=debug \
   -e DOCKERFILE_NAME="Dockerfile-1" \
-  -v $(pwd)/wks:/wks \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
@@ -156,12 +156,12 @@ then, we must pass them as `ENV vars` to the container. Our application will the
 docker run \
   --security-opt seccomp=unconfined \
   -e GRAPH_DRIVER=vfs \
-  -e WORKSPACE_DIR=/wks \
+  -e WORKSPACE_DIR=/workspace \
   -e LOGGING_LEVEL=debug \
   -e LOGGING_FORMAT=color \
   -e base_image="ubuntu:bionic" \
-  -e METADATA_FILE_NAME="metadata_sample_curl.toml" \
-  -v $(pwd)/wks:/wks \
+  -e METADATA_FILE_NAME="metadata_curl.toml" \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
@@ -174,12 +174,12 @@ To parse a different Dockerfile, then pass as ENV var the following key `DOCKERF
 docker run \
   --security-opt seccomp=unconfined \
   -e GRAPH_DRIVER=vfs \
-  -e WORKSPACE_DIR=/wks \
+  -e WORKSPACE_DIR=/workspace \
   -e DOCKERFILE_NAME="Dockerfile-1" \
   -e EXTRACT_LAYERS=true \
   -e FILES_TO_SEARCH="good.txt" \
   -e LOGGING_LEVEL=debug \
-  -v $(pwd)/wks:/wks \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
@@ -194,11 +194,11 @@ To check/control if files added from the layers exist under the root filesystem,
 docker run \
   --security-opt seccomp=unconfined \
   -e GRAPH_DRIVER=vfs \
-  -e WORKSPACE_DIR=/wks \
+  -e WORKSPACE_DIR=/workspace \
   -e DOCKERFILE_NAME="Dockerfile-1" \
   -e EXTRACT_LAYERS=true \
   -e FILES_TO_SEARCH="good.txt" \
-  -v $(pwd)/wks:/wks \
+  -v $(pwd)/../workspace:/workspace \
   -v $(pwd)/cache:/cache \
   -it buildah-app
 ```
@@ -262,9 +262,9 @@ docker run \
   -e GRAPH_DRIVER=vfs \
   -e LOGGING_LEVEL=debug \
   -e LOGGING_FORMAT=color \
-  -e WORKSPACE_DIR=/wks \
+  -e WORKSPACE_DIR=/workspace \
   -v $(pwd)/vol:/var/lib/containers \
-  -v $(pwd)/wks:/wks \
+  -v $(pwd)/../workspace:/workspace \
   -it buildah-app
 ```
 
@@ -276,7 +276,7 @@ Create a k8s cluster having access to your local workspace and cache folders. Th
 and the following [bash script](scripts/kind-reg.sh) where the following config can be defined to access your local folders
 ```yaml
   extraMounts:
-    - hostPath: $(pwd)/wks        # PLEASE CHANGE ME
+    - hostPath: $(pwd)/../workspace        # PLEASE CHANGE ME
       containerPath: /workspace
     - hostPath: $(pwd)/cache      # PLEASE CHANGE ME
       containerPath: /cache
@@ -364,7 +364,7 @@ kubectl delete -f k8s/manifest.yml
 pushd helm
 cat <<EOF > my-values.yml
 buildah:
-  metadataTomlFileName: metadata_sample_curl.toml
+  metadataTomlFileName: metadata_curl.toml
   filesToSearch: curl
 
 image:

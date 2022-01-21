@@ -19,33 +19,33 @@ spec:
           env:
             - name: LOGGING_FORMAT
               value: "color"
-            {{- if .Values.buildah.loggingLevel }}
+            {{- if .Values.engine.loggingLevel }}
             - name: LOGGING_LEVEL
-              value: {{ .Values.buildah.loggingLevel }}
+              value: {{ .Values.engine.loggingLevel }}
             {{- end }}
-            {{- if .Values.buildah.rootFSDir }}
+            {{- if .Values.engine.rootFSDir }}
             - name: ROOT_FS_DIR
-              value: {{ .Values.buildah.rootFSDir }}
+              value: {{ .Values.engine.rootFSDir }}
             {{- end }}
-            {{- if .Values.buildah.workspaceDir }}
+            {{- if .Values.engine.workspaceDir }}
             - name: WORKSPACE_DIR
-              value: {{  .Values.buildah.workspaceDir }}
+              value: {{  .Values.engine.workspaceDir }}
             {{- end }}
-            {{- if .Values.buildah.extractLayers }}
+            {{- if .Values.engine.extractLayers }}
             - name: EXTRACT_LAYERS
-              value: {{ .Values.buildah.extractLayers | quote }}
+              value: {{ .Values.engine.extractLayers | quote }}
             {{- end }}
-            {{- if .Values.buildah.filesToSearch }}
+            {{- if .Values.engine.filesToSearch }}
             - name:  FILES_TO_SEARCH
-              value: {{ .Values.buildah.filesToSearch }}
+              value: {{ .Values.engine.filesToSearch }}
             {{- end }}
-            {{- if .Values.buildah.dockerfilenameToBuild }}
+            {{- if .Values.engine.dockerfilenameToBuild }}
             - name: DOCKERFILE_NAME
-              value: {{ .Values.buildah.dockerfilenameToBuild }}
+              value: {{ .Values.engine.dockerfilenameToBuild }}
             {{- end }}
-            {{- if .Values.buildah.metadataTomlFileName }}
+            {{- if .Values.engine.metadataTomlFileName }}
             - name: METADATA_FILE_NAME
-              value: {{ .Values.buildah.metadataTomlFileName }}
+              value: {{ .Values.engine.metadataTomlFileName }}
             {{- end }}
           workingDir: /workspace
           volumeMounts:

@@ -1,0 +1,3 @@
+From ubuntu:bionic
+
+RUN apt update -y && apt install wget -y
