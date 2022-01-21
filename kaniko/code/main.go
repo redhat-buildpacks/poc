@@ -146,7 +146,8 @@ func main() {
 			// Set up the Build args to be used by Kaniko
 			for _, buildArg := range dockerFile.Args.BuildArg {
 				arg := buildArg.Key + "=" + buildArg.Value
-				b.Opts.BuildArgs = append(b.BuildArgs, arg)
+				logrus.Infof("Build arg: %s",arg)
+				b.Opts.BuildArgs = append(b.Opts.BuildArgs, arg)
 			}
 
 			// Process now the Dockerfile
