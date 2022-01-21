@@ -127,7 +127,7 @@ func (b *BuildPackConfig) InitDefaults() {
 func (b *BuildPackConfig) BuildDockerFile() (err error) {
 
 	// If we look to the Kaniko code, they are moving under the root dire directory
-	logrus.Debug("Moving to root dir")
+	logrus.Info("Moving to root dir")
 	if err := os.Chdir("/"); err != nil {
 		panic(err)
 	}

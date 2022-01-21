@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/BurntSushi/toml"
 	cfg "github.com/redhat-buildpacks/poc/kaniko/buildpackconfig"
 	"github.com/redhat-buildpacks/poc/kaniko/logging"
+	"github.com/redhat-buildpacks/poc/kaniko/model"
 	util "github.com/redhat-buildpacks/poc/kaniko/util"
 	logrus "github.com/sirupsen/logrus"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -28,12 +31,19 @@ const (
 )
 
 var (
-	logLevel      string   // Log level (trace, debug, info, warn, error, fatal, panic)
-	logFormat     string   // Log format (text, color, json)
-	logTimestamp  bool     // Timestamp in log output
-	extractLayers bool     // Extract layers from tgz files. Default is false
-	filesToSearch []string // List of files to search to check if they exist under the updated FS
+	logLevel                string   // Log level (trace, debug, info, warn, error, fatal, panic)
+	logFormat               string   // Log format (text, color, json)
+	logTimestamp            bool     // Timestamp in log output
+	extractLayers           bool     // Extract layers from tgz files. Default is false
+	filesToSearch           []string // List of files to search to check if they exist under the updated FS
+	b						*cfg.BuildPackConfig
+	opts					*globalOptions
 )
+
+type globalOptions struct {
+	metadata                model.Metadata // Metadata file containing the data populated by the Lifecycle builder
+	metadatafileNameToParse string         // METADATA.toml file containing the Dockerfiles and args
+}
 
 func init() {
 	envVal := util.GetValFromEnVar(FILES_TO_SEARCH_ENV_NAME)
@@ -83,6 +93,18 @@ func init() {
 }
 
 func main() {
+	logrus.Info("Starting Kaniko application to process Dockerfile(s) ...")
+
+	// Create a buildPackConfig and set the default values
+	logrus.Info("Initialize the BuildPackConfig and set the defaults values ...")
+	b := cfg.NewBuildPackConfig()
+	b.InitDefaults()
+	b.ExtractLayers = extractLayers
+
+	// TODO: To be reviewed in order to better manage that section
+	opts := initGlobalOptions()
+	opts.metadatafileNameToParse = os.Getenv("METADATA_FILE_NAME")
+
 	if _, ok := os.LookupEnv("DEBUG"); ok && (len(os.Args) <= 1 || os.Args[1] != "from-debugger") {
 		args := []string {
 			"--listen=:2345",
@@ -98,30 +120,56 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	logrus.Info("Starting the Kaniko application to process a Dockerfile ...")
-
-	// Create a buildPackConfig and set the default values
-	logrus.Info("Initialize the BuildPackConfig and set the defaults values ...")
-	b := cfg.NewBuildPackConfig()
-	b.InitDefaults()
-	b.ExtractLayers = extractLayers
 
 	logrus.Infof("Kaniko      dir: %s", b.KanikoDir)
 	logrus.Infof("Workspace   dir: %s", b.WorkspaceDir)
 	logrus.Infof("Cache       dir: %s", b.CacheDir)
 	logrus.Infof("Dockerfile name: %s", b.DockerFileName)
 	logrus.Infof("Extract layer files ? %v", extractLayers)
+	logrus.Infof("Metadata toml file: %s", opts.metadatafileNameToParse)
 
+	err := reapChildProcesses()
+	if err != nil {
+		panic(err)
+	}
+
+	if opts.metadatafileNameToParse != "" {
+		logrus.Infof("Parsing the Metadata toml file to decode it ...")
+		if _, err := toml.DecodeFile(filepath.Join(b.WorkspaceDir, "layers", opts.metadatafileNameToParse), &opts.metadata); err != nil {
+			logrus.Infof("METADATA toml path: %s",filepath.Join(b.WorkspaceDir, "layers", opts.metadatafileNameToParse))
+			logrus.Fatal(err)
+		}
+		for _, dockerFile := range opts.metadata.Dockerfiles {
+			pathToDockerFile := filepath.Join(b.WorkspaceDir, dockerFile.Path)
+			logrus.Infof("Dockerfile path: %s", pathToDockerFile)
+
+			// Set up the Build args to be used by Kaniko
+			for _, buildArg := range dockerFile.Args.BuildArg {
+				arg := buildArg.Key + "=" + buildArg.Value
+				b.Opts.BuildArgs = append(b.BuildArgs, arg)
+			}
+
+			// Process now the Dockerfile
+			processDockerfile(pathToDockerFile)
+		}
+	} else {
+		// When no metadata.toml file is used, parse the dockerfile directly
+		pathToDockerFile := filepath.Join(b.WorkspaceDir, b.DockerFileName)
+		logrus.Infof("Dockerfile path: %s", pathToDockerFile)
+
+		// Process now the Dockerfile
+		processDockerfile(pathToDockerFile)
+	}
+}
+
+func processDockerfile(pathToDockerFile string) {
 	// Launch a timer to measure the time needed to parse/copy/extract
 	start := time.Now()
 
 	// Build the Dockerfile
+	b.DockerFileName = pathToDockerFile
 	logrus.Infof("Building the %s", b.DockerFileName)
 	err := b.BuildDockerFile()
-	if err != nil {
-		panic(err)
-	}
-	err = reapChildProcesses()
 	if err != nil {
 		panic(err)
 	}
@@ -164,7 +212,9 @@ func main() {
 	// Time elapsed is ...
 	logrus.Infof("Time elapsed: %s",time.Since(start))
 }
-
+func initGlobalOptions() *globalOptions {
+	return &globalOptions{}
+}
 func reapChildProcesses() error {
 	procDir, err := os.Open("/proc")
 	if err != nil {

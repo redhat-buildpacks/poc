@@ -1,6 +1,7 @@
 module github.com/redhat-buildpacks/poc/kaniko
 
 require (
+    github.com/BurntSushi/toml v1.0.0
 	github.com/GoogleContainerTools/kaniko v1.7.1-0.20220114205832-76624697df87
 	github.com/docker/docker v20.10.12+incompatible // indirect
 	github.com/google/go-containerregistry v0.4.1-0.20210128200529-19c2b639fab1
