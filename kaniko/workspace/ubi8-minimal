@@ -1,7 +1,0 @@
-FROM registry.access.redhat.com/ubi8-minimal
-
-COPY ./hello.txt /workspace
-
-LABEL "website.name"="geeks website"
-
-RUN microdnf install -y wget python3

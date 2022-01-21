@@ -1,3 +1,0 @@
-FROM alpine
-RUN echo "Good" > good.txt
-RUN echo "Bye" > bye.txt
