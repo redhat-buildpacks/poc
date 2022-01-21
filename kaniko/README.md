@@ -134,8 +134,9 @@ using the ENV var `METADATA_FILE_NAME`. This file should be created under the `w
 ```bash
 docker run \
    -e LOGGING_LEVEL=info \
-   -e IGNORE_PATHS="/usr/lib,/var/spool/mail,/var/mail" \
+   -e IGNORE_PATHS="/var/spool/mail,/var/mail" \
    -e EXTRACT_LAYERS=true \
+   -e FILES_TO_SEARCH="curl" \
    -e METADATA_FILE_NAME=metadata_curl.toml \
    -v $(pwd)/workspace:/workspace \
    -v $(pwd)/cache:/cache \
