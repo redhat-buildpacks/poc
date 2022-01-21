@@ -37,15 +37,18 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build the ${{ env.ENGINE }} Poc
-        working-directory: ${{ env.ENGINE }}
-        run: ./hack/build.sh
+        # working-directory: ${{ env.ENGINE }}
+        run: |
+          cp -r ./workspace ./${{ env.ENGINE }}/workspace
+          pushd ${{ env.ENGINE }}
+          ./hack/build.sh
+          popd
 
       - name: Create Kubernetes cluster using Kind tool
         uses: container-tools/kind-action@v1.7.0
         with:
           cluster_name: e2e-test
           registry: true
-          # config: ./${{ env.ENGINE }}/hack/kind-config.yml
 
       - name: Tag and push the image
         run: |

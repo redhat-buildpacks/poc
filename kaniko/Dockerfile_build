@@ -16,7 +16,7 @@ RUN go install github.com/go-delve/delve/cmd/dlv@v1.7.3
 FROM base AS builder
 WORKDIR /go/src/kaniko-app
 COPY ./code/ .
-COPY ../workspace/ /workspace
+COPY ./workspace/ /workspace
 
 # Build the kaniko app using compilation flags
 RUN GOOS=linux GOARCH=amd64 go build -tags 'containers_image_openpgp exclude_graphdriver_devicemapper exclude_graphdriver_btrfs' -gcflags "all=-N -l" -o /kaniko-app *.go

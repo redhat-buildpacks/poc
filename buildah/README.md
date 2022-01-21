@@ -78,6 +78,7 @@ Alternatively, build a container image using the following instructions
  
 - First build the `buildah-app` container image using this bash script
 ```bash
+cp -r ../workspace ./workspace
 ./hack/build.sh
 ```
 - Launch next the `buildah-app` container 

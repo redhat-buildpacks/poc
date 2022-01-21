@@ -43,6 +43,7 @@ which is the hash of the compressed layer.
 To play with the application, build first the go application and build a container image of the `kaniko-app`.
 
 ```bash
+cp -r ../workspace ./workspace
 ./hack/build.sh
 ```
 

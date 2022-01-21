@@ -14,7 +14,7 @@ FROM base AS builder
 
 WORKDIR /go/src/buildah-app
 COPY ./code/ .
-COPY ../workspace/ /workspace
+COPY ./workspace/ /workspace
 
 # Build the buildah app using compilation flags
 RUN go build -tags 'containers_image_openpgp exclude_graphdriver_devicemapper exclude_graphdriver_btrfs' -gcflags "all=-N -l" -o /buildah-app main.go
