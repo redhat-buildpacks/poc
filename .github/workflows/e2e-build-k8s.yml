@@ -17,9 +17,8 @@ jobs:
             filesToSearch: curl
           - metadataTomlFileName: metadata_ubuntu_cert.toml
             filesToSearch: /usr/local/share/ca-certificates/server.crt
-        # List of the Dockerfiles to be tested using as OS: ubuntu, RHEL
-        # dockerfile_name: [ ubi8-good-bye, ubi8-nodejs, ubuntu-wget, ubuntu-cert ]
-
+          - metadataTomlFileName: metadata_nodejs.toml
+            filesToSearch: node
     steps:
       - name: Set buildah engine
         if: "contains(github.event.head_commit.message, '#buildah')"

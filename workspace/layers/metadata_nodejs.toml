@@ -1,0 +1,13 @@
+[[dockerfiles]]
+extension_id = "sample/nodejs"
+path = "/layers/nodejs/Dockerfile"
+build = true
+run = false
+
+[[dockerfiles.args.build]]
+name = "version"
+value = "14"
+
+[[dockerfiles.args.build]]
+name = "runtime"
+value = "nodejs"
