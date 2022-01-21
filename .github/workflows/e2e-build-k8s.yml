@@ -24,9 +24,9 @@ jobs:
     steps:
       - name: Set building engine
         run: |
-          if [[ "$COMMIT_MSG" == *"buildah"* ]]; then
+          if [[ "$COMMIT_MSG" == "#buildah" ]]; then
             echo "ENGINE=buildah" >> $GITHUB_ENV
-          elif [[ "$COMMIT_MSG" == *"kaniko"* ]]; then
+          elif [[ "$COMMIT_MSG" == "#kaniko" ]]; then
             echo "ENGINE=kaniko" >> $GITHUB_ENV
           else
             echo "No build engine specified. Break the job"
@@ -37,7 +37,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build the ${{ env.ENGINE }} Poc
-        # working-directory: ${{ env.ENGINE }}
         run: |
           cp -r ./workspace ./${{ env.ENGINE }}/workspace
           pushd ${{ env.ENGINE }}
