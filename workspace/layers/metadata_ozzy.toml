@@ -1,0 +1,13 @@
+[[dockerfiles]]
+extension_id = "sample/ozzy"
+path = "/layers/ozzy/Dockerfile"
+build = true
+run = true
+
+[[dockerfiles.args.build]]
+name = "some_arg"
+value = "some-arg-build-value"
+
+[[dockerfiles.args.build]]
+name = "build_id"
+value = "10"
